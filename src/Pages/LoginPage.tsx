@@ -40,7 +40,8 @@ const LoginPage = () => {
                 // Save user info
                 localStorage.setItem('user', JSON.stringify(data.user));
                 setSuccess('Login successful! Redirecting...');
-                setTimeout(() => navigate('/'), 1200);
+                const destination = data.user?.userType === 'admin' ? '/admin/dashboard' : '/';
+                setTimeout(() => navigate(destination), 1200);
             }
         } catch {
             setError('Unable to connect to the server. Make sure the backend is running.');
