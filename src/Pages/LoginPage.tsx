@@ -1,13 +1,14 @@
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, LogIn, Eye, EyeOff, Home, AlertCircle, CheckCircle } from 'lucide-react';
+import { User, Lock, LogIn, Eye, EyeOff, Home, AlertCircle, CheckCircle } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
 
 const LoginPage = () => {
     const navigate = useNavigate();
 
-    const [form, setForm] = useState({ email: '', password: '' });
+    const [form, setForm] = useState({ username: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -20,7 +21,7 @@ const LoginPage = () => {
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (!form.email || !form.password) {
+        if (!form.username || !form.password) {
             setError('Please fill in all fields.');
             return;
         }
@@ -30,7 +31,7 @@ const LoginPage = () => {
             const res = await fetch(`${API_BASE}/users/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: form.email, password: form.password }),
+                body: JSON.stringify({ username: form.username, password: form.password }),
             });
             const data = await res.json();
             if (!res.ok) {
@@ -131,23 +132,21 @@ const LoginPage = () => {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit}>
-                    {/* Email */}
+                    {/* Username */}
                     <div style={{ marginBottom: '16px' }}>
                         <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginBottom: '8px', letterSpacing: '0.3px' }}>
-                            EMAIL ADDRESS
+                            USERNAME
                         </label>
-                        <div
-                            style={{ position: 'relative' }}
-                            onFocus={() => { }}
-                        >
-                            <Mail size={17} color="#6C63FF" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                        <div style={{ position: 'relative' }}>
+                            <User size={17} color="#6C63FF" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                             <input
-                                type="email"
-                                name="email"
-                                value={form.email}
+                                type="text"
+                                name="username"
+                                value={form.username}
                                 onChange={handleChange}
-                                placeholder="you@example.com"
+                                placeholder="Enter your username"
                                 required
+                                autoComplete="username"
                                 style={{
                                     width: '100%',
                                     padding: '13px 14px 13px 42px',
