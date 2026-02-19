@@ -194,8 +194,9 @@ const Navbar = () => {
           {currentUser ? (
             // ── Logged-in state ──
             <>
-              {/* User pill */}
-              <div
+              {/* User pill — click to open profile */}
+              <button
+                onClick={() => navigate('/profile')}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -204,6 +205,18 @@ const Navbar = () => {
                   borderRadius: '100px',
                   background: 'rgba(108,99,255,0.12)',
                   border: '1px solid rgba(108,99,255,0.3)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.25)';
+                  (e.currentTarget as HTMLElement).style.borderColor = '#6C63FF';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.12)';
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.3)';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
                 }}
               >
                 <div
@@ -219,7 +232,7 @@ const Navbar = () => {
                 <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#fff', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {currentUser.name || 'User'}
                 </span>
-              </div>
+              </button>
 
               {/* Logout button */}
               <button
@@ -354,15 +367,18 @@ const Navbar = () => {
           {/* Mobile auth — conditional */}
           {currentUser ? (
             <div style={{ marginTop: '16px', padding: '14px 16px', borderRadius: '12px', background: 'rgba(108,99,255,0.1)', border: '1px solid rgba(108,99,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button
+                onClick={() => { setIsOpen(false); navigate('/profile'); }}
+                style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
                 <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <User size={16} color="#fff" />
                 </div>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#fff' }}>{currentUser.name || 'User'}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>Logged in</div>
+                  <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>View Profile</div>
                 </div>
-              </div>
+              </button>
               <button
                 onClick={handleLogout}
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px', background: 'rgba(255,101,132,0.12)', border: '1px solid rgba(255,101,132,0.3)', color: '#FF6584', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
