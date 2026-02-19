@@ -1,10 +1,24 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Home, Search, Heart, MessageCircle, User, ChevronDown } from 'lucide-react';
+import { Menu, X, Home, Search, Heart, MessageCircle, LogIn, UserPlus, ChevronDown, LogOut, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+  // Read logged-in user from localStorage
+  const storedUser = localStorage.getItem('user');
+  const currentUser = storedUser ? JSON.parse(storedUser) : null;
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setIsOpen(false);
+    navigate('/');
+    // Force re-render by reloading
+    window.location.reload();
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -175,54 +189,114 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* Auth Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} className="desktop-nav">
-          <a
-            href="#"
-            style={{
-              padding: '8px 20px',
-              borderRadius: '10px',
-              color: 'rgba(255,255,255,0.85)',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              border: '1px solid rgba(108,99,255,0.3)',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = '#6C63FF';
-              (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.1)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.3)';
-              (e.currentTarget as HTMLElement).style.background = 'transparent';
-            }}
-          >
-            <User size={15} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
-            Sign In
-          </a>
-          <a
-            href="#"
-            style={{
-              padding: '8px 20px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
-              color: '#fff',
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              boxShadow: '0 4px 15px rgba(108,99,255,0.4)',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
-              (e.currentTarget as HTMLElement).style.boxShadow = '0 6px 20px rgba(108,99,255,0.6)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-              (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 15px rgba(108,99,255,0.4)';
-            }}
-          >
-            Post a Room
-          </a>
+        {/* Auth Section — conditional on login state */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} className="desktop-nav">
+          {currentUser ? (
+            // ── Logged-in state ──
+            <>
+              {/* User pill */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 14px 6px 8px',
+                  borderRadius: '100px',
+                  background: 'rgba(108,99,255,0.12)',
+                  border: '1px solid rgba(108,99,255,0.3)',
+                }}
+              >
+                <div
+                  style={{
+                    width: '28px', height: '28px', borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <User size={14} color="#fff" />
+                </div>
+                <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#fff', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {currentUser.name || 'User'}
+                </span>
+              </div>
+
+              {/* Logout button */}
+              <button
+                onClick={handleLogout}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '7px',
+                  padding: '8px 16px', borderRadius: '10px',
+                  background: 'rgba(255,101,132,0.1)',
+                  border: '1px solid rgba(255,101,132,0.3)',
+                  color: '#FF6584', fontSize: '0.875rem', fontWeight: 600,
+                  cursor: 'pointer', transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(255,101,132,0.2)';
+                  (e.currentTarget as HTMLElement).style.borderColor = '#FF6584';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(255,101,132,0.1)';
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,101,132,0.3)';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                }}
+              >
+                <LogOut size={15} />
+                Logout
+              </button>
+            </>
+          ) : (
+            // ── Guest state ──
+            <>
+              <a
+                href="/login"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '7px',
+                  padding: '8px 18px', borderRadius: '10px',
+                  color: 'rgba(255,255,255,0.85)', fontSize: '0.9rem', fontWeight: 500,
+                  border: '1px solid rgba(108,99,255,0.3)', transition: 'all 0.25s', background: 'transparent',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = '#6C63FF';
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.12)';
+                  (e.currentTarget as HTMLElement).style.color = '#fff';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.3)';
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.85)';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                }}
+              >
+                <LogIn size={15} />
+                Login
+              </a>
+              <a
+                href="/register"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '7px',
+                  padding: '8px 20px', borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                  color: '#fff', fontSize: '0.9rem', fontWeight: 600,
+                  boxShadow: '0 4px 15px rgba(108,99,255,0.4)', transition: 'all 0.25s',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+                  (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 22px rgba(108,99,255,0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                  (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 15px rgba(108,99,255,0.4)';
+                }}
+              >
+                <UserPlus size={15} />
+                Sign Up
+              </a>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger */}
@@ -277,36 +351,43 @@ const Navbar = () => {
               {link.icon} {link.label}
             </a>
           ))}
-          <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-            <a
-              href="#"
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                padding: '12px',
-                borderRadius: '10px',
-                border: '1px solid rgba(108,99,255,0.4)',
-                color: '#fff',
-                fontWeight: 500,
-              }}
-            >
-              Sign In
-            </a>
-            <a
-              href="#"
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                padding: '12px',
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
-                color: '#fff',
-                fontWeight: 600,
-              }}
-            >
-              Post a Room
-            </a>
-          </div>
+          {/* Mobile auth — conditional */}
+          {currentUser ? (
+            <div style={{ marginTop: '16px', padding: '14px 16px', borderRadius: '12px', background: 'rgba(108,99,255,0.1)', border: '1px solid rgba(108,99,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <User size={16} color="#fff" />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#fff' }}>{currentUser.name || 'User'}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>Logged in</div>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px', background: 'rgba(255,101,132,0.12)', border: '1px solid rgba(255,101,132,0.3)', color: '#FF6584', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+              >
+                <LogOut size={14} /> Logout
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+              <a
+                href="/login"
+                style={{ flex: 1, textAlign: 'center', padding: '12px', borderRadius: '10px', border: '1px solid rgba(108,99,255,0.4)', color: '#fff', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}
+              >
+                <LogIn size={15} />
+                Login
+              </a>
+              <a
+                href="/register"
+                style={{ flex: 1, textAlign: 'center', padding: '12px', borderRadius: '10px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', color: '#fff', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}
+              >
+                <UserPlus size={15} />
+                Sign Up
+              </a>
+            </div>
+          )}
         </div>
       )}
 
