@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Home, Search, Heart, MessageCircle, User, ChevronDown } from 'lucide-react';
+import { Menu, X, Home, Search, Heart, MessageCircle, LogIn, UserPlus, ChevronDown } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -176,33 +176,47 @@ const Navbar = () => {
         </div>
 
         {/* Auth Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} className="desktop-nav">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} className="desktop-nav">
+          {/* Login Button */}
           <a
-            href="#"
+            href="/login"
             style={{
-              padding: '8px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '7px',
+              padding: '8px 18px',
               borderRadius: '10px',
               color: 'rgba(255,255,255,0.85)',
               fontSize: '0.9rem',
               fontWeight: 500,
               border: '1px solid rgba(108,99,255,0.3)',
-              transition: 'all 0.2s',
+              transition: 'all 0.25s',
+              background: 'transparent',
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.borderColor = '#6C63FF';
-              (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.1)';
+              (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.12)';
+              (e.currentTarget as HTMLElement).style.color = '#fff';
+              (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.3)';
               (e.currentTarget as HTMLElement).style.background = 'transparent';
+              (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.85)';
+              (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
             }}
           >
-            <User size={15} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
-            Sign In
+            <LogIn size={15} />
+            Login
           </a>
+
+          {/* Sign Up Button */}
           <a
-            href="#"
+            href="/register"
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '7px',
               padding: '8px 20px',
               borderRadius: '10px',
               background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
@@ -210,18 +224,19 @@ const Navbar = () => {
               fontSize: '0.9rem',
               fontWeight: 600,
               boxShadow: '0 4px 15px rgba(108,99,255,0.4)',
-              transition: 'all 0.2s',
+              transition: 'all 0.25s',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
-              (e.currentTarget as HTMLElement).style.boxShadow = '0 6px 20px rgba(108,99,255,0.6)';
+              (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+              (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 22px rgba(108,99,255,0.6)';
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
               (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 15px rgba(108,99,255,0.4)';
             }}
           >
-            Post a Room
+            <UserPlus size={15} />
+            Sign Up
           </a>
         </div>
 
@@ -277,9 +292,9 @@ const Navbar = () => {
               {link.icon} {link.label}
             </a>
           ))}
-          <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+          <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
             <a
-              href="#"
+              href="/login"
               style={{
                 flex: 1,
                 textAlign: 'center',
@@ -288,12 +303,17 @@ const Navbar = () => {
                 border: '1px solid rgba(108,99,255,0.4)',
                 color: '#fff',
                 fontWeight: 500,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
               }}
             >
-              Sign In
+              <LogIn size={15} />
+              Login
             </a>
             <a
-              href="#"
+              href="/register"
               style={{
                 flex: 1,
                 textAlign: 'center',
@@ -302,9 +322,14 @@ const Navbar = () => {
                 background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
                 color: '#fff',
                 fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
               }}
             >
-              Post a Room
+              <UserPlus size={15} />
+              Sign Up
             </a>
           </div>
         </div>
