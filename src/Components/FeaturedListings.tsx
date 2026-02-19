@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Star, MapPin, Wifi, Coffee, ArrowRight, Heart, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
 
+const API_BASE = 'http://localhost:5000';
+
 interface Listing {
-    id: number;
+    id: number | string;
     title: string;
     location: string;
     university: string;
@@ -16,11 +18,52 @@ interface Listing {
     emoji: string;
     bgGradient: string;
     available: boolean;
+    photoUrl?: string;
+    isLive?: boolean;
 }
 
 const FeaturedListings = () => {
     const [activeFilter, setActiveFilter] = useState('All');
-    const [likedCards, setLikedCards] = useState<number[]>([]);
+    const [likedCards, setLikedCards] = useState<(number | string)[]>([]);
+    const [apiListings, setApiListings] = useState<Listing[]>([]);
+
+    // Fetch published boardings from API
+    useEffect(() => {
+        fetch(`${API_BASE}/boardings/published`)
+            .then(r => r.json())
+            .then(data => {
+                const gradients = [
+                    'linear-gradient(135deg, rgba(108,99,255,0.25), rgba(168,85,247,0.1))',
+                    'linear-gradient(135deg, rgba(67,233,123,0.25), rgba(56,249,215,0.1))',
+                    'linear-gradient(135deg, rgba(255,101,132,0.25), rgba(255,143,163,0.1))',
+                    'linear-gradient(135deg, rgba(56,249,215,0.2), rgba(67,233,123,0.05))',
+                ];
+                const emojis = ['🏡', '🏢', '🏠', '🏘️', '✨', '🌸'];
+                const mapped: Listing[] = (data.boardings || []).map((b: {
+                    _id: string; title: string; location: string; nearUniversity: string;
+                    price: number; roomType: string; amenities: string[]; photos: string[];
+                }, i: number) => ({
+                    id: b._id,
+                    title: b.title,
+                    location: b.location,
+                    university: b.nearUniversity || 'Nearby',
+                    price: b.price,
+                    rating: 0,
+                    reviews: 0,
+                    type: b.roomType,
+                    amenities: b.amenities || [],
+                    badge: 'New',
+                    badgeColor: '#6C63FF',
+                    emoji: emojis[i % emojis.length],
+                    bgGradient: gradients[i % gradients.length],
+                    available: true,
+                    photoUrl: b.photos?.[0] ? `${API_BASE}${b.photos[0]}` : undefined,
+                    isLive: true,
+                }));
+                setApiListings(mapped);
+            })
+            .catch(() => {});
+    }, []);
 
     const filters = ['All', 'Near NSBM', 'Near UOC', 'Near SLIIT', 'Budget', 'Premium'];
 
@@ -121,11 +164,14 @@ const FeaturedListings = () => {
         },
     ];
 
-    const toggleLike = (id: number) => {
+    const toggleLike = (id: number | string) => {
         setLikedCards((prev) =>
             prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
         );
     };
+
+    // Combine: API live listings first, then hardcoded as samples
+    const allListings = [...apiListings, ...listings];
 
     const amenityIcons: Record<string, JSX.Element> = {
         WiFi: <Wifi size={12} />,
@@ -273,7 +319,7 @@ const FeaturedListings = () => {
                     }}
                     className="listings-grid"
                 >
-                    {listings.map((listing) => (
+                    {allListings.map((listing) => (
                         <div
                             key={listing.id}
                             style={{
@@ -307,9 +353,13 @@ const FeaturedListings = () => {
                                     justifyContent: 'center',
                                     fontSize: '4rem',
                                     position: 'relative',
+                                    overflow: 'hidden',
                                 }}
                             >
-                                {listing.emoji}
+                                {listing.photoUrl
+                                    ? <img src={listing.photoUrl} alt={listing.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    : listing.emoji
+                                }
 
                                 {/* Badge */}
                                 {listing.badge && (
@@ -459,13 +509,15 @@ const FeaturedListings = () => {
                                         </span>
                                         <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>/month</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <Star size={13} color="#FFD700" fill="#FFD700" />
-                                        <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{listing.rating}</span>
-                                        <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>
-                                            ({listing.reviews})
-                                        </span>
-                                    </div>
+                                    {listing.rating > 0 && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <Star size={13} color="#FFD700" fill="#FFD700" />
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{listing.rating}</span>
+                                            <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>
+                                                ({listing.reviews})
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <button

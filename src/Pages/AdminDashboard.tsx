@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
     Users, Home, TrendingUp, ShieldCheck, LogOut,
     Bell, Search, Menu, X, Trash2, BarChart2,
-    CheckCircle, Clock, AlertCircle, ChevronRight
+    CheckCircle, Clock, AlertCircle, ChevronRight,
+    Eye, MapPin, Building2,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -15,6 +16,24 @@ interface User {
     userType: string;
 }
 
+interface Boarding {
+    _id: string;
+    title: string;
+    location: string;
+    price: number;
+    roomType: string;
+    nearUniversity: string;
+    status: string;
+    landlordName: string;
+    photos: string[];
+    amenities: string[];
+    contactName: string;
+    contactPhone: string;
+    contactEmail: string;
+    description: string;
+    createdAt: string;
+}
+
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,6 +42,13 @@ const AdminDashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeSection, setActiveSection] = useState('dashboard');
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+
+    // Boardings state
+    const [boardings, setBoardings] = useState<Boarding[]>([]);
+    const [loadingBoardings, setLoadingBoardings] = useState(false);
+    const [boardingSearch, setBoardingSearch] = useState('');
+    const [boardingFilter, setBoardingFilter] = useState<'all' | 'pending' | 'published' | 'rejected'>('all');
+    const [selectedBoarding, setSelectedBoarding] = useState<Boarding | null>(null);
 
     // Guard: admins only
     const storedUser = localStorage.getItem('user');
@@ -34,6 +60,7 @@ const AdminDashboard = () => {
             return;
         }
         fetchUsers();
+        fetchBoardings();
     }, []);
 
     const fetchUsers = async () => {
@@ -46,6 +73,48 @@ const AdminDashboard = () => {
             console.error('Failed to fetch users');
         } finally {
             setLoadingUsers(false);
+        }
+    };
+
+    const fetchBoardings = async () => {
+        setLoadingBoardings(true);
+        try {
+            const res = await fetch(`${API_BASE}/boardings`);
+            const data = await res.json();
+            setBoardings(data.boardings || []);
+        } catch {
+            console.error('Failed to fetch boardings');
+        } finally {
+            setLoadingBoardings(false);
+        }
+    };
+
+    const updateBoardingStatus = async (id: string, status: 'published' | 'rejected' | 'pending') => {
+        try {
+            const res = await fetch(`${API_BASE}/boardings/${id}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setBoardings(prev => prev.map(b => b._id === id ? { ...b, status } : b));
+                if (selectedBoarding?._id === id) setSelectedBoarding(prev => prev ? { ...prev, status } : null);
+            } else {
+                console.error(data.message);
+            }
+        } catch {
+            console.error('Status update failed');
+        }
+    };
+
+    const deleteBoarding = async (id: string) => {
+        try {
+            await fetch(`${API_BASE}/boardings/${id}`, { method: 'DELETE' });
+            setBoardings(prev => prev.filter(b => b._id !== id));
+            if (selectedBoarding?._id === id) setSelectedBoarding(null);
+        } catch {
+            console.error('Boarding delete failed');
         }
     };
 
@@ -74,7 +143,7 @@ const AdminDashboard = () => {
         { label: 'Total Users', value: users.length, icon: <Users size={22} />, color: '#6C63FF', bg: 'rgba(108,99,255,0.15)' },
         { label: 'Students', value: users.filter(u => u.userType === 'student').length, icon: <CheckCircle size={22} />, color: '#43E97B', bg: 'rgba(67,233,123,0.15)' },
         { label: 'Landlords', value: users.filter(u => u.userType === 'landlord').length, icon: <Home size={22} />, color: '#38F9D7', bg: 'rgba(56,249,215,0.15)' },
-        { label: 'Admins', value: users.filter(u => u.userType === 'admin').length, icon: <ShieldCheck size={22} />, color: '#a855f7', bg: 'rgba(168,85,247,0.15)' },
+        { label: 'Pending Listings', value: boardings.filter(b => b.status === 'pending').length, icon: <Clock size={22} />, color: '#FCD34D', bg: 'rgba(252,211,77,0.15)' },
     ];
 
     const navItems = [
@@ -285,16 +354,182 @@ const AdminDashboard = () => {
                         </div>
                     )}
 
-                    {/* ── Listings / Reports placeholder ── */}
-                    {(activeSection === 'listings' || activeSection === 'reports') && (
+                    {/* ── Listings Section ── */}
+                    {activeSection === 'listings' && (() => {
+                        const filtered = boardings.filter(b => {
+                            const matchSearch =
+                                b.title?.toLowerCase().includes(boardingSearch.toLowerCase()) ||
+                                b.location?.toLowerCase().includes(boardingSearch.toLowerCase()) ||
+                                b.landlordName?.toLowerCase().includes(boardingSearch.toLowerCase());
+                            const matchFilter = boardingFilter === 'all' || b.status === boardingFilter;
+                            return matchSearch && matchFilter;
+                        });
+
+                        return (
+                            <div>
+                                {/* Toolbar */}
+                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '20px' }}>
+                                    <div style={{ position: 'relative', flex: '1', minWidth: '220px', maxWidth: '360px' }}>
+                                        <Search size={15} color="rgba(255,255,255,0.35)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                                        <input type="text" placeholder="Search listings…" value={boardingSearch} onChange={e => setBoardingSearch(e.target.value)} style={{ width: '100%', padding: '10px 14px 10px 38px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(108,99,255,0.2)', borderRadius: '12px', color: '#fff', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }} />
+                                    </div>
+                                    {(['all', 'pending', 'published', 'rejected'] as const).map(f => (
+                                        <button key={f} onClick={() => setBoardingFilter(f)} style={{ padding: '8px 18px', borderRadius: '100px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', background: boardingFilter === f ? 'linear-gradient(135deg, #6C63FF, #a855f7)' : 'rgba(255,255,255,0.05)', border: boardingFilter === f ? 'none' : '1px solid rgba(255,255,255,0.1)', color: boardingFilter === f ? '#fff' : 'rgba(255,255,255,0.6)', textTransform: 'capitalize' }}>
+                                            {f} {f !== 'all' && <span style={{ marginLeft: '4px', opacity: 0.7 }}>({boardings.filter(b => b.status === f).length})</span>}
+                                        </button>
+                                    ))}
+                                    <button onClick={fetchBoardings} style={{ marginLeft: 'auto', background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '10px', padding: '8px 14px', color: '#fff', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer' }}>Refresh</button>
+                                </div>
+
+                                <div style={{ background: 'rgba(18,18,40,0.8)', border: '1px solid rgba(108,99,255,0.15)', borderRadius: '18px', padding: '24px' }}>
+                                    <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.1rem', fontWeight: 700, margin: '0 0 20px' }}>
+                                        Boarding Submissions <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400, marginLeft: '8px' }}>({filtered.length})</span>
+                                    </h2>
+
+                                    {loadingBoardings ? (
+                                        <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.3)' }}>
+                                            <div style={{ width: '28px', height: '28px', border: '2px solid rgba(108,99,255,0.3)', borderTopColor: '#6C63FF', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
+                                            Loading…
+                                        </div>
+                                    ) : filtered.length === 0 ? (
+                                        <p style={{ color: 'rgba(255,255,255,0.35)', textAlign: 'center', padding: '30px 0' }}>No listings found.</p>
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                            {filtered.map(b => {
+                                                const sc: Record<string, { color: string; bg: string }> = {
+                                                    pending:   { color: '#FCD34D', bg: 'rgba(252,211,77,0.12)' },
+                                                    published: { color: '#43E97B', bg: 'rgba(67,233,123,0.12)' },
+                                                    rejected:  { color: '#FF6584', bg: 'rgba(255,101,132,0.12)' },
+                                                };
+                                                const s = sc[b.status] || sc.pending;
+                                                return (
+                                                    <div key={b._id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', flexWrap: 'wrap' }}>
+                                                        {/* Thumbnail */}
+                                                        <div style={{ width: '60px', height: '60px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0, background: 'rgba(108,99,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            {b.photos?.[0]
+                                                                ? <img src={`${API_BASE}${b.photos[0]}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                : <Building2 size={24} color="rgba(108,99,255,0.5)" />}
+                                                        </div>
+                                                        {/* Info */}
+                                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                                            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', marginTop: '3px' }}>
+                                                                <MapPin size={11} color="#6C63FF" />{b.location}
+                                                            </div>
+                                                            <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginTop: '2px' }}>
+                                                                {b.roomType} · LKR {b.price?.toLocaleString()}/mo · By {b.landlordName}
+                                                            </div>
+                                                        </div>
+                                                        {/* Status */}
+                                                        <span style={{ padding: '4px 12px', borderRadius: '100px', background: s.bg, color: s.color, fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize', border: `1px solid ${s.color}44`, flexShrink: 0 }}>
+                                                            {b.status}
+                                                        </span>
+                                                        {/* Actions */}
+                                                        <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                                                            <button onClick={() => setSelectedBoarding(b)} title="View details" style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.25)', color: '#a855f7', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                <Eye size={14} />
+                                                            </button>
+                                                            {b.status !== 'published' && (
+                                                                <button onClick={() => updateBoardingStatus(b._id, 'published')} title="Publish" style={{ padding: '0 12px', height: '32px', borderRadius: '8px', background: 'rgba(67,233,123,0.1)', border: '1px solid rgba(67,233,123,0.3)', color: '#43E97B', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>
+                                                                    Publish
+                                                                </button>
+                                                            )}
+                                                            {b.status !== 'rejected' && (
+                                                                <button onClick={() => updateBoardingStatus(b._id, 'rejected')} title="Reject" style={{ padding: '0 12px', height: '32px', borderRadius: '8px', background: 'rgba(255,101,132,0.08)', border: '1px solid rgba(255,101,132,0.25)', color: '#FF6584', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>
+                                                                    Reject
+                                                                </button>
+                                                            )}
+                                                            <button onClick={() => deleteBoarding(b._id)} title="Delete" style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,101,132,0.1)', border: '1px solid rgba(255,101,132,0.2)', color: '#FF6584', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                <Trash2 size={13} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })()}
+
+                    {/* ── Reports placeholder ── */}
+                    {activeSection === 'reports' && (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', color: 'rgba(255,255,255,0.25)' }}>
                             <Clock size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
                             <h2 style={{ fontFamily: "'Outfit', sans-serif", margin: '0 0 8px', fontSize: '1.4rem', color: 'rgba(255,255,255,0.4)' }}>Coming Soon</h2>
-                            <p style={{ margin: 0, fontSize: '0.9rem' }}>This section is under development.</p>
+                            <p style={{ margin: 0, fontSize: '0.9rem' }}>Reports section is under development.</p>
                         </div>
                     )}
                 </main>
             </div>
+
+            {/* ── Boarding Detail Modal ── */}
+            {selectedBoarding && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }} onClick={() => setSelectedBoarding(null)}>
+                    <div style={{ background: '#1a1a30', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '24px', padding: '32px', maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+                        {/* Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+                            <div>
+                                <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px', color: '#fff' }}>{selectedBoarding.title}</h3>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)' }}><MapPin size={12} color="#6C63FF" />{selectedBoarding.location}</div>
+                            </div>
+                            <button onClick={() => setSelectedBoarding(null)} style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={15} /></button>
+                        </div>
+                        {/* Photo */}
+                        {selectedBoarding.photos?.[0] && (
+                            <img src={`${API_BASE}${selectedBoarding.photos[0]}`} alt="" style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '14px', marginBottom: '16px' }} />
+                        )}
+                        {/* Details grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+                            {[
+                                ['Type', selectedBoarding.roomType],
+                                ['Price', `LKR ${selectedBoarding.price?.toLocaleString()}/mo`],
+                                ['University', selectedBoarding.nearUniversity],
+                                ['Landlord', selectedBoarding.landlordName],
+                                ['Contact', selectedBoarding.contactName],
+                                ['Phone', selectedBoarding.contactPhone || '—'],
+                                ['Email', selectedBoarding.contactEmail || '—'],
+                                ['Status', selectedBoarding.status],
+                            ].map(([k, v]) => (
+                                <div key={k} style={{ padding: '10px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                                    <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.38)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>{k}</div>
+                                    <div style={{ fontSize: '0.88rem', color: '#fff', fontWeight: 500, textTransform: k === 'Status' ? 'capitalize' : 'none' }}>{v}</div>
+                                </div>
+                            ))}
+                        </div>
+                        {/* Description */}
+                        <div style={{ padding: '14px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', marginBottom: '16px' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.38)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Description</div>
+                            <p style={{ margin: 0, fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{selectedBoarding.description}</p>
+                        </div>
+                        {/* Amenities */}
+                        {selectedBoarding.amenities?.length > 0 && (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
+                                {selectedBoarding.amenities.map(a => <span key={a} style={{ padding: '4px 12px', borderRadius: '8px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.2)', color: '#a78bfa', fontSize: '0.78rem' }}>{a}</span>)}
+                            </div>
+                        )}
+                        {/* Action buttons */}
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            {selectedBoarding.status !== 'published' && (
+                                <button onClick={() => updateBoardingStatus(selectedBoarding._id, 'published')} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(67,233,123,0.12)', border: '1px solid rgba(67,233,123,0.3)', color: '#43E97B', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
+                                    ✓ Publish
+                                </button>
+                            )}
+                            {selectedBoarding.status !== 'rejected' && (
+                                <button onClick={() => updateBoardingStatus(selectedBoarding._id, 'rejected')} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,101,132,0.1)', border: '1px solid rgba(255,101,132,0.3)', color: '#FF6584', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
+                                    ✕ Reject
+                                </button>
+                            )}
+                            {selectedBoarding.status === 'published' && (
+                                <button onClick={() => updateBoardingStatus(selectedBoarding._id, 'pending')} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(252,211,77,0.1)', border: '1px solid rgba(252,211,77,0.3)', color: '#FCD34D', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
+                                    ↩ Unpublish
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── Delete Confirmation Modal ── */}
             {deleteConfirm && (
