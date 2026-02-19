@@ -1,0 +1,327 @@
+import { Home, Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube, ArrowRight, Heart } from 'lucide-react';
+
+const Footer = () => {
+    const links = {
+        'For Students': ['Find Boarding', 'Browse Map', 'Save Favourites', 'Student Guide', 'Compare Rooms'],
+        'For Landlords': ['Post a Room', 'Manage Listings', 'Pricing Plans', 'Verification', 'Dashboard'],
+        'Company': ['About Us', 'How It Works', 'Blog', 'Careers', 'Press Kit'],
+        'Support': ['Help Center', 'Safety Tips', 'Report Listing', 'Contact Us', 'Terms & Privacy'],
+    };
+
+    const socials = [
+        { icon: <Facebook size={18} />, color: '#1877F2', label: 'Facebook' },
+        { icon: <Instagram size={18} />, color: '#E4405F', label: 'Instagram' },
+        { icon: <Twitter size={18} />, color: '#1DA1F2', label: 'Twitter' },
+        { icon: <Youtube size={18} />, color: '#FF0000', label: 'YouTube' },
+    ];
+
+    return (
+        <footer
+            style={{
+                background: 'linear-gradient(180deg, #0D0D1A 0%, #070714 100%)',
+                borderTop: '1px solid rgba(108,99,255,0.15)',
+                position: 'relative',
+                overflow: 'hidden',
+            }}
+        >
+            {/* CTA Section */}
+            <div
+                style={{
+                    background: 'linear-gradient(135deg, rgba(108,99,255,0.12), rgba(168,85,247,0.08))',
+                    borderBottom: '1px solid rgba(108,99,255,0.1)',
+                    padding: '56px 24px',
+                }}
+            >
+                <div
+                    style={{
+                        maxWidth: '1280px',
+                        margin: '0 auto',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '32px',
+                    }}
+                >
+                    <div>
+                        <h2
+                            style={{
+                                fontFamily: "'Outfit', sans-serif",
+                                fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
+                                fontWeight: 800,
+                                marginBottom: '10px',
+                            }}
+                        >
+                            Ready to Find Your{' '}
+                            <span
+                                style={{
+                                    background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                }}
+                            >
+                                Perfect Boarding?
+                            </span>
+                        </h2>
+                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1rem' }}>
+                            Join 8,500+ students who found their ideal home through BoardingFinder.
+                        </p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+                        <a
+                            href="#"
+                            style={{
+                                padding: '14px 28px',
+                                borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                                color: '#fff',
+                                fontWeight: 700,
+                                fontSize: '0.95rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                boxShadow: '0 8px 25px rgba(108,99,255,0.4)',
+                                transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                                (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+                                (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 35px rgba(108,99,255,0.6)';
+                            }}
+                            onMouseLeave={(e) => {
+                                (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                                (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 25px rgba(108,99,255,0.4)';
+                            }}
+                        >
+                            Start Searching <ArrowRight size={16} />
+                        </a>
+                        <a
+                            href="#"
+                            style={{
+                                padding: '14px 28px',
+                                borderRadius: '12px',
+                                border: '1px solid rgba(108,99,255,0.35)',
+                                color: 'rgba(255,255,255,0.85)',
+                                fontWeight: 600,
+                                fontSize: '0.95rem',
+                                transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                                (e.currentTarget as HTMLElement).style.borderColor = '#6C63FF';
+                                (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.1)';
+                            }}
+                            onMouseLeave={(e) => {
+                                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.35)';
+                                (e.currentTarget as HTMLElement).style.background = 'transparent';
+                            }}
+                        >
+                            Post Your Room
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Footer */}
+            <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '64px 24px 40px' }}>
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1.5fr repeat(4, 1fr)',
+                        gap: '40px',
+                        marginBottom: '48px',
+                    }}
+                    className="footer-grid"
+                >
+                    {/* Brand Column */}
+                    <div>
+                        <a href="#home" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                            <div
+                                style={{
+                                    width: '44px',
+                                    height: '44px',
+                                    borderRadius: '14px',
+                                    background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: '0 0 20px rgba(108,99,255,0.4)',
+                                }}
+                            >
+                                <Home size={22} color="#fff" />
+                            </div>
+                            <div>
+                                <div
+                                    style={{
+                                        fontFamily: "'Outfit', sans-serif",
+                                        fontWeight: 800,
+                                        fontSize: '1.2rem',
+                                        background: 'linear-gradient(135deg, #fff, #a855f7)',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent',
+                                    }}
+                                >
+                                    BoardingFinder
+                                </div>
+                                <div style={{ fontSize: '0.6rem', color: 'rgba(108,99,255,0.7)', letterSpacing: '2px', fontWeight: 600 }}>
+                                    CAMPUS EDITION
+                                </div>
+                            </div>
+                        </a>
+                        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.875rem', lineHeight: 1.8, marginBottom: '24px' }}>
+                            Sri Lanka's most trusted boarding house platform for university students. Safe, verified, and affordable.
+                        </p>
+
+                        {/* Contact Info */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
+                            {[
+                                { icon: <Phone size={14} />, text: '+94 11 234 5678' },
+                                { icon: <Mail size={14} />, text: 'hello@boardingfinder.lk' },
+                                { icon: <MapPin size={14} />, text: 'Colombo, Sri Lanka' },
+                            ].map((item, i) => (
+                                <div
+                                    key={i}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px',
+                                        color: 'rgba(255,255,255,0.5)',
+                                        fontSize: '0.8rem',
+                                    }}
+                                >
+                                    <span style={{ color: '#6C63FF' }}>{item.icon}</span>
+                                    {item.text}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Socials */}
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            {socials.map((social) => (
+                                <a
+                                    key={social.label}
+                                    href="#"
+                                    title={social.label}
+                                    style={{
+                                        width: '38px',
+                                        height: '38px',
+                                        borderRadius: '10px',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: 'rgba(255,255,255,0.5)',
+                                        transition: 'all 0.2s',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        (e.currentTarget as HTMLElement).style.background = `${social.color}20`;
+                                        (e.currentTarget as HTMLElement).style.borderColor = social.color;
+                                        (e.currentTarget as HTMLElement).style.color = social.color;
+                                        (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)';
+                                        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)';
+                                        (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.5)';
+                                        (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                                    }}
+                                >
+                                    {social.icon}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Link Columns */}
+                    {Object.entries(links).map(([category, items]) => (
+                        <div key={category}>
+                            <h4
+                                style={{
+                                    fontWeight: 700,
+                                    fontSize: '0.9rem',
+                                    marginBottom: '18px',
+                                    color: '#fff',
+                                    letterSpacing: '0.5px',
+                                }}
+                            >
+                                {category}
+                            </h4>
+                            <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {items.map((item) => (
+                                    <li key={item}>
+                                        <a
+                                            href="#"
+                                            style={{
+                                                color: 'rgba(255,255,255,0.45)',
+                                                fontSize: '0.85rem',
+                                                transition: 'all 0.2s',
+                                                display: 'inline-block',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                (e.currentTarget as HTMLElement).style.color = '#a855f7';
+                                                (e.currentTarget as HTMLElement).style.paddingLeft = '6px';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)';
+                                                (e.currentTarget as HTMLElement).style.paddingLeft = '0';
+                                            }}
+                                        >
+                                            {item}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Bottom Bar */}
+                <div
+                    style={{
+                        borderTop: '1px solid rgba(255,255,255,0.06)',
+                        paddingTop: '24px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '16px',
+                    }}
+                >
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>
+                        © 2025 BoardingFinder. All rights reserved.
+                    </p>
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        Made with <Heart size={13} color="#FF6584" fill="#FF6584" style={{ display: 'inline' }} /> for Sri Lankan students
+                    </p>
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                        {['Privacy Policy', 'Terms of Service', 'Cookies'].map((link) => (
+                            <a
+                                key={link}
+                                href="#"
+                                style={{
+                                    color: 'rgba(255,255,255,0.3)',
+                                    fontSize: '0.8rem',
+                                    transition: 'color 0.2s',
+                                }}
+                                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)')}
+                                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.3)')}
+                            >
+                                {link}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <style>{`
+        @media (max-width: 1024px) {
+          .footer-grid { grid-template-columns: 1fr 1fr 1fr !important; }
+        }
+        @media (max-width: 640px) {
+          .footer-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+      `}</style>
+        </footer>
+    );
+};
+
+export default Footer;
