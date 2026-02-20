@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, MapPin, Share2, Heart, ChevronLeft, ChevronRight,
     Phone, Mail, User, Shield, MessageCircle, Home, GraduationCap,
-    Check,
+    Check, ShoppingCart,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -55,6 +55,7 @@ const BoardingDetailsPage = () => {
     const [liked, setLiked] = useState(false);
     const [copied, setCopied] = useState(false);
     const [showContact, setShowContact] = useState(false);
+    const [cartAdded, setCartAdded] = useState(false);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -74,6 +75,30 @@ const BoardingDetailsPage = () => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2500);
         });
+    };
+
+    const handleAddToCart = () => {
+        if (!boarding) return;
+
+        const cartItem = {
+            _id: boarding._id,
+            title: boarding.title,
+            price: boarding.price,
+            location: boarding.location,
+            photos: boarding.photos,
+            timestamp: new Date().getTime(),
+        };
+
+        const existingCart = localStorage.getItem('boardingCart') ? JSON.parse(localStorage.getItem('boardingCart') || '[]') : [];
+        const itemExists = existingCart.some((item: any) => item._id === boarding._id);
+
+        if (!itemExists) {
+            existingCart.push(cartItem);
+            localStorage.setItem('boardingCart', JSON.stringify(existingCart));
+        }
+
+        setCartAdded(true);
+        setTimeout(() => setCartAdded(false), 2500);
     };
 
     /* ── Loading ── */
@@ -397,6 +422,25 @@ const BoardingDetailsPage = () => {
                             >
                                 <MessageCircle size={18} />
                                 {isAvailable ? (showContact ? 'Hide Contact Info' : 'Contact Landlord') : 'Currently Occupied'}
+                            </button>
+
+                            {/* Add to Cart Button */}
+                            <button
+                                onClick={handleAddToCart}
+                                style={{
+                                    width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
+                                    background: cartAdded ? 'rgba(67,233,123,0.2)' : 'rgba(108,99,255,0.12)',
+                                    border: cartAdded ? '1px solid rgba(67,233,123,0.4)' : '1px solid rgba(108,99,255,0.3)',
+                                    color: cartAdded ? '#43E97B' : 'rgba(196,181,253,0.9)',
+                                    fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                    transition: 'all 0.25s',
+                                }}
+                                onMouseEnter={e => { if (!cartAdded) { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.22)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.5)'; } }}
+                                onMouseLeave={e => { if (!cartAdded) { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.12)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.3)'; } }}
+                            >
+                                <ShoppingCart size={18} />
+                                {cartAdded ? '✓ Added to Cart' : 'Add to Cart'}
                             </button>
 
                             {/* Contact details reveal */}

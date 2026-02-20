@@ -95,7 +95,8 @@ const Navbar = () => {
                 letterSpacing: '-0.5px',
               }}
             >
-              BoardingFinder
+              UniSpace
+             
             </span>
             <div style={{ fontSize: '0.65rem', color: 'rgba(108,99,255,0.8)', letterSpacing: '2px', fontWeight: 600, marginTop: '-4px' }}>
               CAMPUS EDITION
