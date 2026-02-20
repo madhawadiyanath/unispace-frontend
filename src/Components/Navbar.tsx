@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Home, Search, Heart, MessageCircle, LogIn, UserPlus, ChevronDown, LogOut, User } from 'lucide-react';
+import { Menu, X, Home, Search, Heart, MessageCircle, LogIn, UserPlus, ChevronDown, LogOut, User, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
@@ -36,6 +36,7 @@ const Navbar = () => {
     },
     { label: 'Favourites', href: '#', icon: <Heart size={16} /> },
     { label: 'Messages', href: '#', icon: <MessageCircle size={16} /> },
+    { label: 'Cleaning', href: '/cleaning-service', icon: <Sparkles size={16} /> },
   ];
 
   return (
