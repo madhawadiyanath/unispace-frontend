@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Star, MapPin, Wifi, Coffee, ArrowRight, Heart, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, MapPin, Wifi, Coffee, ArrowRight, Heart, Shield, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
 
@@ -26,6 +26,7 @@ const FeaturedListings = () => {
     const [activeFilter, setActiveFilter] = useState('All');
     const [likedCards, setLikedCards] = useState<(number | string)[]>([]);
     const [apiListings, setApiListings] = useState<Listing[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Fetch published boardings from API
     useEffect(() => {
@@ -173,6 +174,24 @@ const FeaturedListings = () => {
     // Combine: API live listings first, then hardcoded as samples
     const allListings = [...apiListings, ...listings];
 
+    // Apply search + filter
+    const displayListings = allListings.filter(listing => {
+        const q = searchQuery.toLowerCase();
+        const matchSearch = !q ||
+            listing.title.toLowerCase().includes(q) ||
+            listing.location.toLowerCase().includes(q) ||
+            listing.university.toLowerCase().includes(q) ||
+            listing.type.toLowerCase().includes(q);
+        const matchFilter =
+            activeFilter === 'All' ||
+            (activeFilter === 'Near NSBM' && listing.university?.toLowerCase().includes('nsbm')) ||
+            (activeFilter === 'Near UOC' && listing.university?.toLowerCase().includes('uoc')) ||
+            (activeFilter === 'Near SLIIT' && listing.university?.toLowerCase().includes('sliit')) ||
+            (activeFilter === 'Budget' && listing.price < 10000) ||
+            (activeFilter === 'Premium' && listing.price >= 20000);
+        return matchSearch && matchFilter;
+    });
+
     const amenityIcons: Record<string, JSX.Element> = {
         WiFi: <Wifi size={12} />,
         AC: <span>❄️</span>,
@@ -267,6 +286,54 @@ const FeaturedListings = () => {
                     </a>
                 </div>
 
+                {/* Search Bar */}
+                <div style={{ position: 'relative', maxWidth: '520px', marginBottom: '24px' }}>
+                    <Search
+                        size={16}
+                        color="rgba(255,255,255,0.35)"
+                        style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Search by title, location, university or type…"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{
+                            width: '100%',
+                            padding: '14px 44px 14px 46px',
+                            background: 'rgba(255,255,255,0.06)',
+                            border: '1px solid rgba(108,99,255,0.25)',
+                            borderRadius: '14px',
+                            color: '#fff',
+                            fontSize: '0.92rem',
+                            outline: 'none',
+                            boxSizing: 'border-box',
+                            transition: 'border-color 0.2s, box-shadow 0.2s',
+                        }}
+                        onFocus={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(108,99,255,0.6)';
+                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(108,99,255,0.12)';
+                        }}
+                        onBlur={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(108,99,255,0.25)';
+                            e.currentTarget.style.boxShadow = 'none';
+                        }}
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery('')}
+                            style={{
+                                position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                                background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%',
+                                width: '22px', height: '22px', display: 'flex', alignItems: 'center',
+                                justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,0.6)',
+                            }}
+                        >
+                            <X size={12} />
+                        </button>
+                    )}
+                </div>
+
                 {/* Filter Tabs */}
                 <div
                     style={{
@@ -319,7 +386,14 @@ const FeaturedListings = () => {
                     }}
                     className="listings-grid"
                 >
-                    {allListings.map((listing) => (
+                    {displayListings.length === 0 && (
+                        <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', color: 'rgba(255,255,255,0.3)' }}>
+                            <Search size={40} style={{ marginBottom: '14px', opacity: 0.4 }} />
+                            <p style={{ fontSize: '1rem', margin: '0 0 6px', color: 'rgba(255,255,255,0.45)' }}>No boardings found</p>
+                            <p style={{ fontSize: '0.85rem', margin: 0 }}>Try a different search term or clear the filter.</p>
+                        </div>
+                    )}
+                    {displayListings.map((listing) => (
                         <div
                             key={listing.id}
                             style={{
