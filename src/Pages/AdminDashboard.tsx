@@ -4,7 +4,7 @@ import {
     Users, Home, TrendingUp, ShieldCheck, LogOut,
     Bell, Search, Menu, X, Trash2, BarChart2,
     CheckCircle, Clock, AlertCircle, ChevronRight,
-    Eye, MapPin, Building2,
+    Eye, MapPin, Building2, UserPlus, DollarSign,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -42,6 +42,14 @@ const AdminDashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeSection, setActiveSection] = useState('dashboard');
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+
+    // Finance Manager form state
+    const [fmName, setFmName] = useState('');
+    const [fmEmail, setFmEmail] = useState('');
+    const [fmPassword, setFmPassword] = useState('');
+    const [fmSubmitting, setFmSubmitting] = useState(false);
+    const [fmSuccess, setFmSuccess] = useState('');
+    const [fmError, setFmError] = useState('');
 
     // Boardings state
     const [boardings, setBoardings] = useState<Boarding[]>([]);
@@ -128,6 +136,38 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleAddFinanceManager = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setFmError('');
+        setFmSuccess('');
+        if (!fmName.trim() || !fmEmail.trim() || !fmPassword.trim()) {
+            setFmError('All fields are required.');
+            return;
+        }
+        setFmSubmitting(true);
+        try {
+            const res = await fetch(`${API_BASE}/users/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: fmName, email: fmEmail, password: fmPassword, userType: 'finance_manager' }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setFmSuccess(`Finance Manager "${fmName}" added successfully!`);
+                setFmName('');
+                setFmEmail('');
+                setFmPassword('');
+                fetchUsers();
+            } else {
+                setFmError(data.message || 'Failed to add Finance Manager.');
+            }
+        } catch {
+            setFmError('Network error. Please try again.');
+        } finally {
+            setFmSubmitting(false);
+        }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem('user');
         navigate('/login');
@@ -147,16 +187,18 @@ const AdminDashboard = () => {
     ];
 
     const navItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: <BarChart2 size={18} /> },
-        { id: 'users', label: 'Users', icon: <Users size={18} /> },
-        { id: 'listings', label: 'Listings', icon: <Home size={18} /> },
-        { id: 'reports', label: 'Reports', icon: <TrendingUp size={18} /> },
+        { id: 'dashboard', label: 'Dashboard', icon: <BarChart2 size={18} />, sub: false },
+        { id: 'users', label: 'Users', icon: <Users size={18} />, sub: false },
+        { id: 'add-finance-manager', label: 'Add Finance Manager', icon: <DollarSign size={15} />, sub: true },
+        { id: 'listings', label: 'Listings', icon: <Home size={18} />, sub: false },
+        { id: 'reports', label: 'Reports', icon: <TrendingUp size={18} />, sub: false },
     ];
 
     const typeColor: Record<string, { color: string; bg: string }> = {
         admin: { color: '#a855f7', bg: 'rgba(168,85,247,0.15)' },
         student: { color: '#43E97B', bg: 'rgba(67,233,123,0.15)' },
         landlord: { color: '#38F9D7', bg: 'rgba(56,249,215,0.15)' },
+        finance_manager: { color: '#FCD34D', bg: 'rgba(252,211,77,0.15)' },
     };
 
     return (
@@ -198,16 +240,29 @@ const AdminDashboard = () => {
                             key={item.id}
                             onClick={() => { setActiveSection(item.id); setSidebarOpen(false); }}
                             style={{
-                                width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
-                                padding: '11px 14px', borderRadius: '12px', marginBottom: '4px',
-                                background: activeSection === item.id ? 'rgba(108,99,255,0.2)' : 'transparent',
-                                border: activeSection === item.id ? '1px solid rgba(108,99,255,0.3)' : '1px solid transparent',
-                                color: activeSection === item.id ? '#fff' : 'rgba(255,255,255,0.55)',
-                                fontSize: '0.9rem', fontWeight: activeSection === item.id ? 600 : 400,
+                                width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
+                                padding: item.sub ? '9px 12px 9px 30px' : '11px 14px',
+                                borderRadius: '12px', marginBottom: '3px',
+                                background: activeSection === item.id
+                                    ? item.sub ? 'rgba(252,211,77,0.12)' : 'rgba(108,99,255,0.2)'
+                                    : 'transparent',
+                                border: activeSection === item.id
+                                    ? item.sub ? '1px solid rgba(252,211,77,0.3)' : '1px solid rgba(108,99,255,0.3)'
+                                    : '1px solid transparent',
+                                color: activeSection === item.id
+                                    ? item.sub ? '#FCD34D' : '#fff'
+                                    : item.sub ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.55)',
+                                fontSize: item.sub ? '0.82rem' : '0.9rem',
+                                fontWeight: activeSection === item.id ? 600 : 400,
                                 cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left',
                             }}
+                            onMouseEnter={(e) => { if (activeSection !== item.id) (e.currentTarget as HTMLElement).style.background = item.sub ? 'rgba(252,211,77,0.06)' : 'rgba(108,99,255,0.08)'; }}
+                            onMouseLeave={(e) => { if (activeSection !== item.id) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                         >
-                            {item.icon}
+                            {item.sub && (
+                                <span style={{ width: '14px', height: '14px', borderLeft: '1.5px solid rgba(252,211,77,0.35)', borderBottom: '1.5px solid rgba(252,211,77,0.35)', borderRadius: '0 0 0 4px', flexShrink: 0, marginLeft: '-12px' }} />
+                            )}
+                            <span style={{ color: activeSection === item.id && item.sub ? '#FCD34D' : 'inherit', flexShrink: 0 }}>{item.icon}</span>
                             {item.label}
                         </button>
                     ))}
@@ -246,7 +301,7 @@ const AdminDashboard = () => {
                         </button>
                         <div>
                             <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.3rem', fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>
-                                {navItems.find(n => n.id === activeSection)?.label || 'Dashboard'}
+                                {activeSection === 'add-finance-manager' ? 'Finance Manager' : navItems.find(n => n.id === activeSection)?.label || 'Dashboard'}
                             </h1>
                             <p style={{ margin: 0, fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' }}>
                                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
@@ -452,6 +507,131 @@ const AdminDashboard = () => {
                             </div>
                         );
                     })()}
+
+                    {/* ── Add Finance Manager Section ── */}
+                    {activeSection === 'add-finance-manager' && (
+                        <div style={{ maxWidth: '640px' }}>
+                            {/* Header */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
+                                <div style={{ width: '52px', height: '52px', borderRadius: '16px', background: 'rgba(252,211,77,0.12)', border: '1px solid rgba(252,211,77,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    <DollarSign size={24} color="#FCD34D" />
+                                </div>
+                                <div>
+                                    <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Add Finance Manager</h2>
+                                    <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.45)', fontSize: '0.85rem' }}>Create a new Finance Manager account</p>
+                                </div>
+                            </div>
+
+                            {/* Form Card */}
+                            <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(252,211,77,0.18)', borderRadius: '22px', padding: '32px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+
+                                {/* Success banner */}
+                                {fmSuccess && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px', borderRadius: '12px', background: 'rgba(67,233,123,0.1)', border: '1px solid rgba(67,233,123,0.3)', color: '#43E97B', fontSize: '0.9rem', fontWeight: 600, marginBottom: '24px' }}>
+                                        <CheckCircle size={18} /> {fmSuccess}
+                                    </div>
+                                )}
+
+                                {/* Error banner */}
+                                {fmError && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px', borderRadius: '12px', background: 'rgba(255,101,132,0.1)', border: '1px solid rgba(255,101,132,0.3)', color: '#FF6584', fontSize: '0.9rem', fontWeight: 600, marginBottom: '24px' }}>
+                                        <AlertCircle size={18} /> {fmError}
+                                    </div>
+                                )}
+
+                                <form onSubmit={handleAddFinanceManager}>
+                                    {/* Full Name */}
+                                    <div style={{ marginBottom: '20px' }}>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Full Name</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <UserPlus size={16} color="rgba(252,211,77,0.5)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                                            <input
+                                                type="text"
+                                                placeholder="e.g. Kasun Perera"
+                                                value={fmName}
+                                                onChange={e => setFmName(e.target.value)}
+                                                style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(252,211,77,0.2)', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
+                                                onFocus={e => { (e.target as HTMLInputElement).style.borderColor = 'rgba(252,211,77,0.55)'; }}
+                                                onBlur={e => { (e.target as HTMLInputElement).style.borderColor = 'rgba(252,211,77,0.2)'; }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Email */}
+                                    <div style={{ marginBottom: '20px' }}>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Email Address</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <Search size={16} color="rgba(252,211,77,0.5)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                                            <input
+                                                type="email"
+                                                placeholder="e.g. kasun@company.com"
+                                                value={fmEmail}
+                                                onChange={e => setFmEmail(e.target.value)}
+                                                style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(252,211,77,0.2)', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
+                                                onFocus={e => { (e.target as HTMLInputElement).style.borderColor = 'rgba(252,211,77,0.55)'; }}
+                                                onBlur={e => { (e.target as HTMLInputElement).style.borderColor = 'rgba(252,211,77,0.2)'; }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Password */}
+                                    <div style={{ marginBottom: '28px' }}>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Password</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <ShieldCheck size={16} color="rgba(252,211,77,0.5)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                                            <input
+                                                type="password"
+                                                placeholder="Min. 8 characters"
+                                                value={fmPassword}
+                                                onChange={e => setFmPassword(e.target.value)}
+                                                style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(252,211,77,0.2)', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
+                                                onFocus={e => { (e.target as HTMLInputElement).style.borderColor = 'rgba(252,211,77,0.55)'; }}
+                                                onBlur={e => { (e.target as HTMLInputElement).style.borderColor = 'rgba(252,211,77,0.2)'; }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Submit */}
+                                    <button
+                                        type="submit"
+                                        disabled={fmSubmitting}
+                                        style={{ width: '100%', padding: '14px', borderRadius: '14px', background: fmSubmitting ? 'rgba(252,211,77,0.3)' : 'linear-gradient(135deg, #FCD34D, #F59E0B)', border: 'none', color: '#0D0D1A', fontWeight: 800, fontSize: '1rem', cursor: fmSubmitting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: fmSubmitting ? 'none' : '0 8px 24px rgba(252,211,77,0.3)', transition: 'all 0.25s' }}
+                                        onMouseEnter={e => { if (!fmSubmitting) { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 14px 32px rgba(252,211,77,0.45)'; } }}
+                                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = fmSubmitting ? 'none' : '0 8px 24px rgba(252,211,77,0.3)'; }}
+                                    >
+                                        {fmSubmitting ? (
+                                            <><div style={{ width: '18px', height: '18px', border: '2.5px solid rgba(13,13,26,0.3)', borderTopColor: '#0D0D1A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Adding…</>
+                                        ) : (
+                                            <><UserPlus size={18} /> Add Finance Manager</>
+                                        )}
+                                    </button>
+                                </form>
+                            </div>
+
+                            {/* Finance Managers list */}
+                            <div style={{ marginTop: '28px', background: 'rgba(18,18,40,0.8)', border: '1px solid rgba(252,211,77,0.14)', borderRadius: '18px', padding: '24px' }}>
+                                <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1rem', fontWeight: 700, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <DollarSign size={16} color="#FCD34D" /> Existing Finance Managers
+                                    <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400, marginLeft: '4px' }}>({users.filter(u => u.userType === 'finance_manager').length})</span>
+                                </h3>
+                                {loadingUsers ? (
+                                    <div style={{ textAlign: 'center', padding: '20px', color: 'rgba(255,255,255,0.3)' }}>
+                                        <div style={{ width: '22px', height: '22px', border: '2px solid rgba(252,211,77,0.3)', borderTopColor: '#FCD34D', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
+                                    </div>
+                                ) : users.filter(u => u.userType === 'finance_manager').length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: '28px 0', color: 'rgba(255,255,255,0.3)', fontSize: '0.88rem' }}>
+                                        No Finance Managers added yet.
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {users.filter(u => u.userType === 'finance_manager').map(u => (
+                                            <UserRow key={u._id} user={u} typeColor={typeColor} onDelete={() => setDeleteConfirm(u._id)} />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* ── Reports placeholder ── */}
                     {activeSection === 'reports' && (
