@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Star, MapPin, Wifi, Coffee, ArrowRight, Heart, Shield, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -23,6 +24,7 @@ interface Listing {
 }
 
 const FeaturedListings = () => {
+    const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('All');
     const [likedCards, setLikedCards] = useState<(number | string)[]>([]);
     const [apiListings, setApiListings] = useState<Listing[]>([]);
@@ -595,6 +597,11 @@ const FeaturedListings = () => {
                                 </div>
 
                                 <button
+                                    onClick={() => {
+                                        if (listing.available && listing.isLive && typeof listing.id === 'string') {
+                                            navigate(`/boarding/${listing.id}`);
+                                        }
+                                    }}
                                     style={{
                                         width: '100%',
                                         marginTop: '14px',
