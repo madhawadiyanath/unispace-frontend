@@ -9,6 +9,7 @@ import BoardingFormPage from './Pages/BoardingFormPage';
 import BoardingDetailsPage from './Pages/BoardingDetailsPage';
 import FinanceManagerDashboard from './Pages/FinanceManagerDashboard';
 import CleaningServicePage from './Pages/CleaningServicePage';
+import CleaningStaffDashboard from './Pages/CleaningStaffDashboard';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/boarding/add" element={<BoardingFormPage />} />
         <Route path="/boarding/:id" element={<BoardingDetailsPage />} />
         <Route path="/cleaning-service" element={<CleaningServicePage />} />
+        <Route path="/cleaning-staff/dashboard" element={<CleaningStaffDashboard />} />
       </Routes>
     </BrowserRouter>
   );

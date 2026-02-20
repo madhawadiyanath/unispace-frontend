@@ -44,6 +44,7 @@ const LoginPage = () => {
                 const destination =
                     userType === 'admin' ? '/admin/dashboard' :
                     userType === 'finance_manager' ? '/finance/dashboard' :
+                    userType === 'cleaning_staff' ? '/cleaning-staff/dashboard' :
                     '/';
                 setTimeout(() => navigate(destination), 1200);
             }
