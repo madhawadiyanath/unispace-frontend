@@ -27,7 +27,7 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { label: 'Home', href: '#home', icon: <Home size={16} /> },
+    { label: 'Home', href: '/', icon: <Home size={16} /> },
     {
       label: 'Browse',
       href: '#listings',
