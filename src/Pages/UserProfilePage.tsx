@@ -15,6 +15,9 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  ShoppingCart,
+  Trash2,
+  ExternalLink,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -29,6 +32,15 @@ interface Boarding {
   createdAt: string;
 }
 
+interface CartItem {
+  _id: string;
+  title: string;
+  price: number;
+  location: string;
+  photos: string[];
+  timestamp: number;
+}
+
 interface UserData {
   _id: string;
   name: string;
@@ -41,6 +53,7 @@ const UserProfilePage = () => {
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [myBoardings, setMyBoardings] = useState<Boarding[]>([]);
   const [loadingBoardings, setLoadingBoardings] = useState(false);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -50,6 +63,12 @@ const UserProfilePage = () => {
     }
     const user = JSON.parse(stored);
     setCurrentUser(user);
+
+    // Load cart items from localStorage
+    const savedCart = localStorage.getItem('boardingCart');
+    if (savedCart) {
+      try { setCartItems(JSON.parse(savedCart)); } catch {}
+    }
 
     // Fetch landlord's own boarding submissions
     if (user.userType === 'landlord') {
@@ -61,6 +80,12 @@ const UserProfilePage = () => {
         .finally(() => setLoadingBoardings(false));
     }
   }, [navigate]);
+
+  const handleRemoveFromCart = (id: string) => {
+    const updated = cartItems.filter(item => item._id !== id);
+    setCartItems(updated);
+    localStorage.setItem('boardingCart', JSON.stringify(updated));
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -385,6 +410,107 @@ const UserProfilePage = () => {
             </div>
           </div>
         )}
+
+        {/* ── Saved Boardings (Cart) section ── */}
+        <div
+          style={{
+            marginTop: '24px',
+            background: 'rgba(18, 18, 40, 0.80)',
+            backdropFilter: 'blur(24px)',
+            border: '1px solid rgba(108,99,255,0.2)',
+            borderRadius: '24px',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Section header */}
+          <div style={{ padding: '24px 28px', borderBottom: '1px solid rgba(108,99,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(108,99,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShoppingCart size={18} color="#a855f7" />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, color: '#fff', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Saved Boardings</h3>
+                <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} saved</p>
+              </div>
+            </div>
+            {cartItems.length > 0 && (
+              <button
+                onClick={() => { setCartItems([]); localStorage.setItem('boardingCart', '[]'); }}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '10px', background: 'rgba(255,101,132,0.08)', border: '1px solid rgba(255,101,132,0.25)', color: '#FF6584', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,101,132,0.18)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,101,132,0.08)'; }}
+              >
+                <Trash2 size={13} /> Clear All
+              </button>
+            )}
+          </div>
+
+          {/* Cart items list */}
+          <div style={{ padding: '16px 28px 24px' }}>
+            {cartItems.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                <ShoppingCart size={40} color="rgba(108,99,255,0.25)" style={{ marginBottom: '12px' }} />
+                <p style={{ margin: 0, color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>No saved boardings yet.</p>
+                <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.22)', fontSize: '0.8rem' }}>Browse listings and click "Add to Cart" to save them here.</p>
+                <button
+                  onClick={() => navigate('/')}
+                  style={{ marginTop: '18px', padding: '10px 24px', borderRadius: '12px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', border: 'none', color: '#fff', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', boxShadow: '0 4px 16px rgba(108,99,255,0.4)' }}
+                >
+                  Browse Boardings
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {cartItems.map(item => (
+                  <div
+                    key={item._id}
+                    style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px', borderRadius: '16px', background: 'rgba(108,99,255,0.05)', border: '1px solid rgba(108,99,255,0.14)', transition: 'all 0.2s' }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.1)'; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.05)'; }}
+                  >
+                    {/* Thumbnail */}
+                    <div style={{ width: '72px', height: '56px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, background: 'rgba(108,99,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {item.photos && item.photos.length > 0 ? (
+                        <img src={`${API_BASE}${item.photos[0]}`} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <Home size={22} color="rgba(108,99,255,0.4)" />
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</div>
+                      <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', marginTop: '3px' }}>{item.location}</div>
+                      <div style={{ fontSize: '0.82rem', color: '#a78bfa', fontWeight: 700, marginTop: '3px' }}>LKR {item.price?.toLocaleString()} / mo</div>
+                    </div>
+
+                    {/* Actions */}
+                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                      <button
+                        onClick={() => navigate(`/boarding/${item._id}`)}
+                        style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', color: '#a78bfa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.3)'; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.15)'; }}
+                        title="View Listing"
+                      >
+                        <ExternalLink size={15} />
+                      </button>
+                      <button
+                        onClick={() => handleRemoveFromCart(item._id)}
+                        style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,101,132,0.08)', border: '1px solid rgba(255,101,132,0.25)', color: '#FF6584', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,101,132,0.2)'; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,101,132,0.08)'; }}
+                        title="Remove"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Logout card */}
         <div
