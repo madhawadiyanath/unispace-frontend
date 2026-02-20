@@ -8,6 +8,7 @@ import UserProfilePage from './Pages/UserProfilePage';
 import BoardingFormPage from './Pages/BoardingFormPage';
 import BoardingDetailsPage from './Pages/BoardingDetailsPage';
 import FinanceManagerDashboard from './Pages/FinanceManagerDashboard';
+import CleaningServicePage from './Pages/CleaningServicePage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/profile" element={<UserProfilePage />} />
         <Route path="/boarding/add" element={<BoardingFormPage />} />
         <Route path="/boarding/:id" element={<BoardingDetailsPage />} />
+        <Route path="/cleaning-service" element={<CleaningServicePage />} />
       </Routes>
     </BrowserRouter>
   );
