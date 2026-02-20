@@ -174,6 +174,17 @@ const CleaningServicePage = () => {
     setLoading(true);
     // Simulate API call
     setTimeout(() => {
+      // Persist booking to localStorage for cleaning staff dashboard
+      const newBooking = {
+        id: Date.now().toString(),
+        ...form,
+        status: 'pending',
+        submittedAt: new Date().toISOString(),
+      };
+      try {
+        const existing = JSON.parse(localStorage.getItem('cleaningBookings') || '[]');
+        localStorage.setItem('cleaningBookings', JSON.stringify([...existing, newBooking]));
+      } catch {}
       setLoading(false);
       setSubmitted(true);
     }, 1400);
