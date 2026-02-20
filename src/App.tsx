@@ -7,6 +7,7 @@ import AdminDashboard from './Pages/AdminDashboard';
 import UserProfilePage from './Pages/UserProfilePage';
 import BoardingFormPage from './Pages/BoardingFormPage';
 import BoardingDetailsPage from './Pages/BoardingDetailsPage';
+import FinanceManagerDashboard from './Pages/FinanceManagerDashboard';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<SignupPage />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/finance/dashboard" element={<FinanceManagerDashboard />} />
         <Route path="/profile" element={<UserProfilePage />} />
         <Route path="/boarding/add" element={<BoardingFormPage />} />
         <Route path="/boarding/:id" element={<BoardingDetailsPage />} />

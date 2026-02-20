@@ -40,7 +40,11 @@ const LoginPage = () => {
                 // Save user info
                 localStorage.setItem('user', JSON.stringify(data.user));
                 setSuccess('Login successful! Redirecting...');
-                const destination = data.user?.userType === 'admin' ? '/admin/dashboard' : '/';
+                const userType = data.user?.userType;
+                const destination =
+                    userType === 'admin' ? '/admin/dashboard' :
+                    userType === 'finance_manager' ? '/finance/dashboard' :
+                    '/';
                 setTimeout(() => navigate(destination), 1200);
             }
         } catch {
