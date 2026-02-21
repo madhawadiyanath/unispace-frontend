@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, MapPin, Share2, Heart, ChevronLeft, ChevronRight,
     Phone, Mail, User, Shield, MessageCircle, Home, GraduationCap,
-    Check, ShoppingCart,
+    Check, ShoppingCart, Send, X,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -22,6 +22,7 @@ interface Boarding {
     contactEmail: string;
     photos: string[];
     status: string;
+    landlordId: string;
     landlordName: string;
     createdAt: string;
 }
@@ -56,6 +57,14 @@ const BoardingDetailsPage = () => {
     const [copied, setCopied] = useState(false);
     const [showContact, setShowContact] = useState(false);
     const [cartAdded, setCartAdded] = useState(false);
+
+    // Chat state
+    const [showChat, setShowChat] = useState(false);
+    const [chatMessage, setChatMessage] = useState('');
+    const [chatSending, setChatSending] = useState(false);
+    const [chatSent, setChatSent] = useState(false);
+    const [chatError, setChatError] = useState('');
+    const chatTextRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -99,6 +108,42 @@ const BoardingDetailsPage = () => {
 
         setCartAdded(true);
         setTimeout(() => setCartAdded(false), 2500);
+    };
+
+    const handleSendChat = async () => {
+        if (!boarding || !chatMessage.trim()) return;
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) { navigate('/login'); return; }
+        const user = JSON.parse(storedUser);
+        setChatSending(true);
+        setChatError('');
+        try {
+            const res = await fetch(`${API_BASE}/chat/send`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    boardingId:    boarding._id,
+                    boardingTitle: boarding.title,
+                    senderId:      user._id,
+                    senderName:    user.name,
+                    senderEmail:   user.email,
+                    ownerId:       boarding.landlordId,
+                    message:       chatMessage.trim(),
+                }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setChatSent(true);
+                setChatMessage('');
+                setTimeout(() => { setChatSent(false); setShowChat(false); }, 3000);
+            } else {
+                setChatError(data.error || 'Failed to send message.');
+            }
+        } catch {
+            setChatError('Network error. Please try again.');
+        } finally {
+            setChatSending(false);
+        }
     };
 
     /* ── Loading ── */
@@ -442,6 +487,92 @@ const BoardingDetailsPage = () => {
                                 <ShoppingCart size={18} />
                                 {cartAdded ? '✓ Added to Cart' : 'Add to Cart'}
                             </button>
+
+                            {/* ── Chat with Owner Button ── */}
+                            {isAvailable && (
+                                <button
+                                    onClick={() => { setShowChat(c => !c); setChatSent(false); setChatError(''); }}
+                                    style={{
+                                        width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
+                                        background: showChat ? 'rgba(56,249,215,0.15)' : 'rgba(56,249,215,0.07)',
+                                        border: `1px solid ${showChat ? 'rgba(56,249,215,0.5)' : 'rgba(56,249,215,0.25)'}`,
+                                        color: '#38F9D7',
+                                        fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                        transition: 'all 0.25s',
+                                    }}
+                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(56,249,215,0.18)'; }}
+                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showChat ? 'rgba(56,249,215,0.15)' : 'rgba(56,249,215,0.07)'; }}
+                                >
+                                    {showChat ? <><X size={17} /> Close Chat</> : <><MessageCircle size={17} /> Chat with Owner</>}
+                                </button>
+                            )}
+
+                            {/* ── Inline Chat Form ── */}
+                            {showChat && isAvailable && (
+                                <div style={{ borderRadius: '16px', background: 'rgba(56,249,215,0.05)', border: '1px solid rgba(56,249,215,0.2)', padding: '18px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
+                                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#38F9D7', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <MessageCircle size={12} /> Message to {boarding.landlordName || 'Owner'}
+                                    </div>
+
+                                    {chatSent ? (
+                                        <div style={{ textAlign: 'center', padding: '16px 0', color: '#43E97B', fontWeight: 700, fontSize: '0.95rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                            <span style={{ fontSize: '2rem' }}>✅</span>
+                                            Message sent! The owner will reply in your profile inbox.
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <textarea
+                                                ref={chatTextRef}
+                                                value={chatMessage}
+                                                onChange={e => setChatMessage(e.target.value)}
+                                                placeholder={`Hi ${boarding.landlordName || 'there'}, I'm interested in "${boarding.title}"…`}
+                                                rows={4}
+                                                style={{
+                                                    width: '100%', boxSizing: 'border-box',
+                                                    background: 'rgba(0,0,0,0.3)',
+                                                    border: '1px solid rgba(56,249,215,0.25)',
+                                                    borderRadius: '12px', padding: '12px 14px',
+                                                    color: '#fff', fontSize: '0.875rem', lineHeight: 1.6,
+                                                    resize: 'vertical', outline: 'none',
+                                                    fontFamily: "'Inter', sans-serif",
+                                                    marginBottom: '10px',
+                                                    transition: 'border-color 0.2s',
+                                                }}
+                                                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(56,249,215,0.6)'; }}
+                                                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(56,249,215,0.25)'; }}
+                                            />
+                                            {chatError && (
+                                                <p style={{ color: '#FF6584', fontSize: '0.78rem', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                    ⚠ {chatError}
+                                                </p>
+                                            )}
+                                            <button
+                                                onClick={handleSendChat}
+                                                disabled={chatSending || !chatMessage.trim()}
+                                                style={{
+                                                    width: '100%', padding: '12px', borderRadius: '12px',
+                                                    background: chatSending || !chatMessage.trim()
+                                                        ? 'rgba(56,249,215,0.08)'
+                                                        : 'linear-gradient(135deg, #38F9D7, #43E97B)',
+                                                    border: 'none',
+                                                    color: chatSending || !chatMessage.trim() ? 'rgba(255,255,255,0.3)' : '#0D0D1A',
+                                                    fontWeight: 700, fontSize: '0.9rem',
+                                                    cursor: chatSending || !chatMessage.trim() ? 'not-allowed' : 'pointer',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                                                    transition: 'all 0.2s',
+                                                    boxShadow: chatSending || !chatMessage.trim() ? 'none' : '0 6px 20px rgba(56,249,215,0.35)',
+                                                }}
+                                            >
+                                                {chatSending
+                                                    ? <><div style={{ width: '14px', height: '14px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#0D0D1A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
+                                                    : <><Send size={15} /> Send Message</>
+                                                }
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Contact details reveal */}
                             {showContact && isAvailable && (
