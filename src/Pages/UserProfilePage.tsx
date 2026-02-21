@@ -18,6 +18,8 @@ import {
   ShoppingCart,
   Trash2,
   ExternalLink,
+  MessageSquare,
+  MailOpen,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -41,6 +43,17 @@ interface CartItem {
   timestamp: number;
 }
 
+interface ChatMessage {
+  _id: string;
+  boardingId: string;
+  boardingTitle: string;
+  senderName: string;
+  senderEmail: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
 interface UserData {
   _id: string;
   name: string;
@@ -54,6 +67,8 @@ const UserProfilePage = () => {
   const [myBoardings, setMyBoardings] = useState<Boarding[]>([]);
   const [loadingBoardings, setLoadingBoardings] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -78,6 +93,14 @@ const UserProfilePage = () => {
         .then(data => setMyBoardings(data.boardings || []))
         .catch(() => {})
         .finally(() => setLoadingBoardings(false));
+
+      // Fetch messages sent to this landlord
+      setLoadingMessages(true);
+      fetch(`${API_BASE}/chat/owner/${user._id}`)
+        .then(r => r.json())
+        .then(data => setChatMessages(data.messages || []))
+        .catch(() => {})
+        .finally(() => setLoadingMessages(false));
     }
   }, [navigate]);
 
@@ -85,6 +108,11 @@ const UserProfilePage = () => {
     const updated = cartItems.filter(item => item._id !== id);
     setCartItems(updated);
     localStorage.setItem('boardingCart', JSON.stringify(updated));
+  };
+
+  const handleMarkAsRead = (id: string) => {
+    fetch(`${API_BASE}/chat/${id}/read`, { method: 'PUT' }).catch(() => {});
+    setChatMessages(prev => prev.map(m => m._id === id ? { ...m, isRead: true } : m));
   };
 
   const handleLogout = () => {
@@ -405,6 +433,151 @@ const UserProfilePage = () => {
                       </div>
                     );
                   })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Landlord: Messages Inbox section ── */}
+        {currentUser.userType === 'landlord' && (
+          <div
+            style={{
+              marginTop: '24px',
+              background: 'rgba(18, 18, 40, 0.80)',
+              backdropFilter: 'blur(24px)',
+              border: '1px solid rgba(56,249,215,0.2)',
+              borderRadius: '24px',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Header */}
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid rgba(56,249,215,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(56,249,215,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                  <MessageSquare size={18} color="#38F9D7" />
+                  {chatMessages.filter(m => !m.isRead).length > 0 && (
+                    <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#FF6584', color: '#fff', fontSize: '0.65rem', fontWeight: 800, borderRadius: '100px', padding: '1px 6px', minWidth: '18px', textAlign: 'center' }}>
+                      {chatMessages.filter(m => !m.isRead).length}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, color: '#fff', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Messages Inbox</h3>
+                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>
+                    {chatMessages.length} message{chatMessages.length !== 1 ? 's' : ''}
+                    {chatMessages.filter(m => !m.isRead).length > 0 && (
+                      <span style={{ color: '#FF6584', fontWeight: 700 }}> · {chatMessages.filter(m => !m.isRead).length} unread</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+              {chatMessages.some(m => !m.isRead) && (
+                <button
+                  onClick={() => {
+                    chatMessages.filter(m => !m.isRead).forEach(m => handleMarkAsRead(m._id));
+                  }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '10px', background: 'rgba(56,249,215,0.08)', border: '1px solid rgba(56,249,215,0.25)', color: '#38F9D7', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(56,249,215,0.18)'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(56,249,215,0.08)'; }}
+                >
+                  <MailOpen size={13} /> Mark all as read
+                </button>
+              )}
+            </div>
+
+            {/* Message list */}
+            <div style={{ padding: '16px 28px 24px' }}>
+              {loadingMessages ? (
+                <div style={{ textAlign: 'center', padding: '28px', color: 'rgba(255,255,255,0.35)' }}>
+                  <div style={{ width: '24px', height: '24px', border: '2px solid rgba(56,249,215,0.3)', borderTopColor: '#38F9D7', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
+                  Loading messages…
+                </div>
+              ) : chatMessages.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '36px 0' }}>
+                  <MessageSquare size={38} color="rgba(56,249,215,0.2)" style={{ marginBottom: '12px' }} />
+                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>No messages yet.</p>
+                  <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.22)', fontSize: '0.8rem' }}>Students will appear here once they chat about your listings.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {chatMessages.map(msg => (
+                    <div
+                      key={msg._id}
+                      style={{
+                        padding: '16px 18px',
+                        borderRadius: '16px',
+                        background: msg.isRead ? 'rgba(255,255,255,0.03)' : 'rgba(56,249,215,0.06)',
+                        border: `1px solid ${msg.isRead ? 'rgba(255,255,255,0.07)' : 'rgba(56,249,215,0.25)'}`,
+                        transition: 'all 0.2s',
+                        position: 'relative',
+                      }}
+                    >
+                      {/* Unread dot */}
+                      {!msg.isRead && (
+                        <span style={{ position: 'absolute', top: '16px', right: '16px', width: '8px', height: '8px', borderRadius: '50%', background: '#38F9D7', boxShadow: '0 0 8px rgba(56,249,215,0.8)' }} />
+                      )}
+
+                      {/* Sender info row */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.95rem', fontWeight: 800, color: '#fff' }}>
+                          {msg.senderName?.[0]?.toUpperCase() || '?'}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#fff' }}>{msg.senderName || 'Unknown Student'}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{msg.senderEmail}</div>
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', flexShrink: 0, textAlign: 'right' }}>
+                          {new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}<br />
+                          {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+
+                      {/* Boarding tag */}
+                      {msg.boardingTitle && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '8px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.22)', color: '#a78bfa', fontSize: '0.75rem', fontWeight: 600, marginBottom: '10px' }}>
+                          🏠 {msg.boardingTitle}
+                        </div>
+                      )}
+
+                      {/* Message body */}
+                      <p style={{ margin: '0 0 12px', color: 'rgba(255,255,255,0.78)', fontSize: '0.875rem', lineHeight: 1.65, background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '10px 14px', borderLeft: '3px solid rgba(56,249,215,0.35)' }}>
+                        {msg.message}
+                      </p>
+
+                      {/* Actions row */}
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={() => navigate(`/boarding/${msg.boardingId}`)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: '8px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.25)', color: '#a78bfa', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.25)'; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.12)'; }}
+                        >
+                          <ExternalLink size={12} /> View Boarding
+                        </button>
+                        {msg.senderEmail && (
+                          <a
+                            href={`mailto:${msg.senderEmail}`}
+                            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: '8px', background: 'rgba(56,249,215,0.08)', border: '1px solid rgba(56,249,215,0.22)', color: '#38F9D7', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', transition: 'all 0.2s' }}
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(56,249,215,0.18)'; }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(56,249,215,0.08)'; }}
+                          >
+                            ✉️ Reply via Email
+                          </a>
+                        )}
+                        {!msg.isRead && (
+                          <button
+                            onClick={() => handleMarkAsRead(msg._id)}
+                            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.45)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)'; }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                          >
+                            ✓ Mark as read
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
