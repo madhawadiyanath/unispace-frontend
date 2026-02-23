@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, MapPin, Share2, Heart, ChevronLeft, ChevronRight,
     Phone, Mail, User, Shield, MessageCircle, Home, GraduationCap,
-    Check, ShoppingCart, Send, X,
+    Check, ShoppingCart, Send, X, AlertTriangle, Wrench,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -65,6 +65,15 @@ const BoardingDetailsPage = () => {
     const [chatSent, setChatSent] = useState(false);
     const [chatError, setChatError] = useState('');
     const chatTextRef = useRef<HTMLTextAreaElement>(null);
+
+    // Issue report state
+    const [showIssueForm, setShowIssueForm] = useState(false);
+    const [issueType, setIssueType] = useState('repairs');
+    const [issuePriority, setIssuePriority] = useState('medium');
+    const [issueDescription, setIssueDescription] = useState('');
+    const [issueSending, setIssueSending] = useState(false);
+    const [issueSent, setIssueSent] = useState(false);
+    const [issueError, setIssueError] = useState('');
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -143,6 +152,44 @@ const BoardingDetailsPage = () => {
             setChatError('Network error. Please try again.');
         } finally {
             setChatSending(false);
+        }
+    };
+
+    const handleReportIssue = async () => {
+        if (!boarding || !issueDescription.trim()) return;
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) { navigate('/login'); return; }
+        const user = JSON.parse(storedUser);
+        setIssueSending(true);
+        setIssueError('');
+        try {
+            const res = await fetch(`${API_BASE}/issues`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    boardingId:    boarding._id,
+                    boardingTitle: boarding.title,
+                    tenantId:      user._id,
+                    tenantName:    user.name,
+                    tenantEmail:   user.email,
+                    landlordId:    boarding.landlordId,
+                    issueType,
+                    priority:      issuePriority,
+                    description:   issueDescription.trim(),
+                }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setIssueSent(true);
+                setIssueDescription('');
+                setTimeout(() => { setIssueSent(false); setShowIssueForm(false); }, 3500);
+            } else {
+                setIssueError(data.message || 'Failed to submit issue.');
+            }
+        } catch {
+            setIssueError('Network error. Please try again.');
+        } finally {
+            setIssueSending(false);
         }
     };
 
@@ -567,6 +614,134 @@ const BoardingDetailsPage = () => {
                                                 {chatSending
                                                     ? <><div style={{ width: '14px', height: '14px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#0D0D1A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
                                                     : <><Send size={15} /> Send Message</>
+                                                }
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* ── Report an Issue Button ── */}
+                            <button
+                                onClick={() => { setShowIssueForm(c => !c); setIssueSent(false); setIssueError(''); }}
+                                style={{
+                                    width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
+                                    background: showIssueForm ? 'rgba(252,211,77,0.15)' : 'rgba(252,211,77,0.07)',
+                                    border: `1px solid ${showIssueForm ? 'rgba(252,211,77,0.5)' : 'rgba(252,211,77,0.25)'}`,
+                                    color: '#FCD34D',
+                                    fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                    transition: 'all 0.25s',
+                                }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(252,211,77,0.18)'; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showIssueForm ? 'rgba(252,211,77,0.15)' : 'rgba(252,211,77,0.07)'; }}
+                            >
+                                {showIssueForm ? <><X size={17} /> Cancel Report</> : <><AlertTriangle size={17} /> Report an Issue</>}
+                            </button>
+
+                            {/* ── Inline Issue Report Form ── */}
+                            {showIssueForm && (
+                                <div style={{ borderRadius: '16px', background: 'rgba(252,211,77,0.05)', border: '1px solid rgba(252,211,77,0.2)', padding: '18px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
+                                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#FCD34D', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <AlertTriangle size={12} /> Report Issue to {boarding.landlordName || 'Owner'}
+                                    </div>
+
+                                    {issueSent ? (
+                                        <div style={{ textAlign: 'center', padding: '16px 0', color: '#43E97B', fontWeight: 700, fontSize: '0.92rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                            <span style={{ fontSize: '2rem' }}>✅</span>
+                                            Issue reported! The owner has been notified.
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* Issue Type */}
+                                            <div style={{ marginBottom: '12px' }}>
+                                                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Issue Type</div>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                                                    {[
+                                                        { id: 'cleaning',   label: '🧹 Cleaning',  color: '#6C63FF' },
+                                                        { id: 'plumbing',   label: '💧 Plumbing',  color: '#06b6d4' },
+                                                        { id: 'electrical', label: '⚡ Electrical', color: '#f59e0b' },
+                                                        { id: 'repairs',    label: '🔨 Repairs',   color: '#22c55e' },
+                                                    ].map(t => (
+                                                        <button
+                                                            key={t.id}
+                                                            type="button"
+                                                            onClick={() => setIssueType(t.id)}
+                                                            style={{
+                                                                padding: '8px 6px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                                                                background: issueType === t.id ? `${t.color}22` : 'rgba(255,255,255,0.04)',
+                                                                border: `1.5px solid ${issueType === t.id ? t.color : 'rgba(255,255,255,0.1)'}`,
+                                                                color: issueType === t.id ? t.color : 'rgba(255,255,255,0.5)',
+                                                            }}
+                                                        >{t.label}</button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Priority */}
+                                            <div style={{ marginBottom: '12px' }}>
+                                                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Priority</div>
+                                                <div style={{ display: 'flex', gap: '6px' }}>
+                                                    {[
+                                                        { id: 'low',    label: 'Low',    color: '#22c55e' },
+                                                        { id: 'medium', label: 'Medium', color: '#f59e0b' },
+                                                        { id: 'high',   label: 'High',   color: '#ef4444' },
+                                                    ].map(p => (
+                                                        <button
+                                                            key={p.id}
+                                                            type="button"
+                                                            onClick={() => setIssuePriority(p.id)}
+                                                            style={{
+                                                                flex: 1, padding: '7px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
+                                                                background: issuePriority === p.id ? `${p.color}22` : 'rgba(255,255,255,0.04)',
+                                                                border: `1.5px solid ${issuePriority === p.id ? p.color : 'rgba(255,255,255,0.1)'}`,
+                                                                color: issuePriority === p.id ? p.color : 'rgba(255,255,255,0.45)',
+                                                            }}
+                                                        >{p.label}</button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Description */}
+                                            <textarea
+                                                value={issueDescription}
+                                                onChange={e => { setIssueDescription(e.target.value); setIssueError(''); }}
+                                                placeholder="Describe the issue in detail…"
+                                                rows={3}
+                                                style={{
+                                                    width: '100%', boxSizing: 'border-box',
+                                                    background: 'rgba(0,0,0,0.3)',
+                                                    border: '1px solid rgba(252,211,77,0.25)',
+                                                    borderRadius: '12px', padding: '10px 12px',
+                                                    color: '#fff', fontSize: '0.875rem', lineHeight: 1.6,
+                                                    resize: 'vertical', outline: 'none',
+                                                    fontFamily: "'Inter', sans-serif",
+                                                    marginBottom: '10px',
+                                                }}
+                                                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(252,211,77,0.6)'; }}
+                                                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(252,211,77,0.25)'; }}
+                                            />
+                                            {issueError && (
+                                                <p style={{ color: '#ef4444', fontSize: '0.78rem', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '5px' }}>⚠ {issueError}</p>
+                                            )}
+                                            <button
+                                                onClick={handleReportIssue}
+                                                disabled={issueSending || !issueDescription.trim()}
+                                                style={{
+                                                    width: '100%', padding: '11px', borderRadius: '12px',
+                                                    background: issueSending || !issueDescription.trim() ? 'rgba(252,211,77,0.08)' : 'linear-gradient(135deg, #FCD34D, #f59e0b)',
+                                                    border: 'none',
+                                                    color: issueSending || !issueDescription.trim() ? 'rgba(255,255,255,0.3)' : '#0D0D1A',
+                                                    fontWeight: 700, fontSize: '0.9rem',
+                                                    cursor: issueSending || !issueDescription.trim() ? 'not-allowed' : 'pointer',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                                                    transition: 'all 0.2s',
+                                                    boxShadow: issueSending || !issueDescription.trim() ? 'none' : '0 6px 20px rgba(252,211,77,0.3)',
+                                                }}
+                                            >
+                                                {issueSending
+                                                    ? <><div style={{ width: '14px', height: '14px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#0D0D1A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Submitting…</>
+                                                    : <><Wrench size={15} /> Submit Issue Report</>
                                                 }
                                             </button>
                                         </>
