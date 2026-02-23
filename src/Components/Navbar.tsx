@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Home, Search, Heart, MessageCircle, LogIn, UserPlus, ChevronDown, LogOut, User, Sparkles } from 'lucide-react';
+import { Menu, X, Home, Search, Heart, MessageCircle, LogIn, UserPlus, ChevronDown, LogOut, User, Sparkles, Wrench, Droplets, Zap, Hammer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
@@ -36,7 +36,14 @@ const Navbar = () => {
     },
     { label: 'Favourites', href: '#', icon: <Heart size={16} /> },
     { label: 'Messages', href: '#', icon: <MessageCircle size={16} /> },
-    { label: 'Cleaning', href: '/cleaning-service', icon: <Sparkles size={16} /> },
+    {
+      label: 'Maintenance',
+      href: '/maintenance',
+      icon: <Wrench size={16} />,
+      dropdown: ['Cleaning Service', 'Plumbing', 'Electrical', 'General Repairs'],
+      dropdownLinks: ['/maintenance?tab=cleaning', '/maintenance?tab=plumbing', '/maintenance?tab=electrical', '/maintenance?tab=repairs'],
+      dropdownIcons: [<Sparkles size={14} />, <Droplets size={14} />, <Zap size={14} />, <Hammer size={14} />],
+    },
   ];
 
   return (
@@ -161,12 +168,14 @@ const Navbar = () => {
                     animation: 'slideDown 0.2s ease',
                   }}
                 >
-                  {link.dropdown.map((item) => (
+                  {link.dropdown.map((item, idx) => (
                     <a
                       key={item}
-                      href="#"
+                      href={(link as any).dropdownLinks ? (link as any).dropdownLinks[idx] : '#'}
                       style={{
-                        display: 'block',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
                         padding: '10px 14px',
                         borderRadius: '8px',
                         color: 'rgba(255,255,255,0.8)',
@@ -182,6 +191,9 @@ const Navbar = () => {
                         (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.8)';
                       }}
                     >
+                      {(link as any).dropdownIcons?.[idx] && (
+                        <span style={{ opacity: 0.7 }}>{(link as any).dropdownIcons[idx]}</span>
+                      )}
                       {item}
                     </a>
                   ))}
