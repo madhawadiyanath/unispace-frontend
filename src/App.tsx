@@ -10,6 +10,7 @@ import BoardingDetailsPage from './Pages/BoardingDetailsPage';
 import FinanceManagerDashboard from './Pages/FinanceManagerDashboard';
 import CleaningServicePage from './Pages/CleaningServicePage';
 import CleaningStaffDashboard from './Pages/CleaningStaffDashboard';
+import EditProfilePage from './Pages/EditProfilePage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/finance/dashboard" element={<FinanceManagerDashboard />} />
         <Route path="/profile" element={<UserProfilePage />} />
+        <Route path="/profile/edit" element={<EditProfilePage />} />
         <Route path="/boarding/add" element={<BoardingFormPage />} />
         <Route path="/boarding/:id" element={<BoardingDetailsPage />} />
         <Route path="/cleaning-service" element={<CleaningServicePage />} />

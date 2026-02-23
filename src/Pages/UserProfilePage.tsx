@@ -267,6 +267,7 @@ const UserProfilePage = () => {
             {/* Edit button top-right */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '16px' }}>
               <button
+                onClick={() => navigate('/profile/edit')}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '7px',
                   padding: '8px 18px', borderRadius: '10px',
