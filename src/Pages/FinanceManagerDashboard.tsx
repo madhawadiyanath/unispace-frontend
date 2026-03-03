@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    DollarSign, LogOut, Bell, Menu, X, BarChart2,
+    Banknote, LogOut, Bell, Menu, X, BarChart2,
     TrendingUp, Users, Home, Eye,
     MapPin, Building2, CheckCircle,
     CreditCard, Wallet, ArrowUpRight, ArrowDownRight,
@@ -214,7 +214,7 @@ const FinanceManagerDashboard = () => {
                 <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(252,211,77,0.1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'linear-gradient(135deg, #FCD34D, #F59E0B)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 18px rgba(252,211,77,0.4)', flexShrink: 0 }}>
-                            <DollarSign size={20} color="#0D0D1A" />
+                            <Banknote size={20} color="#0D0D1A" />
                         </div>
                         <div>
                             <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '0.95rem', letterSpacing: '-0.3px' }}>Finance Panel</div>
@@ -250,7 +250,7 @@ const FinanceManagerDashboard = () => {
                 <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(252,211,77,0.1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '12px', background: 'rgba(252,211,77,0.05)', marginBottom: '10px' }}>
                         <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #FCD34D, #F59E0B)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <DollarSign size={15} color="#0D0D1A" />
+                            <Banknote size={15} color="#0D0D1A" />
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                             <div style={{ fontWeight: 600, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser?.name || 'Finance Manager'}</div>
@@ -295,7 +295,7 @@ const FinanceManagerDashboard = () => {
                             <Bell size={17} />
                         </button>
                         <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #FCD34D, #F59E0B)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 12px rgba(252,211,77,0.35)' }}>
-                            <DollarSign size={16} color="#0D0D1A" />
+                            <Banknote size={16} color="#0D0D1A" />
                         </div>
                     </div>
                 </header>

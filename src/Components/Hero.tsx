@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, MapPin, DollarSign, Star, Users, Home, ArrowRight, Sparkles } from 'lucide-react';
+import { Search, MapPin, Star, Users, Home, ArrowRight, Sparkles } from 'lucide-react';
 
 const Hero = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -248,7 +248,7 @@ const Hero = () => {
                                         padding: '10px 14px',
                                     }}
                                 >
-                                    <DollarSign size={16} color="#43E97B" />
+                                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#43E97B', flexShrink: 0, letterSpacing: '0.3px' }}>Rs.</span>
                                     <select
                                         value={priceRange}
                                         onChange={(e) => setPriceRange(e.target.value)}
