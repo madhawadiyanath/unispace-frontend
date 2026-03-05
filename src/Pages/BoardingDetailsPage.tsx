@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, MapPin, Share2, Heart, ChevronLeft, ChevronRight,
     Phone, Mail, User, Shield, MessageCircle, Home, GraduationCap,
-    Check, ShoppingCart, Send, X,
+    Check, ShoppingCart, Send, X, AlertTriangle, Wrench, CreditCard,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -65,6 +65,23 @@ const BoardingDetailsPage = () => {
     const [chatSent, setChatSent] = useState(false);
     const [chatError, setChatError] = useState('');
     const chatTextRef = useRef<HTMLTextAreaElement>(null);
+
+    // Issue report state
+    const [showIssueForm, setShowIssueForm] = useState(false);
+    const [issueType, setIssueType] = useState('repairs');
+    const [issuePriority, setIssuePriority] = useState('medium');
+    const [issueDescription, setIssueDescription] = useState('');
+    const [issueSending, setIssueSending] = useState(false);
+    const [issueSent, setIssueSent] = useState(false);
+    const [issueError, setIssueError] = useState('');
+
+    // Advance payment state
+    const [showAdvanceForm, setShowAdvanceForm] = useState(false);
+    const [advanceAmount, setAdvanceAmount] = useState('');
+    const [advanceMethod, setAdvanceMethod] = useState<'card' | 'bank_transfer' | 'cash'>('card');
+    const [advanceSending, setAdvanceSending] = useState(false);
+    const [advanceSent, setAdvanceSent] = useState(false);
+    const [advanceError, setAdvanceError] = useState('');
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -143,6 +160,83 @@ const BoardingDetailsPage = () => {
             setChatError('Network error. Please try again.');
         } finally {
             setChatSending(false);
+        }
+    };
+
+    const handleReportIssue = async () => {
+        if (!boarding || !issueDescription.trim()) return;
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) { navigate('/login'); return; }
+        const user = JSON.parse(storedUser);
+        setIssueSending(true);
+        setIssueError('');
+        try {
+            const res = await fetch(`${API_BASE}/issues`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    boardingId:    boarding._id,
+                    boardingTitle: boarding.title,
+                    tenantId:      user._id,
+                    tenantName:    user.name,
+                    tenantEmail:   user.email,
+                    landlordId:    boarding.landlordId,
+                    issueType,
+                    priority:      issuePriority,
+                    description:   issueDescription.trim(),
+                }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setIssueSent(true);
+                setIssueDescription('');
+                setTimeout(() => { setIssueSent(false); setShowIssueForm(false); }, 3500);
+            } else {
+                setIssueError(data.message || 'Failed to submit issue.');
+            }
+        } catch {
+            setIssueError('Network error. Please try again.');
+        } finally {
+            setIssueSending(false);
+        }
+    };
+
+    const handlePayAdvance = async () => {
+        const amt = Number(advanceAmount);
+        if (!boarding || isNaN(amt) || amt <= 0) { setAdvanceError('Please enter a valid amount.'); return; }
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) { navigate('/login'); return; }
+        const user = JSON.parse(storedUser);
+        setAdvanceSending(true);
+        setAdvanceError('');
+        try {
+            const res = await fetch(`${API_BASE}/advances`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    boardingId:    boarding._id,
+                    boardingTitle: boarding.title,
+                    tenantId:      user._id,
+                    tenantName:    user.name,
+                    tenantEmail:   user.email,
+                    landlordId:    boarding.landlordId,
+                    landlordName:  boarding.landlordName,
+                    amount:        amt,
+                    paymentMethod: advanceMethod,
+                }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setAdvanceSent(true);
+                setAdvanceAmount('');
+                setTimeout(() => { setAdvanceSent(false); setShowAdvanceForm(false); }, 4000);
+            } else {
+                setAdvanceError(data.message || 'Payment submission failed.');
+            }
+        } catch {
+            setAdvanceError('Network error. Please try again.');
+        } finally {
+            setAdvanceSending(false);
         }
     };
 
@@ -488,6 +582,143 @@ const BoardingDetailsPage = () => {
                                 {cartAdded ? '✓ Added to Cart' : 'Add to Cart'}
                             </button>
 
+                            {/* ── Pay Advance Button ── */}
+                            {isAvailable && (
+                                <button
+                                    onClick={() => {
+                                        setShowAdvanceForm(c => !c);
+                                        setAdvanceSent(false);
+                                        setAdvanceError('');
+                                        if (!showAdvanceForm && boarding) setAdvanceAmount(String(boarding.price || ''));
+                                    }}
+                                    style={{
+                                        width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
+                                        background: showAdvanceForm ? 'rgba(67,233,123,0.15)' : 'rgba(67,233,123,0.07)',
+                                        border: `1px solid ${showAdvanceForm ? 'rgba(67,233,123,0.5)' : 'rgba(67,233,123,0.28)'}`,
+                                        color: '#43E97B',
+                                        fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                        transition: 'all 0.25s',
+                                    }}
+                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(67,233,123,0.18)'; }}
+                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showAdvanceForm ? 'rgba(67,233,123,0.15)' : 'rgba(67,233,123,0.07)'; }}
+                                >
+                                    {showAdvanceForm ? <><X size={17} /> Cancel Payment</> : <><CreditCard size={17} /> Pay Advance</>}
+                                </button>
+                            )}
+
+                            {/* ── Inline Advance Payment Form ── */}
+                            {showAdvanceForm && isAvailable && (() => {
+                                const amt = Number(advanceAmount) || 0;
+                                const platformFee = Math.round(amt * 0.12);
+                                const landlordAmt = amt - platformFee;
+                                return (
+                                    <div style={{ borderRadius: '16px', background: 'rgba(67,233,123,0.05)', border: '1px solid rgba(67,233,123,0.22)', padding: '18px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
+                                        <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#43E97B', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <CreditCard size={12} /> Advance Payment · 12% Platform Fee
+                                        </div>
+                                        {advanceSent ? (
+                                            <div style={{ textAlign: 'center', padding: '16px 0', color: '#43E97B', fontWeight: 700, fontSize: '0.92rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                                <span style={{ fontSize: '2rem' }}>✅</span>
+                                                Advance payment submitted! The finance manager will confirm it shortly.
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {/* Amount Input */}
+                                                <div style={{ marginBottom: '12px' }}>
+                                                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Advance Amount (LKR)</div>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        value={advanceAmount}
+                                                        onChange={e => { setAdvanceAmount(e.target.value); setAdvanceError(''); }}
+                                                        placeholder={`e.g. ${boarding.price}`}
+                                                        style={{
+                                                            width: '100%', boxSizing: 'border-box', padding: '10px 13px',
+                                                            background: 'rgba(0,0,0,0.3)',
+                                                            border: '1px solid rgba(67,233,123,0.25)',
+                                                            borderRadius: '10px', color: '#fff',
+                                                            fontSize: '1rem', fontWeight: 700, outline: 'none',
+                                                            fontFamily: "'Inter', sans-serif",
+                                                        }}
+                                                        onFocus={e => { e.currentTarget.style.borderColor = 'rgba(67,233,123,0.6)'; }}
+                                                        onBlur={e => { e.currentTarget.style.borderColor = 'rgba(67,233,123,0.25)'; }}
+                                                    />
+                                                </div>
+
+                                                {/* Fee Breakdown */}
+                                                {amt > 0 && (
+                                                    <div style={{ marginBottom: '14px', padding: '12px 14px', borderRadius: '10px', background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
+                                                            <span>Your advance:</span>
+                                                            <span style={{ color: '#fff', fontWeight: 700 }}>LKR {amt.toLocaleString()}</span>
+                                                        </div>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
+                                                            <span>Platform fee (12%):</span>
+                                                            <span style={{ color: '#FCD34D', fontWeight: 700 }}>− LKR {platformFee.toLocaleString()}</span>
+                                                        </div>
+                                                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.09)', paddingTop: '7px', display: 'flex', justifyContent: 'space-between', fontSize: '0.87rem' }}>
+                                                            <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 600 }}>Landlord receives:</span>
+                                                            <span style={{ color: '#43E97B', fontWeight: 800 }}>LKR {landlordAmt.toLocaleString()}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Payment Method */}
+                                                <div style={{ marginBottom: '12px' }}>
+                                                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Payment Method</div>
+                                                    <div style={{ display: 'flex', gap: '6px' }}>
+                                                        {([
+                                                            { id: 'card',          label: '💳 Card' },
+                                                            { id: 'bank_transfer', label: '🏦 Bank' },
+                                                            { id: 'cash',          label: '💵 Cash' },
+                                                        ] as { id: 'card' | 'bank_transfer' | 'cash'; label: string }[]).map(m => (
+                                                            <button
+                                                                key={m.id}
+                                                                type="button"
+                                                                onClick={() => setAdvanceMethod(m.id)}
+                                                                style={{
+                                                                    flex: 1, padding: '8px 4px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                                                                    background: advanceMethod === m.id ? 'rgba(67,233,123,0.18)' : 'rgba(255,255,255,0.04)',
+                                                                    border: `1.5px solid ${advanceMethod === m.id ? '#43E97B' : 'rgba(255,255,255,0.1)'}`,
+                                                                    color: advanceMethod === m.id ? '#43E97B' : 'rgba(255,255,255,0.5)',
+                                                                }}
+                                                            >{m.label}</button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {advanceError && (
+                                                    <p style={{ color: '#FF6584', fontSize: '0.78rem', margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: '5px' }}>⚠ {advanceError}</p>
+                                                )}
+                                                <button
+                                                    onClick={handlePayAdvance}
+                                                    disabled={advanceSending || !advanceAmount || Number(advanceAmount) <= 0}
+                                                    style={{
+                                                        width: '100%', padding: '12px', borderRadius: '12px',
+                                                        background: advanceSending || !advanceAmount || Number(advanceAmount) <= 0
+                                                            ? 'rgba(67,233,123,0.08)'
+                                                            : 'linear-gradient(135deg, #43E97B, #38F9D7)',
+                                                        border: 'none',
+                                                        color: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 ? 'rgba(255,255,255,0.3)' : '#0D0D1A',
+                                                        fontWeight: 700, fontSize: '0.9rem',
+                                                        cursor: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 ? 'not-allowed' : 'pointer',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                                                        transition: 'all 0.2s',
+                                                        boxShadow: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 ? 'none' : '0 6px 20px rgba(67,233,123,0.35)',
+                                                    }}
+                                                >
+                                                    {advanceSending
+                                                        ? <><div style={{ width: '14px', height: '14px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#0D0D1A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Processing…</>
+                                                        : <><CreditCard size={15} /> Confirm Advance Payment</>
+                                                    }
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                );
+                            })()}
+
                             {/* ── Chat with Owner Button ── */}
                             {isAvailable && (
                                 <button
@@ -567,6 +798,134 @@ const BoardingDetailsPage = () => {
                                                 {chatSending
                                                     ? <><div style={{ width: '14px', height: '14px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#0D0D1A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
                                                     : <><Send size={15} /> Send Message</>
+                                                }
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* ── Report an Issue Button ── */}
+                            <button
+                                onClick={() => { setShowIssueForm(c => !c); setIssueSent(false); setIssueError(''); }}
+                                style={{
+                                    width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
+                                    background: showIssueForm ? 'rgba(252,211,77,0.15)' : 'rgba(252,211,77,0.07)',
+                                    border: `1px solid ${showIssueForm ? 'rgba(252,211,77,0.5)' : 'rgba(252,211,77,0.25)'}`,
+                                    color: '#FCD34D',
+                                    fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                    transition: 'all 0.25s',
+                                }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(252,211,77,0.18)'; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showIssueForm ? 'rgba(252,211,77,0.15)' : 'rgba(252,211,77,0.07)'; }}
+                            >
+                                {showIssueForm ? <><X size={17} /> Cancel Report</> : <><AlertTriangle size={17} /> Report an Issue</>}
+                            </button>
+
+                            {/* ── Inline Issue Report Form ── */}
+                            {showIssueForm && (
+                                <div style={{ borderRadius: '16px', background: 'rgba(252,211,77,0.05)', border: '1px solid rgba(252,211,77,0.2)', padding: '18px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
+                                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#FCD34D', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <AlertTriangle size={12} /> Report Issue to {boarding.landlordName || 'Owner'}
+                                    </div>
+
+                                    {issueSent ? (
+                                        <div style={{ textAlign: 'center', padding: '16px 0', color: '#43E97B', fontWeight: 700, fontSize: '0.92rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                            <span style={{ fontSize: '2rem' }}>✅</span>
+                                            Issue reported! The owner has been notified.
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* Issue Type */}
+                                            <div style={{ marginBottom: '12px' }}>
+                                                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Issue Type</div>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                                                    {[
+                                                        { id: 'cleaning',   label: '🧹 Cleaning',  color: '#6C63FF' },
+                                                        { id: 'plumbing',   label: '💧 Plumbing',  color: '#06b6d4' },
+                                                        { id: 'electrical', label: '⚡ Electrical', color: '#f59e0b' },
+                                                        { id: 'repairs',    label: '🔨 Repairs',   color: '#22c55e' },
+                                                    ].map(t => (
+                                                        <button
+                                                            key={t.id}
+                                                            type="button"
+                                                            onClick={() => setIssueType(t.id)}
+                                                            style={{
+                                                                padding: '8px 6px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                                                                background: issueType === t.id ? `${t.color}22` : 'rgba(255,255,255,0.04)',
+                                                                border: `1.5px solid ${issueType === t.id ? t.color : 'rgba(255,255,255,0.1)'}`,
+                                                                color: issueType === t.id ? t.color : 'rgba(255,255,255,0.5)',
+                                                            }}
+                                                        >{t.label}</button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Priority */}
+                                            <div style={{ marginBottom: '12px' }}>
+                                                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Priority</div>
+                                                <div style={{ display: 'flex', gap: '6px' }}>
+                                                    {[
+                                                        { id: 'low',    label: 'Low',    color: '#22c55e' },
+                                                        { id: 'medium', label: 'Medium', color: '#f59e0b' },
+                                                        { id: 'high',   label: 'High',   color: '#ef4444' },
+                                                    ].map(p => (
+                                                        <button
+                                                            key={p.id}
+                                                            type="button"
+                                                            onClick={() => setIssuePriority(p.id)}
+                                                            style={{
+                                                                flex: 1, padding: '7px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
+                                                                background: issuePriority === p.id ? `${p.color}22` : 'rgba(255,255,255,0.04)',
+                                                                border: `1.5px solid ${issuePriority === p.id ? p.color : 'rgba(255,255,255,0.1)'}`,
+                                                                color: issuePriority === p.id ? p.color : 'rgba(255,255,255,0.45)',
+                                                            }}
+                                                        >{p.label}</button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Description */}
+                                            <textarea
+                                                value={issueDescription}
+                                                onChange={e => { setIssueDescription(e.target.value); setIssueError(''); }}
+                                                placeholder="Describe the issue in detail…"
+                                                rows={3}
+                                                style={{
+                                                    width: '100%', boxSizing: 'border-box',
+                                                    background: 'rgba(0,0,0,0.3)',
+                                                    border: '1px solid rgba(252,211,77,0.25)',
+                                                    borderRadius: '12px', padding: '10px 12px',
+                                                    color: '#fff', fontSize: '0.875rem', lineHeight: 1.6,
+                                                    resize: 'vertical', outline: 'none',
+                                                    fontFamily: "'Inter', sans-serif",
+                                                    marginBottom: '10px',
+                                                }}
+                                                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(252,211,77,0.6)'; }}
+                                                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(252,211,77,0.25)'; }}
+                                            />
+                                            {issueError && (
+                                                <p style={{ color: '#ef4444', fontSize: '0.78rem', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '5px' }}>⚠ {issueError}</p>
+                                            )}
+                                            <button
+                                                onClick={handleReportIssue}
+                                                disabled={issueSending || !issueDescription.trim()}
+                                                style={{
+                                                    width: '100%', padding: '11px', borderRadius: '12px',
+                                                    background: issueSending || !issueDescription.trim() ? 'rgba(252,211,77,0.08)' : 'linear-gradient(135deg, #FCD34D, #f59e0b)',
+                                                    border: 'none',
+                                                    color: issueSending || !issueDescription.trim() ? 'rgba(255,255,255,0.3)' : '#0D0D1A',
+                                                    fontWeight: 700, fontSize: '0.9rem',
+                                                    cursor: issueSending || !issueDescription.trim() ? 'not-allowed' : 'pointer',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                                                    transition: 'all 0.2s',
+                                                    boxShadow: issueSending || !issueDescription.trim() ? 'none' : '0 6px 20px rgba(252,211,77,0.3)',
+                                                }}
+                                            >
+                                                {issueSending
+                                                    ? <><div style={{ width: '14px', height: '14px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#0D0D1A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Submitting…</>
+                                                    : <><Wrench size={15} /> Submit Issue Report</>
                                                 }
                                             </button>
                                         </>

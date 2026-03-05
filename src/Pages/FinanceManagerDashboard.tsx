@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    DollarSign, LogOut, Bell, Menu, X, BarChart2,
+    Banknote, LogOut, Bell, Menu, X, BarChart2,
     TrendingUp, Users, Home, Eye,
     MapPin, Building2, CheckCircle,
     CreditCard, Wallet, ArrowUpRight, ArrowDownRight,
@@ -30,6 +30,20 @@ interface User {
     userType: string;
 }
 
+interface AdvancePayment {
+    _id: string;
+    boardingTitle: string;
+    tenantName: string;
+    tenantEmail: string;
+    landlordName: string;
+    amount: number;
+    platformFee: number;
+    landlordAmount: number;
+    paymentMethod: string;
+    status: 'pending' | 'confirmed' | 'released' | 'refunded';
+    createdAt: string;
+}
+
 const FinanceManagerDashboard = () => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -39,6 +53,8 @@ const FinanceManagerDashboard = () => {
     const [loadingBoardings, setLoadingBoardings] = useState(true);
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [advancePayments, setAdvancePayments] = useState<AdvancePayment[]>([]);
+    const [loadingAdvances, setLoadingAdvances] = useState(true);
 
     const storedUser = localStorage.getItem('user');
     const currentUser = storedUser ? JSON.parse(storedUser) : null;
@@ -50,6 +66,7 @@ const FinanceManagerDashboard = () => {
         }
         fetchBoardings();
         fetchUsers();
+        fetchAdvances();
     }, []);
 
     const fetchBoardings = async () => {
@@ -72,9 +89,28 @@ const FinanceManagerDashboard = () => {
         finally { setLoadingUsers(false); }
     };
 
+    const fetchAdvances = async () => {
+        setLoadingAdvances(true);
+        try {
+            const res = await fetch(`${API_BASE}/advances`);
+            const data = await res.json();
+            setAdvancePayments(data.payments || []);
+        } catch { console.error('Failed to fetch advances'); }
+        finally { setLoadingAdvances(false); }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem('user');
         navigate('/login');
+    };
+
+    const handleUpdateAdvanceStatus = (id: string, status: string) => {
+        fetch(`${API_BASE}/advances/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status }),
+        }).catch(() => {});
+        setAdvancePayments(prev => prev.map(p => p._id === id ? { ...p, status: status as AdvancePayment['status'] } : p));
     };
 
     // ── Derived financial stats ──
@@ -84,6 +120,10 @@ const FinanceManagerDashboard = () => {
     const avgRent           = publishedListings.length ? Math.round(totalRevenue / publishedListings.length) : 0;
     const students          = users.filter(u => u.userType === 'student').length;
     const landlords         = users.filter(u => u.userType === 'landlord').length;
+
+    const totalAdvancesCollected = advancePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    const totalPlatformFees      = advancePayments.reduce((sum, p) => sum + (p.platformFee || 0), 0);
+    const pendingAdvances        = advancePayments.filter(p => p.status === 'pending').length;
 
     const filteredBoardings = boardings.filter(b =>
         b.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -95,6 +135,7 @@ const FinanceManagerDashboard = () => {
         { id: 'overview',      label: 'Overview',       icon: <BarChart2 size={18} /> },
         { id: 'listings',      label: 'Listings',        icon: <Home size={18} /> },
         { id: 'transactions',  label: 'Transactions',    icon: <CreditCard size={18} /> },
+        { id: 'advances',      label: 'Advances',        icon: <Wallet size={18} /> },
         { id: 'users',         label: 'Users',           icon: <Users size={18} /> },
         { id: 'reports',       label: 'Reports',         icon: <FileText size={18} /> },
     ];
@@ -140,6 +181,16 @@ const FinanceManagerDashboard = () => {
             trend: '-2%',
             up: false,
         },
+        {
+            label: 'Platform Fee Revenue (12%)',
+            value: totalPlatformFees > 0 ? `LKR ${totalPlatformFees.toLocaleString()}` : 'LKR 0',
+            sub: `${advancePayments.length} advance payment${advancePayments.length !== 1 ? 's' : ''}`,
+            icon: <Wallet size={22} />,
+            color: '#43E97B',
+            bg: 'rgba(67,233,123,0.15)',
+            trend: `+${advancePayments.length} txns`,
+            up: true,
+        },
     ];
 
     const sectionLabel = navItems.find(n => n.id === activeSection)?.label || 'Overview';
@@ -163,7 +214,7 @@ const FinanceManagerDashboard = () => {
                 <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(252,211,77,0.1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'linear-gradient(135deg, #FCD34D, #F59E0B)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 18px rgba(252,211,77,0.4)', flexShrink: 0 }}>
-                            <DollarSign size={20} color="#0D0D1A" />
+                            <Banknote size={20} color="#0D0D1A" />
                         </div>
                         <div>
                             <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '0.95rem', letterSpacing: '-0.3px' }}>Finance Panel</div>
@@ -199,7 +250,7 @@ const FinanceManagerDashboard = () => {
                 <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(252,211,77,0.1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '12px', background: 'rgba(252,211,77,0.05)', marginBottom: '10px' }}>
                         <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #FCD34D, #F59E0B)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <DollarSign size={15} color="#0D0D1A" />
+                            <Banknote size={15} color="#0D0D1A" />
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                             <div style={{ fontWeight: 600, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser?.name || 'Finance Manager'}</div>
@@ -244,7 +295,7 @@ const FinanceManagerDashboard = () => {
                             <Bell size={17} />
                         </button>
                         <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #FCD34D, #F59E0B)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 12px rgba(252,211,77,0.35)' }}>
-                            <DollarSign size={16} color="#0D0D1A" />
+                            <Banknote size={16} color="#0D0D1A" />
                         </div>
                     </div>
                 </header>
@@ -513,6 +564,108 @@ const FinanceManagerDashboard = () => {
                         </div>
                     )}
 
+                    {/* ══════ ADVANCES ══════ */}
+                    {activeSection === 'advances' && (
+                        <div>
+                            {/* Summary stats */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '22px' }}>
+                                {[
+                                    { label: 'Total Advances',         value: advancePayments.length,                                  color: '#a855f7', icon: '💳' },
+                                    { label: 'Total Collected',        value: `LKR ${totalAdvancesCollected.toLocaleString()}`,         color: '#FCD34D', icon: '💰' },
+                                    { label: 'Platform Revenue (12%)', value: `LKR ${totalPlatformFees.toLocaleString()}`,              color: '#43E97B', icon: '🏦' },
+                                    { label: 'Pending Confirmation',   value: pendingAdvances,                                         color: '#FF6584', icon: '⏳' },
+                                ].map((c, i) => (
+                                    <div key={i} style={{ padding: '18px 20px', borderRadius: '16px', background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                                        <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{c.icon}</div>
+                                        <div style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: "'Outfit', sans-serif", color: c.color }}>{c.value}</div>
+                                        <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)', marginTop: '3px' }}>{c.label}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Advance payments ledger */}
+                            <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(252,211,77,0.14)', borderRadius: '18px', padding: '24px' }}>
+                                <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.1rem', fontWeight: 700, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Wallet size={18} color="#FCD34D" /> Advance Payment Ledger
+                                </h2>
+                                {loadingAdvances ? (
+                                    <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.3)' }}>
+                                        <div style={{ width: '28px', height: '28px', border: '2px solid rgba(252,211,77,0.3)', borderTopColor: '#FCD34D', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
+                                        Loading payments…
+                                    </div>
+                                ) : advancePayments.length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: '40px 20px', color: 'rgba(255,255,255,0.35)' }}>
+                                        <div style={{ fontSize: '3rem', marginBottom: '12px' }}>💳</div>
+                                        <p style={{ margin: 0, fontSize: '0.9rem' }}>No advance payments yet.</p>
+                                        <p style={{ margin: '4px 0 0', fontSize: '0.78rem', opacity: 0.6 }}>Payments will appear here once tenants submit them from a boarding details page.</p>
+                                    </div>
+                                ) : (
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                                            <thead>
+                                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                                                    {['Tenant', 'Boarding', 'Amount', 'Fee (12%)', 'Landlord Gets', 'Method', 'Status', 'Date'].map(h => (
+                                                        <th key={h} style={{ padding: '10px 12px', textAlign: 'left', color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {advancePayments.map(p => {
+                                                    const sc: Record<string, { color: string; bg: string }> = {
+                                                        pending:   { color: '#FCD34D', bg: 'rgba(252,211,77,0.12)' },
+                                                        confirmed: { color: '#43E97B', bg: 'rgba(67,233,123,0.12)' },
+                                                        released:  { color: '#38F9D7', bg: 'rgba(56,249,215,0.12)' },
+                                                        refunded:  { color: '#FF6584', bg: 'rgba(255,101,132,0.12)' },
+                                                    };
+                                                    const s = sc[p.status] || sc.pending;
+                                                    const methodLabel: Record<string, string> = { card: '💳 Card', bank_transfer: '🏦 Bank', cash: '💵 Cash' };
+                                                    return (
+                                                        <tr key={p._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                                                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(252,211,77,0.04)'; }}
+                                                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                                                        >
+                                                            <td style={{ padding: '12px' }}>
+                                                                <div style={{ fontWeight: 600, color: '#fff', maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.tenantName}</div>
+                                                                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginTop: '2px', maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.tenantEmail}</div>
+                                                            </td>
+                                                            <td style={{ padding: '12px', color: 'rgba(255,255,255,0.65)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.boardingTitle}</td>
+                                                            <td style={{ padding: '12px', color: '#FCD34D', fontWeight: 800, fontFamily: "'Outfit', sans-serif", whiteSpace: 'nowrap' }}>LKR {p.amount?.toLocaleString()}</td>
+                                                            <td style={{ padding: '12px', color: '#38F9D7', fontWeight: 700, whiteSpace: 'nowrap' }}>LKR {p.platformFee?.toLocaleString()}</td>
+                                                            <td style={{ padding: '12px', color: '#43E97B', fontWeight: 700, whiteSpace: 'nowrap' }}>LKR {p.landlordAmount?.toLocaleString()}</td>
+                                                            <td style={{ padding: '12px', color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>{methodLabel[p.paymentMethod] || p.paymentMethod}</td>
+                                                            <td style={{ padding: '12px' }}>
+                                                                <select
+                                                                    value={p.status}
+                                                                    onChange={e => handleUpdateAdvanceStatus(p._id, e.target.value)}
+                                                                    style={{
+                                                                        padding: '5px 10px', borderRadius: '8px',
+                                                                        background: s.bg, color: s.color,
+                                                                        border: `1px solid ${s.color}55`,
+                                                                        fontSize: '0.75rem', fontWeight: 700,
+                                                                        cursor: 'pointer', outline: 'none',
+                                                                        minWidth: '110px',
+                                                                    }}
+                                                                >
+                                                                    <option value="pending">⏳ Pending</option>
+                                                                    <option value="confirmed">✅ Confirmed</option>
+                                                                    <option value="released">🚀 Released</option>
+                                                                    <option value="refunded">↩ Refunded</option>
+                                                                </select>
+                                                            </td>
+                                                            <td style={{ padding: '12px', color: 'rgba(255,255,255,0.35)', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                                                                {new Date(p.createdAt).toLocaleDateString('en-GB')}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* ══════ USERS ══════ */}
                     {activeSection === 'users' && (
                         <div>
@@ -583,12 +736,14 @@ const FinanceManagerDashboard = () => {
                                 </h2>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '28px' }}>
                                     {[
-                                        { label: 'Total Listings',       value: boardings.length,            icon: '🏠' },
-                                        { label: 'Published',            value: publishedListings.length,     icon: '✅' },
-                                        { label: 'Pending Review',       value: pendingListings.length,       icon: '⏳' },
-                                        { label: 'Total Monthly Revenue',value: `LKR ${totalRevenue.toLocaleString()}`, icon: '💰' },
-                                        { label: 'Average Rent',         value: avgRent ? `LKR ${avgRent.toLocaleString()}` : '—', icon: '📊' },
-                                        { label: 'Total Registered Users', value: users.length,             icon: '👥' },
+                                        { label: 'Total Listings',             value: boardings.length,            icon: '🏠' },
+                                        { label: 'Published',                  value: publishedListings.length,     icon: '✅' },
+                                        { label: 'Pending Review',             value: pendingListings.length,       icon: '⏳' },
+                                        { label: 'Total Monthly Revenue',      value: `LKR ${totalRevenue.toLocaleString()}`, icon: '💰' },
+                                        { label: 'Average Rent',               value: avgRent ? `LKR ${avgRent.toLocaleString()}` : '—', icon: '📊' },
+                                        { label: 'Total Registered Users',     value: users.length,             icon: '👥' },
+                                        { label: 'Advance Payments',           value: advancePayments.length,   icon: '💳' },
+                                        { label: 'Platform Fee Revenue (12%)', value: `LKR ${totalPlatformFees.toLocaleString()}`, icon: '🏦' },
                                     ].map((item, i) => (
                                         <div key={i} style={{ padding: '20px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(252,211,77,0.12)', textAlign: 'center' }}>
                                             <div style={{ fontSize: '2rem', marginBottom: '8px' }}>{item.icon}</div>
@@ -628,3 +783,4 @@ const FinanceManagerDashboard = () => {
 };
 
 export default FinanceManagerDashboard;
+        

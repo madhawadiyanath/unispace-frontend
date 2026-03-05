@@ -1,0 +1,712 @@
+import { useState } from 'react';
+import type { ReactNode } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import {
+  Wrench, Sparkles, Droplets, Zap, Hammer,
+  CheckCircle, ArrowLeft, Calendar, Clock,
+  MapPin, User, Phone, Mail, FileText, Star,
+  Wind, ShieldCheck, Layers, AlertCircle, ChevronRight,
+  AlertTriangle, Settings,
+} from 'lucide-react';
+import Navbar from '../Components/Navbar';
+
+/* ─── Types ─────────────────────────────────────────────── */
+interface ServicePackage {
+  id: string;
+  name: string;
+  price: number;
+  duration: string;
+  description: string;
+  features: string[];
+  popular?: boolean;
+  color: string;
+  icon: ReactNode;
+}
+
+interface CleaningForm {
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  date: string;
+  time: string;
+  packageId: string;
+  addOns: string[];
+  notes: string;
+}
+
+interface MaintenanceForm {
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  date: string;
+  time: string;
+  priority: string;
+  description: string;
+}
+
+/* ─── Cleaning Data ──────────────────────────────────────── */
+const CLEANING_PACKAGES: ServicePackage[] = [
+  {
+    id: 'basic',
+    name: 'Basic Clean',
+    price: 1200,
+    duration: '2–3 hrs',
+    description: 'Perfect for regular weekly upkeep of your room.',
+    features: [
+      'Sweeping & mopping floors',
+      'Dusting surfaces & furniture',
+      'Bin emptying',
+      'Bathroom wipe-down',
+      'Window sill cleaning',
+    ],
+    color: '#6C63FF',
+    icon: <Droplets size={28} color="#6C63FF" />,
+  },
+  {
+    id: 'deep',
+    name: 'Deep Clean',
+    price: 2500,
+    duration: '4–5 hrs',
+    description: 'Thorough top-to-bottom cleaning for a fresh start.',
+    features: [
+      'Everything in Basic Clean',
+      'Inside cupboard & wardrobe clean',
+      'Under-bed vacuuming',
+      'Mattress sanitisation',
+      'Full bathroom scrub',
+      'Kitchen deep-clean',
+    ],
+    popular: true,
+    color: '#a855f7',
+    icon: <Wind size={28} color="#a855f7" />,
+  },
+  {
+    id: 'moveout',
+    name: 'Move-Out Clean',
+    price: 3800,
+    duration: '5–7 hrs',
+    description: 'Leave your boarding spotless and get your deposit back.',
+    features: [
+      'Everything in Deep Clean',
+      'Wall spot-cleaning',
+      'Full appliance clean',
+      'Balcony / outdoor area',
+      'Waste disposal',
+      'Final inspection checklist',
+    ],
+    color: '#06b6d4',
+    icon: <Layers size={28} color="#06b6d4" />,
+  },
+];
+
+const ADD_ONS = [
+  { id: 'laundry', label: 'Laundry & Folding', price: 400 },
+  { id: 'windows', label: 'Window Glass Cleaning', price: 300 },
+  { id: 'fridge', label: 'Fridge Interior Clean', price: 250 },
+  { id: 'shoes', label: 'Shoe & Rack Organising', price: 200 },
+];
+
+const TIME_SLOTS = [
+  '08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM',
+  '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM',
+];
+
+/* ─── Maintenance Categories ─────────────────────────────── */
+const CATEGORIES = [
+  {
+    id: 'cleaning',
+    label: 'Cleaning',
+    icon: <Sparkles size={18} />,
+    color: '#6C63FF',
+    description: 'Room & boarding cleaning services',
+  },
+  {
+    id: 'plumbing',
+    label: 'Plumbing',
+    icon: <Droplets size={18} />,
+    color: '#06b6d4',
+    description: 'Leaks, pipes & water issues',
+  },
+  {
+    id: 'electrical',
+    label: 'Electrical',
+    icon: <Zap size={18} />,
+    color: '#f59e0b',
+    description: 'Wiring, switches & power issues',
+  },
+  {
+    id: 'repairs',
+    label: 'General Repairs',
+    icon: <Hammer size={18} />,
+    color: '#22c55e',
+    description: 'Furniture, walls & general fixes',
+  },
+];
+
+/* ─── Component ──────────────────────────────────────────── */
+const MaintenancePage = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'cleaning';
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  const storedUser = localStorage.getItem('user');
+  const currentUser = storedUser ? JSON.parse(storedUser) : null;
+
+  /* ── Cleaning state ── */
+  const [selectedPackage, setSelectedPackage] = useState('deep');
+  const [cleaningForm, setCleaningForm] = useState<CleaningForm>({
+    name: currentUser?.name || '',
+    phone: '',
+    email: currentUser?.email || '',
+    address: '',
+    date: '',
+    time: '',
+    packageId: 'deep',
+    addOns: [],
+    notes: '',
+  });
+  const [cleaningError, setCleaningError] = useState('');
+  const [cleaningSubmitted, setCleaningSubmitted] = useState(false);
+  const [cleaningLoading, setCleaningLoading] = useState(false);
+
+  /* ── Generic maintenance state ── */
+  const [maintenanceForm, setMaintenanceForm] = useState<MaintenanceForm>({
+    name: currentUser?.name || '',
+    phone: '',
+    email: currentUser?.email || '',
+    address: '',
+    date: '',
+    time: '',
+    priority: 'medium',
+    description: '',
+  });
+  const [maintenanceError, setMaintenanceError] = useState('');
+  const [maintenanceSubmitted, setMaintenanceSubmitted] = useState(false);
+  const [maintenanceLoading, setMaintenanceLoading] = useState(false);
+
+  /* ── Cleaning helpers ── */
+  const pkg = CLEANING_PACKAGES.find(p => p.id === selectedPackage)!;
+  const addOnTotal = ADD_ONS.filter(a => cleaningForm.addOns.includes(a.id)).reduce((s, a) => s + a.price, 0);
+  const totalPrice = (pkg?.price ?? 0) + addOnTotal;
+
+  const handleCleaningChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setCleaningForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setCleaningError('');
+  };
+
+  const toggleAddOn = (id: string) => {
+    setCleaningForm(prev => ({
+      ...prev,
+      addOns: prev.addOns.includes(id) ? prev.addOns.filter(a => a !== id) : [...prev.addOns, id],
+    }));
+  };
+
+  const selectPackage = (id: string) => {
+    setSelectedPackage(id);
+    setCleaningForm(prev => ({ ...prev, packageId: id }));
+  };
+
+  const handleCleaningSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cleaningForm.name || !cleaningForm.phone || !cleaningForm.email || !cleaningForm.address || !cleaningForm.date || !cleaningForm.time) {
+      setCleaningError('Please fill in all required fields.'); return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaningForm.email)) { setCleaningError('Please enter a valid email address.'); return; }
+    if (!/^\d{9,12}$/.test(cleaningForm.phone.replace(/[\s\-+]/g, ''))) { setCleaningError('Please enter a valid phone number.'); return; }
+    setCleaningLoading(true);
+    setTimeout(() => {
+      const newBooking = { id: Date.now().toString(), ...cleaningForm, status: 'pending', submittedAt: new Date().toISOString() };
+      try {
+        const existing = JSON.parse(localStorage.getItem('cleaningBookings') || '[]');
+        localStorage.setItem('cleaningBookings', JSON.stringify([...existing, newBooking]));
+      } catch {}
+      setCleaningLoading(false);
+      setCleaningSubmitted(true);
+    }, 1400);
+  };
+
+  /* ── Maintenance helpers ── */
+  const handleMaintenanceChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setMaintenanceForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setMaintenanceError('');
+  };
+
+  const handleMaintenanceSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!maintenanceForm.name || !maintenanceForm.phone || !maintenanceForm.email || !maintenanceForm.address || !maintenanceForm.date || !maintenanceForm.description) {
+      setMaintenanceError('Please fill in all required fields.'); return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(maintenanceForm.email)) { setMaintenanceError('Please enter a valid email address.'); return; }
+    setMaintenanceLoading(true);
+    setTimeout(() => {
+      const request = { id: Date.now().toString(), type: activeTab, ...maintenanceForm, status: 'pending', submittedAt: new Date().toISOString() };
+      try {
+        const existing = JSON.parse(localStorage.getItem('maintenanceRequests') || '[]');
+        localStorage.setItem('maintenanceRequests', JSON.stringify([...existing, request]));
+      } catch {}
+      setMaintenanceLoading(false);
+      setMaintenanceSubmitted(true);
+    }, 1200);
+  };
+
+  const activeCat = CATEGORIES.find(c => c.id === activeTab)!;
+
+  /* ─── Input style helper ─── */
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '12px 16px',
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.12)',
+    borderRadius: '10px',
+    color: '#fff',
+    fontSize: '0.9rem',
+    outline: 'none',
+    boxSizing: 'border-box',
+    fontFamily: "'Inter', sans-serif",
+  };
+
+  /* ─── Cleaning success ─── */
+  if (cleaningSubmitted) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0D0D1A', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ maxWidth: '520px', width: '100%', textAlign: 'center' }}>
+          <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 0 40px rgba(108,99,255,0.5)', animation: 'pulse-glow 3s ease-in-out infinite' }}>
+            <CheckCircle size={48} color="#fff" />
+          </div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', margin: '0 0 12px' }}>Booking Confirmed! 🎉</h1>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', lineHeight: 1.7, margin: '0 0 32px' }}>
+            Your <strong style={{ color: '#a855f7' }}>{pkg.name}</strong> has been booked for{' '}
+            <strong style={{ color: '#fff' }}>{cleaningForm.date}</strong> at{' '}
+            <strong style={{ color: '#fff' }}>{cleaningForm.time}</strong>.<br />
+            A confirmation will be sent to <strong style={{ color: '#6C63FF' }}>{cleaningForm.email}</strong>.
+          </p>
+          <div style={{ background: 'rgba(108,99,255,0.08)', border: '1px solid rgba(108,99,255,0.2)', borderRadius: '16px', padding: '20px', marginBottom: '32px', textAlign: 'left' }}>
+            {[['Service', pkg.name], ['Address', cleaningForm.address], ['Date & Time', `${cleaningForm.date} · ${cleaningForm.time}`], ['Total', `LKR ${totalPrice.toLocaleString()}`]].map(([label, val]) => (
+              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.85rem' }}>{label}</span>
+                <span style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600 }}>{val}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => { setCleaningSubmitted(false); setCleaningForm({ name: currentUser?.name || '', phone: '', email: currentUser?.email || '', address: '', date: '', time: '', packageId: 'deep', addOns: [], notes: '' }); setSelectedPackage('deep'); }} style={{ padding: '12px 24px', borderRadius: '12px', background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>
+              Book Another
+            </button>
+            <button onClick={() => navigate('/')} style={{ padding: '12px 24px', borderRadius: '12px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', border: 'none', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>
+              Back to Home
+            </button>
+          </div>
+        </div>
+        <style>{`@keyframes pulse-glow { 0%,100%{box-shadow:0 0 30px rgba(108,99,255,0.4)} 50%{box-shadow:0 0 60px rgba(168,85,247,0.7)} }`}</style>
+      </div>
+    );
+  }
+
+  /* ─── Maintenance success ─── */
+  if (maintenanceSubmitted) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0D0D1A', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ maxWidth: '520px', width: '100%', textAlign: 'center' }}>
+          <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: `linear-gradient(135deg, ${activeCat.color}, ${activeCat.color}99)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: `0 0 40px ${activeCat.color}55` }}>
+            <CheckCircle size={48} color="#fff" />
+          </div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', margin: '0 0 12px' }}>Request Submitted! ✅</h1>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', lineHeight: 1.7, margin: '0 0 32px' }}>
+            Your <strong style={{ color: activeCat.color }}>{activeCat.label}</strong> request has been received.<br />
+            Our team will contact you at <strong style={{ color: '#6C63FF' }}>{maintenanceForm.email}</strong> shortly.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => { setMaintenanceSubmitted(false); setMaintenanceForm({ name: currentUser?.name || '', phone: '', email: currentUser?.email || '', address: '', date: '', time: '', priority: 'medium', description: '' }); }} style={{ padding: '12px 24px', borderRadius: '12px', background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>
+              New Request
+            </button>
+            <button onClick={() => navigate('/')} style={{ padding: '12px 24px', borderRadius: '12px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', border: 'none', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── Main Page ─── */
+  return (
+    <div style={{ minHeight: '100vh', background: '#0D0D1A', fontFamily: "'Inter', sans-serif", color: '#fff' }}>
+      <Navbar />
+
+      {/* ── Hero Banner ── */}
+      <div style={{ paddingTop: '120px', paddingBottom: '56px', background: 'linear-gradient(160deg, rgba(108,99,255,0.12) 0%, rgba(168,85,247,0.07) 50%, transparent 100%)', borderBottom: '1px solid rgba(108,99,255,0.12)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-60px', right: '10%', width: '300px', height: '300px', borderRadius: '50%', background: 'rgba(108,99,255,0.07)', filter: 'blur(60px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-40px', left: '5%', width: '220px', height: '220px', borderRadius: '50%', background: 'rgba(168,85,247,0.06)', filter: 'blur(50px)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px', textAlign: 'center' }}>
+          <button onClick={() => navigate('/')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '8px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.25)', color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem', cursor: 'pointer', marginBottom: '28px' }}>
+            <ArrowLeft size={14} /> Back to Home
+          </button>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(108,99,255,0.1)', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '100px', padding: '6px 16px', marginBottom: '20px' }}>
+            <Wrench size={14} color="#6C63FF" />
+            <span style={{ fontSize: '0.8rem', color: '#6C63FF', fontWeight: 600, letterSpacing: '1px' }}>MAINTENANCE SERVICES</span>
+          </div>
+          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, margin: '0 0 16px', lineHeight: 1.15 }}>
+            Keep Your Boarding{' '}
+            <span style={{ background: 'linear-gradient(135deg, #6C63FF, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Well Maintained
+            </span>
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1rem', maxWidth: '540px', margin: '0 auto 36px', lineHeight: 1.7 }}>
+            From routine cleaning to urgent repairs — one place to manage all your boarding maintenance needs.
+          </p>
+          {/* Trust badges */}
+          <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '20px' }}>
+            {[
+              { icon: <ShieldCheck size={15} color="#22d3ee" />, label: 'Verified Technicians' },
+              { icon: <Star size={15} color="#f59e0b" />, label: '4.9★ Rated Service' },
+              { icon: <Clock size={15} color="#a855f7" />, label: 'On-Time Guarantee' },
+              { icon: <CheckCircle size={15} color="#22c55e" />, label: '100% Satisfaction' },
+            ].map(b => (
+              <div key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '7px', color: 'rgba(255,255,255,0.6)', fontSize: '0.83rem' }}>
+                {b.icon} {b.label}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Category Tab Navigation ── */}
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 24px 0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '48px' }}>
+          {CATEGORIES.map(cat => {
+            const isActive = activeTab === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => { setActiveTab(cat.id); setMaintenanceError(''); setMaintenanceSubmitted(false); }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  padding: '16px 20px',
+                  borderRadius: '14px',
+                  background: isActive ? `rgba(${cat.id === 'cleaning' ? '108,99,255' : cat.id === 'plumbing' ? '6,182,212' : cat.id === 'electrical' ? '245,158,11' : '34,197,94'},0.15)` : 'rgba(255,255,255,0.04)',
+                  border: `2px solid ${isActive ? cat.color : 'rgba(255,255,255,0.08)'}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textAlign: 'left',
+                  boxShadow: isActive ? `0 4px 20px ${cat.color}30` : 'none',
+                }}
+                onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.border = `2px solid ${cat.color}55`; (e.currentTarget as HTMLElement).style.background = isActive ? '' : 'rgba(255,255,255,0.07)'; }}
+                onMouseLeave={e => { if (!isActive) { (e.currentTarget as HTMLElement).style.border = '2px solid rgba(255,255,255,0.08)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; } }}
+              >
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: `${cat.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: cat.color }}>
+                  {cat.icon}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: isActive ? '#fff' : 'rgba(255,255,255,0.8)' }}>{cat.label}</div>
+                  <div style={{ fontSize: '0.73rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{cat.description}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ═══════════ CLEANING TAB ═══════════ */}
+        {activeTab === 'cleaning' && (
+          <div>
+            {/* Sub-header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '32px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(108,99,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Sparkles size={18} color="#6C63FF" />
+              </div>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800 }}>Cleaning Service</h2>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)' }}>Professional room & boarding cleaning — affordable, flexible, trusted</p>
+              </div>
+            </div>
+
+            {/* Packages */}
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 6px' }}>Choose Your Package</h3>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', margin: '0 0 24px' }}>All prices in LKR · GST included</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '48px' }}>
+              {CLEANING_PACKAGES.map(p => {
+                const isSelected = selectedPackage === p.id;
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => selectPackage(p.id)}
+                    style={{
+                      position: 'relative',
+                      background: isSelected ? `rgba(${p.id === 'basic' ? '108,99,255' : p.id === 'deep' ? '168,85,247' : '6,182,212'},0.12)` : 'rgba(255,255,255,0.03)',
+                      border: `2px solid ${isSelected ? p.color : 'rgba(255,255,255,0.08)'}`,
+                      borderRadius: '18px', padding: '24px', cursor: 'pointer', transition: 'all 0.25s',
+                      boxShadow: isSelected ? `0 6px 24px ${p.color}30` : 'none',
+                    }}
+                    onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.border = `2px solid ${p.color}55`; }}
+                    onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.border = '2px solid rgba(255,255,255,0.08)'; }}
+                  >
+                    {p.popular && (
+                      <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', borderRadius: '100px', padding: '4px 14px', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap', letterSpacing: '1px' }}>
+                        ⭐ MOST POPULAR
+                      </div>
+                    )}
+                    <div style={{ marginBottom: '12px' }}>{p.icon}</div>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '1.1rem', fontWeight: 700 }}>{p.name}</h3>
+                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', margin: '0 0 14px' }}>{p.description}</p>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 800, color: p.color, marginBottom: '4px' }}>LKR {p.price.toLocaleString()}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', marginBottom: '18px' }}>
+                      <Clock size={12} /> {p.duration}
+                    </div>
+                    <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                      {p.features.map(f => (
+                        <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.65)' }}>
+                          <CheckCircle size={13} color={p.color} /> {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Add-ons */}
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 16px' }}>Optional Add-Ons</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '48px' }}>
+              {ADD_ONS.map(a => {
+                const isSelected = cleaningForm.addOns.includes(a.id);
+                return (
+                  <div
+                    key={a.id}
+                    onClick={() => toggleAddOn(a.id)}
+                    style={{
+                      padding: '14px 16px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s',
+                      background: isSelected ? 'rgba(108,99,255,0.15)' : 'rgba(255,255,255,0.03)',
+                      border: `1.5px solid ${isSelected ? '#6C63FF' : 'rgba(255,255,255,0.08)'}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>{a.label}</div>
+                      <div style={{ fontSize: '0.75rem', color: isSelected ? '#a855f7' : 'rgba(255,255,255,0.4)', marginTop: '2px' }}>+LKR {a.price}</div>
+                    </div>
+                    <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: isSelected ? '#6C63FF' : 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {isSelected && <CheckCircle size={14} color="#fff" />}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Booking Form */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '32px', alignItems: 'start' }}>
+              <form onSubmit={handleCleaningSubmit}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Calendar size={18} color="#6C63FF" /> Booking Details
+                </h3>
+                {cleaningError && (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px' }}>
+                    <AlertCircle size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: '1px' }} />
+                    <span style={{ fontSize: '0.85rem', color: '#ef4444' }}>{cleaningError}</span>
+                  </div>
+                )}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                  {[
+                    { name: 'name', label: 'Full Name *', icon: <User size={14} />, type: 'text', placeholder: 'Your name' },
+                    { name: 'phone', label: 'Phone Number *', icon: <Phone size={14} />, type: 'tel', placeholder: '07X XXX XXXX' },
+                  ].map(f => (
+                    <div key={f.name}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}>{f.icon} {f.label}</label>
+                      <input name={f.name} type={f.type} placeholder={f.placeholder} value={(cleaningForm as any)[f.name]} onChange={handleCleaningChange} style={inputStyle} />
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginBottom: '14px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Mail size={14} /> Email Address *</label>
+                  <input name="email" type="email" placeholder="you@example.com" value={cleaningForm.email} onChange={handleCleaningChange} style={inputStyle} />
+                </div>
+                <div style={{ marginBottom: '14px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><MapPin size={14} /> Boarding Address *</label>
+                  <input name="address" type="text" placeholder="No. 12, Temple Road, Nugegoda" value={cleaningForm.address} onChange={handleCleaningChange} style={inputStyle} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Calendar size={14} /> Preferred Date *</label>
+                    <input name="date" type="date" value={cleaningForm.date} onChange={handleCleaningChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'dark' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Clock size={14} /> Preferred Time *</label>
+                    <select name="time" value={cleaningForm.time} onChange={handleCleaningChange} style={{ ...inputStyle, cursor: 'pointer' }}>
+                      <option value="">Select a time</option>
+                      {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><FileText size={14} /> Special Instructions</label>
+                  <textarea name="notes" placeholder="Any specific instructions for the cleaners…" value={cleaningForm.notes} onChange={handleCleaningChange} rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
+                </div>
+                <button type="submit" disabled={cleaningLoading} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: cleaningLoading ? 'rgba(108,99,255,0.4)' : 'linear-gradient(135deg, #6C63FF, #a855f7)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: cleaningLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 20px rgba(108,99,255,0.4)', transition: 'all 0.2s' }}>
+                  {cleaningLoading ? <><Settings size={18} className="spin" /> Processing…</> : <><Sparkles size={18} /> Confirm Booking — LKR {totalPrice.toLocaleString()}</>}
+                </button>
+              </form>
+
+              {/* Order Summary */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '24px', position: 'sticky', top: '96px' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ChevronRight size={16} color="#6C63FF" /> Order Summary
+                </h3>
+                <div style={{ background: `rgba(${selectedPackage === 'basic' ? '108,99,255' : selectedPackage === 'deep' ? '168,85,247' : '6,182,212'},0.1)`, border: `1px solid ${pkg.color}33`, borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{pkg.name}</span>
+                    <span style={{ color: pkg.color, fontWeight: 700 }}>LKR {pkg.price.toLocaleString()}</span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Clock size={11} /> {pkg.duration}
+                  </div>
+                </div>
+                {cleaningForm.addOns.length > 0 && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '8px', fontWeight: 600, letterSpacing: '0.5px' }}>ADD-ONS</div>
+                    {ADD_ONS.filter(a => cleaningForm.addOns.includes(a.id)).map(a => (
+                      <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <span style={{ fontSize: '0.83rem', color: 'rgba(255,255,255,0.65)' }}>{a.label}</span>
+                        <span style={{ fontSize: '0.83rem', color: '#a855f7' }}>+LKR {a.price}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+                  <span style={{ fontWeight: 700 }}>Total</span>
+                  <span style={{ fontSize: '1.4rem', fontWeight: 800, background: 'linear-gradient(135deg, #6C63FF, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    LKR {totalPrice.toLocaleString()}
+                  </span>
+                </div>
+                <div style={{ marginTop: '16px', padding: '12px', borderRadius: '10px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
+                  <div style={{ fontSize: '0.75rem', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ShieldCheck size={13} /> Satisfaction guaranteed or we re-clean for free
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════ NON-CLEANING TABS ═══════════ */}
+        {activeTab !== 'cleaning' && (
+          <div style={{ maxWidth: '720px', margin: '0 auto', paddingBottom: '80px' }}>
+            {/* Tab sub-header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', padding: '20px 24px', borderRadius: '16px', background: `rgba(${activeTab === 'plumbing' ? '6,182,212' : activeTab === 'electrical' ? '245,158,11' : '34,197,94'},0.08)`, border: `1px solid ${activeCat.color}33` }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: `${activeCat.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: activeCat.color, flexShrink: 0 }}>
+                {activeCat.icon}
+              </div>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800 }}>{activeCat.label}</h2>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)', marginTop: '2px' }}>{activeCat.description}</p>
+              </div>
+            </div>
+
+            {/* What's covered */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', marginBottom: '36px' }}>
+              {(activeTab === 'plumbing'
+                ? ['Leaking taps & pipes', 'Blocked drains', 'Water pressure issues', 'Toilet repairs', 'Shower fixing', 'Water heater issues']
+                : activeTab === 'electrical'
+                  ? ['Power outages', 'Switch & socket repairs', 'Light fitting issues', 'Fuse box problems', 'Fan installation', 'Wiring inspection']
+                  : ['Door & window repairs', 'Wall cracks & patches', 'Furniture assembly', 'Ceiling fan fixing', 'Lock & key issues', 'General handyman work']
+              ).map(item => (
+                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)' }}>
+                  <CheckCircle size={13} color={activeCat.color} /> {item}
+                </div>
+              ))}
+            </div>
+
+            {/* Request Form */}
+            <form onSubmit={handleMaintenanceSubmit} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '28px' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Wrench size={16} color={activeCat.color} /> Submit a Request
+              </h3>
+              {maintenanceError && (
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px' }}>
+                  <AlertTriangle size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: '1px' }} />
+                  <span style={{ fontSize: '0.85rem', color: '#ef4444' }}>{maintenanceError}</span>
+                </div>
+              )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                {[
+                  { name: 'name', label: 'Full Name *', icon: <User size={14} />, type: 'text', placeholder: 'Your name' },
+                  { name: 'phone', label: 'Phone Number *', icon: <Phone size={14} />, type: 'tel', placeholder: '07X XXX XXXX' },
+                ].map(f => (
+                  <div key={f.name}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}>{f.icon} {f.label}</label>
+                    <input name={f.name} type={f.type} placeholder={f.placeholder} value={(maintenanceForm as any)[f.name]} onChange={handleMaintenanceChange} style={inputStyle} />
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Mail size={14} /> Email Address *</label>
+                <input name="email" type="email" placeholder="you@example.com" value={maintenanceForm.email} onChange={handleMaintenanceChange} style={inputStyle} />
+              </div>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><MapPin size={14} /> Boarding Address *</label>
+                <input name="address" type="text" placeholder="No. 12, Temple Road, Nugegoda" value={maintenanceForm.address} onChange={handleMaintenanceChange} style={inputStyle} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Calendar size={14} /> Preferred Date *</label>
+                  <input name="date" type="date" value={maintenanceForm.date} onChange={handleMaintenanceChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'dark' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Clock size={14} /> Preferred Time</label>
+                  <select name="time" value={maintenanceForm.time} onChange={handleMaintenanceChange} style={{ ...inputStyle, cursor: 'pointer' }}>
+                    <option value="">Select a time</option>
+                    {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><AlertTriangle size={14} /> Priority Level</label>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  {[{ id: 'low', label: 'Low', color: '#22c55e' }, { id: 'medium', label: 'Medium', color: '#f59e0b' }, { id: 'high', label: 'High', color: '#ef4444' }].map(p => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setMaintenanceForm(prev => ({ ...prev, priority: p.id }))}
+                      style={{
+                        flex: 1, padding: '10px', borderRadius: '10px', border: `1.5px solid ${maintenanceForm.priority === p.id ? p.color : 'rgba(255,255,255,0.1)'}`,
+                        background: maintenanceForm.priority === p.id ? `${p.color}22` : 'transparent',
+                        color: maintenanceForm.priority === p.id ? p.color : 'rgba(255,255,255,0.5)',
+                        fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.15s',
+                      }}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><FileText size={14} /> Issue Description *</label>
+                <textarea name="description" placeholder={`Describe the ${activeCat.label.toLowerCase()} issue in detail…`} value={maintenanceForm.description} onChange={handleMaintenanceChange} rows={4} style={{ ...inputStyle, resize: 'vertical' }} />
+              </div>
+              <button type="submit" disabled={maintenanceLoading} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: maintenanceLoading ? `${activeCat.color}66` : `linear-gradient(135deg, ${activeCat.color}, ${activeCat.color}bb)`, border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: maintenanceLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: `0 4px 20px ${activeCat.color}44`, transition: 'all 0.2s' }}>
+                {maintenanceLoading ? <><Settings size={18} /> Processing…</> : <><Wrench size={18} /> Submit {activeCat.label} Request</>}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Bottom spacing */}
+        {activeTab === 'cleaning' && <div style={{ height: '80px' }} />}
+      </div>
+
+      <style>{`
+        @keyframes pulse-glow { 0%,100%{box-shadow:0 0 30px rgba(108,99,255,0.4)} 50%{box-shadow:0 0 60px rgba(168,85,247,0.7)} }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        .spin { animation: spin 1s linear infinite; }
+        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.25); }
+        input:focus, textarea:focus, select:focus { border-color: rgba(108,99,255,0.5) !important; background: rgba(108,99,255,0.06) !important; }
+        select option { background: #1a1a2e; color: #fff; }
+        @media (max-width: 768px) {
+          .cleaning-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default MaintenancePage;
