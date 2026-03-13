@@ -75,21 +75,25 @@ const Navbar = () => {
         }}
       >
         {/* Logo */}
-        <a href="#home" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <a href="#home" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+              width: '52px',
+              height: '52px',
+              borderRadius: '14px',
+              overflow: 'hidden',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+              backgroundColor: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 20px rgba(108,99,255,0.5)',
-              animation: 'pulse-glow 3s ease-in-out infinite',
             }}
           >
-            <Home size={20} color="#fff" />
+            <img
+              src="http://localhost:5000/uploads/1.png"
+              alt="UniSpace logo"
+              style={{ width: '90%', height: '90%', objectFit: 'contain', imageRendering: 'auto' }}
+            />
           </div>
           <div>
             <span
