@@ -34,7 +34,7 @@ const Navbar = () => {
       icon: <Search size={16} />,
       dropdown: ['All Boardings', 'Near Campus', 'Budget Friendly', 'Premium'],
     },
-    { label: 'Favourites', href: '#', icon: <Heart size={16} /> },
+    { label: 'Favourites', href: '/favourites', icon: <Heart size={16} /> },
     { label: 'Messages', href: '#', icon: <MessageCircle size={16} /> },
     {
       label: 'Maintenance',
