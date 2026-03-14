@@ -12,6 +12,7 @@ import CleaningServicePage from './Pages/CleaningServicePage';
 import CleaningStaffDashboard from './Pages/CleaningStaffDashboard';
 import MaintenancePage from './Pages/MaintenancePage';
 import EditProfilePage from './Pages/EditProfilePage';
+import FavouritesPage from './Pages/FavouritesPage';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/cleaning-service" element={<CleaningServicePage />} />
         <Route path="/cleaning-staff/dashboard" element={<CleaningStaffDashboard />} />
         <Route path="/maintenance" element={<MaintenancePage />} />
+        <Route path="/favourites" element={<FavouritesPage />} />
       </Routes>
     </BrowserRouter>
   );
