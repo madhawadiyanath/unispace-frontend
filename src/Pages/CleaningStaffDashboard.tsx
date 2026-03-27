@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Sparkles, LogOut, Bell, Calendar, Clock,
@@ -464,7 +464,7 @@ const CleaningStaffDashboard = () => {
           ) : (
             <div className="booking-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '18px' }}>
               {maintenanceForStaff.map(req => {
-                const typeCfg: Record<string, { label: string; icon: JSX.Element; color: string }> = {
+                const typeCfg: Record<string, { label: string; icon: ReactNode; color: string }> = {
                   plumbing: { label: 'Plumbing', icon: <Droplets size={16} />, color: '#06b6d4' },
                   electrical: { label: 'Electrical', icon: <Zap size={16} />, color: '#f59e0b' },
                   repairs: { label: 'Repairs', icon: <Hammer size={16} />, color: '#22c55e' },

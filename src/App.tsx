@@ -1,4 +1,5 @@
 import './index.css';
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from './Pages/HomePage';
 import LoginPage from './Pages/LoginPage';
@@ -15,6 +16,17 @@ import EditProfilePage from './Pages/EditProfilePage';
 import FavouritesPage from './Pages/FavouritesPage';
 
 function App() {
+  useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    const prefersLight = window.matchMedia?.('(prefers-color-scheme: light)')?.matches;
+    const initialTheme = saved === 'light' || saved === 'dark'
+      ? saved
+      : (prefersLight ? 'light' : 'dark');
+
+    document.documentElement.dataset.theme = initialTheme;
+    localStorage.setItem('theme', initialTheme);
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
