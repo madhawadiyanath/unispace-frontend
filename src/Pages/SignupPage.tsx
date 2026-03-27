@@ -87,10 +87,10 @@ const SignupPage = () => {
     const inputStyle: React.CSSProperties = {
         width: '100%',
         padding: '13px 14px 13px 42px',
-        background: 'rgba(255,255,255,0.05)',
-        border: '1px solid rgba(108,99,255,0.2)',
+        background: 'var(--input-bg)',
+        border: '1px solid var(--input-border)',
         borderRadius: '12px',
-        color: '#fff',
+        color: 'var(--input-text)',
         fontSize: '0.95rem',
         transition: 'border-color 0.2s, box-shadow 0.2s',
         outline: 'none',
@@ -101,17 +101,17 @@ const SignupPage = () => {
         display: 'block',
         fontSize: '0.78rem',
         fontWeight: 600,
-        color: 'rgba(255,255,255,0.55)',
+        color: 'var(--text-muted)',
         marginBottom: '8px',
         letterSpacing: '0.4px',
     };
 
     const focusIn = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
-        e.target.style.borderColor = '#6C63FF';
-        e.target.style.boxShadow = '0 0 0 3px rgba(108,99,255,0.15)';
+        e.target.style.borderColor = 'var(--input-focus-border)';
+        e.target.style.boxShadow = 'var(--input-focus-ring)';
     };
     const focusOut = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
-        e.target.style.borderColor = 'rgba(108,99,255,0.2)';
+        e.target.style.borderColor = 'var(--input-border)';
         e.target.style.boxShadow = 'none';
     };
 
@@ -119,7 +119,7 @@ const SignupPage = () => {
         <div
             style={{
                 minHeight: '100vh',
-                background: 'linear-gradient(135deg, #0D0D1A 0%, #1a0533 50%, #0D0D1A 100%)',
+                background: 'var(--gradient-hero)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -127,6 +127,7 @@ const SignupPage = () => {
                 position: 'relative',
                 overflow: 'hidden',
                 fontFamily: "'Inter', sans-serif",
+                color: 'var(--text-primary)',
             }}
         >
             {/* Background blobs */}
@@ -136,10 +137,10 @@ const SignupPage = () => {
 
             {/* Logo */}
             <Link to="/" style={{ position: 'absolute', top: '24px', left: '28px', display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px rgba(108,99,255,0.5)' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--btn-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--btn-primary-shadow-sm)' }}>
                     <Home size={18} color="#fff" />
                 </div>
-                <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.1rem', background: 'linear-gradient(135deg, #fff, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.1rem', background: 'var(--gradient-purple)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     BoardingFinder
                 </span>
             </Link>
@@ -149,12 +150,12 @@ const SignupPage = () => {
                 style={{
                     width: '100%',
                     maxWidth: '460px',
-                    background: 'rgba(18, 18, 40, 0.85)',
+                    background: 'var(--surface-2)',
                     backdropFilter: 'blur(24px)',
-                    border: '1px solid rgba(108,99,255,0.2)',
+                    border: '1px solid var(--border-1)',
                     borderRadius: '28px',
                     padding: '44px 40px',
-                    boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
+                    boxShadow: 'var(--shadow-card)',
                     position: 'relative',
                     zIndex: 1,
                     animation: 'fadeInUp 0.6s ease forwards',
@@ -162,22 +163,22 @@ const SignupPage = () => {
             >
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                    <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'linear-gradient(135deg, #a855f7, #6C63FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px', boxShadow: '0 8px 25px rgba(168,85,247,0.5)' }}>
+                    <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'var(--btn-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px', boxShadow: 'var(--btn-primary-shadow)' }}>
                         <UserPlus size={28} color="#fff" />
                     </div>
-                    <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.85rem', fontWeight: 800, margin: '0 0 8px', letterSpacing: '-0.5px', color: '#fff' }}>
+                    <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.85rem', fontWeight: 800, margin: '0 0 8px', letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
                         Create Account
                     </h1>
-                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                         Join thousands of students on BoardingFinder
                     </p>
                 </div>
 
                 {/* Alerts */}
                 {error && (
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', background: 'rgba(255,101,132,0.12)', border: '1px solid rgba(255,101,132,0.35)', borderRadius: '12px', padding: '12px 16px', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', background: 'var(--danger-soft-bg)', border: '1px solid var(--danger-soft-border)', borderRadius: '12px', padding: '12px 16px', marginBottom: '20px' }}>
                         <AlertCircle size={17} color="#FF6584" style={{ flexShrink: 0, marginTop: '1px' }} />
-                        <span style={{ color: '#FF6584', fontSize: '0.875rem' }}>{error}</span>
+                        <span style={{ color: 'var(--danger-soft-text)', fontSize: '0.875rem' }}>{error}</span>
                     </div>
                 )}
                 {success && (
@@ -269,7 +270,7 @@ const SignupPage = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                style={{ position: 'absolute', right: '13px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', padding: 0 }}
+                                style={{ position: 'absolute', right: '13px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0 }}
                             >
                                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
@@ -278,7 +279,7 @@ const SignupPage = () => {
                         {form.password && (
                             <div style={{ marginTop: '8px', display: 'flex', gap: '4px', alignItems: 'center' }}>
                                 {[1, 2, 3, 4].map((i) => (
-                                    <div key={i} style={{ flex: 1, height: '3px', borderRadius: '3px', background: i <= strength.score ? strength.color : 'rgba(255,255,255,0.1)', transition: 'background 0.3s' }} />
+                                    <div key={i} style={{ flex: 1, height: '3px', borderRadius: '3px', background: i <= strength.score ? strength.color : 'var(--border-1)', transition: 'background 0.3s' }} />
                                 ))}
                                 <span style={{ fontSize: '0.7rem', color: strength.color, marginLeft: '6px', fontWeight: 600, minWidth: '40px' }}>{strength.label}</span>
                             </div>
@@ -304,7 +305,7 @@ const SignupPage = () => {
                                         ? form.password === form.confirmPassword
                                             ? 'rgba(67,233,123,0.5)'
                                             : 'rgba(255,101,132,0.5)'
-                                        : 'rgba(108,99,255,0.2)',
+                                        : 'var(--input-border)',
                                 }}
                                 onFocus={focusIn}
                                 onBlur={focusOut}
@@ -312,7 +313,7 @@ const SignupPage = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowConfirm(!showConfirm)}
-                                style={{ position: 'absolute', right: '13px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', padding: 0 }}
+                                style={{ position: 'absolute', right: '13px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0 }}
                             >
                                 {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
@@ -320,10 +321,10 @@ const SignupPage = () => {
                     </div>
 
                     {/* Terms note */}
-                    <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginBottom: '18px', lineHeight: 1.6 }}>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '18px', lineHeight: 1.6 }}>
                         By creating an account you agree to our{' '}
-                        <a href="#" style={{ color: '#a855f7' }}>Terms of Service</a> and{' '}
-                        <a href="#" style={{ color: '#a855f7' }}>Privacy Policy</a>.
+                        <a href="#" style={{ color: 'var(--primary)' }}>Terms of Service</a> and{' '}
+                        <a href="#" style={{ color: 'var(--primary)' }}>Privacy Policy</a>.
                     </p>
 
                     {/* Submit */}
@@ -334,13 +335,14 @@ const SignupPage = () => {
                             width: '100%',
                             padding: '14px',
                             borderRadius: '14px',
-                            background: loading ? 'rgba(168,85,247,0.45)' : 'linear-gradient(135deg, #a855f7, #6C63FF)',
+                            background: 'var(--btn-primary-bg)',
                             color: '#fff',
                             fontSize: '1rem',
                             fontWeight: 700,
                             cursor: loading ? 'not-allowed' : 'pointer',
                             border: 'none',
-                            boxShadow: loading ? 'none' : '0 8px 25px rgba(168,85,247,0.45)',
+                            boxShadow: loading ? 'none' : 'var(--btn-primary-shadow)',
+                            opacity: loading ? 0.75 : 1,
                             transition: 'all 0.25s',
                             display: 'flex',
                             alignItems: 'center',
@@ -352,12 +354,12 @@ const SignupPage = () => {
                         onMouseEnter={(e) => {
                             if (!loading) {
                                 (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
-                                (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 30px rgba(168,85,247,0.6)';
+                                (e.currentTarget as HTMLElement).style.boxShadow = 'var(--btn-primary-shadow-hover)';
                             }
                         }}
                         onMouseLeave={(e) => {
                             (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                            (e.currentTarget as HTMLElement).style.boxShadow = loading ? 'none' : '0 8px 25px rgba(168,85,247,0.45)';
+                            (e.currentTarget as HTMLElement).style.boxShadow = loading ? 'none' : 'var(--btn-primary-shadow)';
                         }}
                     >
                         {loading ? (
@@ -376,17 +378,17 @@ const SignupPage = () => {
 
                 {/* Divider */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', margin: '26px 0' }}>
-                    <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
-                    <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>or</span>
-                    <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+                    <div style={{ flex: 1, height: '1px', background: 'var(--border-1)' }} />
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>or</span>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--border-1)' }} />
                 </div>
 
                 {/* Login link */}
-                <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                     Already have an account?{' '}
                     <Link
                         to="/login"
-                        style={{ color: '#6C63FF', fontWeight: 600, textDecoration: 'none' }}
+                        style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}
                         onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.textDecoration = 'underline')}
                         onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.textDecoration = 'none')}
                     >
@@ -398,8 +400,8 @@ const SignupPage = () => {
             <style>{`
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin-slow { to { transform: rotate(360deg); } }
-        input::placeholder { color: rgba(255,255,255,0.25); }
-        select option { background: #1a1a35; color: #fff; }
+                input::placeholder { color: var(--text-muted); }
+                select option { background: var(--select-option-bg); color: var(--text-primary); }
       `}</style>
         </div>
     );
