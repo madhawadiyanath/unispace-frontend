@@ -246,7 +246,7 @@ const Testimonials = () => {
 
                     {/* Dots */}
                     <div style={{ display: 'flex', gap: '8px' }}>
-                        {testimonials.map((t, i) => (
+                        {testimonials.map((_, i) => (
                             <button
                                 key={i}
                                 onClick={() => setActive(i)}
