@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   User,
@@ -21,6 +21,7 @@ import {
   MessageSquare,
   MailOpen,
   Wrench,
+  MapPin,
   AlertTriangle,
 } from 'lucide-react';
 
@@ -69,6 +70,29 @@ interface IssueReport {
   createdAt: string;
 }
 
+type MaintenanceRequestStatus = 'pending' | 'accepted' | 'completed';
+
+interface MaintenanceRequest {
+  id: string;
+  type: string;
+  status: MaintenanceRequestStatus;
+  submittedAt: string;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  date: string;
+  time: string;
+  priority: string;
+  description: string;
+  requestedById?: string;
+  requestedByEmail?: string;
+  acceptedById?: string;
+  acceptedByName?: string;
+  acceptedAt?: string;
+  completedAt?: string;
+}
+
 interface UserData {
   _id: string;
   name: string;
@@ -86,6 +110,7 @@ const UserProfilePage = () => {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [issueReports, setIssueReports] = useState<IssueReport[]>([]);
   const [loadingIssues, setLoadingIssues] = useState(false);
+  const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -126,8 +151,43 @@ const UserProfilePage = () => {
         .then(data => setIssueReports(data.issues || []))
         .catch(() => {})
         .finally(() => setLoadingIssues(false));
+
+      // Load maintenance requests (stored locally by MaintenancePage)
+      try {
+        const raw = localStorage.getItem('maintenanceRequests');
+        const parsed = raw ? JSON.parse(raw) : [];
+        setMaintenanceRequests(Array.isArray(parsed) ? parsed : []);
+      } catch {
+        setMaintenanceRequests([]);
+      }
     }
   }, [navigate]);
+
+  useEffect(() => {
+    if (!currentUser || currentUser.userType !== 'landlord') return;
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== 'maintenanceRequests') return;
+      try {
+        const raw = localStorage.getItem('maintenanceRequests');
+        const parsed = raw ? JSON.parse(raw) : [];
+        setMaintenanceRequests(Array.isArray(parsed) ? parsed : []);
+      } catch {
+        setMaintenanceRequests([]);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [currentUser]);
+
+  const acceptedMaintenanceForOwner = useMemo(() => {
+    if (!currentUser) return [];
+    const id = currentUser._id;
+    const email = currentUser.email;
+    return maintenanceRequests
+      .filter(r => (r.status === 'accepted' || r.status === 'completed'))
+      .filter(r => (id && r.requestedById === id) || (email && (r.requestedByEmail === email || r.email === email)))
+      .sort((a, b) => (b.acceptedAt || b.submittedAt || '').localeCompare(a.acceptedAt || a.submittedAt || ''));
+  }, [maintenanceRequests, currentUser]);
 
   const handleRemoveFromCart = (id: string) => {
     const updated = cartItems.filter(item => item._id !== id);
@@ -795,6 +855,109 @@ const UserProfilePage = () => {
                             </button>
                           )}
                         </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Landlord: Accepted Maintenance Requests ── */}
+        {currentUser.userType === 'landlord' && (
+          <div
+            style={{
+              marginTop: '24px',
+              background: 'rgba(18, 18, 40, 0.80)',
+              backdropFilter: 'blur(24px)',
+              border: '1px solid rgba(34,211,238,0.18)',
+              borderRadius: '24px',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Header */}
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid rgba(34,211,238,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(34,211,238,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Wrench size={18} color="#22d3ee" />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, color: '#fff', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Maintenance Requests</h3>
+                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>
+                    {acceptedMaintenanceForOwner.length} accepted / completed
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  try {
+                    const raw = localStorage.getItem('maintenanceRequests');
+                    const parsed = raw ? JSON.parse(raw) : [];
+                    setMaintenanceRequests(Array.isArray(parsed) ? parsed : []);
+                  } catch {
+                    setMaintenanceRequests([]);
+                  }
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '8px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.65)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Refresh
+              </button>
+            </div>
+
+            <div style={{ padding: '16px 28px 24px' }}>
+              {acceptedMaintenanceForOwner.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '36px 0' }}>
+                  <Wrench size={38} color="rgba(34,211,238,0.18)" style={{ marginBottom: '12px' }} />
+                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>No accepted maintenance requests yet.</p>
+                  <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.22)', fontSize: '0.8rem' }}>After staff accepts your request, it will appear here.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {acceptedMaintenanceForOwner.map(r => {
+                    const typeConfig: Record<string, { label: string; color: string; bg: string }> = {
+                      plumbing: { label: '💧 Plumbing', color: '#06b6d4', bg: 'rgba(6,182,212,0.12)' },
+                      electrical: { label: '⚡ Electrical', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+                      repairs: { label: '🔨 General Repairs', color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
+                      cleaning: { label: '🧹 Cleaning', color: '#6C63FF', bg: 'rgba(108,99,255,0.12)' },
+                    };
+                    const tc = typeConfig[r.type] || { label: r.type, color: '#22d3ee', bg: 'rgba(34,211,238,0.12)' };
+                    const statusCfg = r.status === 'completed'
+                      ? { color: '#22c55e', bg: 'rgba(34,197,94,0.12)' }
+                      : { color: '#22d3ee', bg: 'rgba(34,211,238,0.12)' };
+
+                    return (
+                      <div key={r.id} style={{ padding: '16px 18px', borderRadius: '18px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '100px', background: tc.bg, color: tc.color, fontSize: '0.75rem', fontWeight: 800, border: `1px solid ${tc.color}44` }}>
+                              {tc.label}
+                            </span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '100px', background: statusCfg.bg, color: statusCfg.color, fontSize: '0.75rem', fontWeight: 800, border: `1px solid ${statusCfg.color}44`, textTransform: 'capitalize' }}>
+                              {r.status}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', textAlign: 'right' }}>
+                            {new Date(r.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </div>
+                        </div>
+
+                        <p style={{ margin: '0 0 10px', color: 'rgba(255,255,255,0.78)', fontSize: '0.875rem', lineHeight: 1.6, background: 'rgba(0,0,0,0.18)', borderRadius: '12px', padding: '10px 12px', borderLeft: `3px solid ${tc.color}66` }}>
+                          {r.description}
+                        </p>
+
+                        <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MapPin size={14} color={tc.color} /> {r.address}</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Calendar size={14} color={tc.color} /> {r.date}{r.time ? ` · ${r.time}` : ''}</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><User size={14} color={tc.color} /> {r.acceptedByName || 'Staff'}</span>
+                        </div>
+
+                        {r.acceptedAt && (
+                          <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)' }}>
+                            Accepted · {new Date(r.acceptedAt).toLocaleString()}
+                            {r.completedAt ? ` · Completed · ${new Date(r.completedAt).toLocaleString()}` : ''}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
