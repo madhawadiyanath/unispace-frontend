@@ -380,8 +380,21 @@ const MaintenancePage = () => {
             A confirmation will be sent to <strong style={{ color: '#6C63FF' }}>{cleaningForm.email}</strong>.
           </p>
           <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '16px', padding: '20px', marginBottom: '32px', textAlign: 'left' }}>
-            {[['Service', pkg.name], ['Address', cleaningForm.address], ['Date & Time', `${cleaningForm.date} · ${cleaningForm.time}`], ['Total', `LKR ${totalPrice.toLocaleString()}`]].map(([label, val]) => (
-              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            {[
+              ['Service', pkg.name],
+              ['Address', cleaningForm.address],
+              ['Date & Time', `${cleaningForm.date} · ${cleaningForm.time}`],
+              ['Total', `LKR ${totalPrice.toLocaleString()}`],
+            ].map(([label, val], idx, arr) => (
+              <div
+                key={label}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '8px 0',
+                  borderBottom: idx === arr.length - 1 ? 'none' : '1px solid var(--border-1)',
+                }}
+              >
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{label}</span>
                 <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600 }}>{val}</span>
               </div>
@@ -514,13 +527,13 @@ const MaintenancePage = () => {
               </div>
               <div>
                 <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800 }}>Cleaning Service</h2>
-                <p style={{ margin: 0, fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)' }}>Professional room & boarding cleaning — affordable, flexible, trusted</p>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)' }}>Professional room & boarding cleaning — affordable, flexible, trusted</p>
               </div>
             </div>
 
             {/* Packages */}
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 6px' }}>Choose Your Package</h3>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', margin: '0 0 24px' }}>All prices in LKR · GST included</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', margin: '0 0 24px' }}>All prices in LKR · GST included</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '48px' }}>
               {CLEANING_PACKAGES.map(p => {
                 const isSelected = selectedPackage === p.id;
@@ -530,29 +543,29 @@ const MaintenancePage = () => {
                     onClick={() => selectPackage(p.id)}
                     style={{
                       position: 'relative',
-                      background: isSelected ? `rgba(${p.id === 'basic' ? '108,99,255' : p.id === 'deep' ? '168,85,247' : '6,182,212'},0.12)` : 'rgba(255,255,255,0.03)',
-                      border: `2px solid ${isSelected ? p.color : 'rgba(255,255,255,0.08)'}`,
+                      background: isSelected ? 'var(--surface-2)' : 'var(--surface-1)',
+                      border: `2px solid ${isSelected ? p.color : 'var(--border-1)'}`,
                       borderRadius: '18px', padding: '24px', cursor: 'pointer', transition: 'all 0.25s',
-                      boxShadow: isSelected ? `0 6px 24px ${p.color}30` : 'none',
+                      boxShadow: isSelected ? `0 10px 34px ${p.color}20` : 'none',
                     }}
                     onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.border = `2px solid ${p.color}55`; }}
-                    onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.border = '2px solid rgba(255,255,255,0.08)'; }}
+                    onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.border = '2px solid var(--border-1)'; }}
                   >
                     {p.popular && (
-                      <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', borderRadius: '100px', padding: '4px 14px', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap', letterSpacing: '1px' }}>
+                      <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: 'var(--btn-primary-bg)', borderRadius: '100px', padding: '4px 14px', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap', letterSpacing: '1px', color: '#fff' }}>
                         ⭐ MOST POPULAR
                       </div>
                     )}
                     <div style={{ marginBottom: '12px' }}>{p.icon}</div>
                     <h3 style={{ margin: '0 0 4px', fontSize: '1.1rem', fontWeight: 700 }}>{p.name}</h3>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', margin: '0 0 14px' }}>{p.description}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: '0 0 14px' }}>{p.description}</p>
                     <div style={{ fontSize: '1.6rem', fontWeight: 800, color: p.color, marginBottom: '4px' }}>LKR {p.price.toLocaleString()}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', marginBottom: '18px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-muted)', fontSize: '0.78rem', marginBottom: '18px' }}>
                       <Clock size={12} /> {p.duration}
                     </div>
                     <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '7px' }}>
                       {p.features.map(f => (
-                        <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.65)' }}>
+                        <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                           <CheckCircle size={13} color={p.color} /> {f}
                         </li>
                       ))}
@@ -573,16 +586,16 @@ const MaintenancePage = () => {
                     onClick={() => toggleAddOn(a.id)}
                     style={{
                       padding: '14px 16px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s',
-                      background: isSelected ? 'rgba(108,99,255,0.15)' : 'rgba(255,255,255,0.03)',
-                      border: `1.5px solid ${isSelected ? '#6C63FF' : 'rgba(255,255,255,0.08)'}`,
+                      background: isSelected ? 'var(--nav-link-hover-bg)' : 'var(--surface-1)',
+                      border: `1.5px solid ${isSelected ? 'var(--primary)' : 'var(--border-1)'}`,
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>{a.label}</div>
-                      <div style={{ fontSize: '0.75rem', color: isSelected ? '#a855f7' : 'rgba(255,255,255,0.4)', marginTop: '2px' }}>+LKR {a.price}</div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{a.label}</div>
+                      <div style={{ fontSize: '0.75rem', color: isSelected ? 'var(--primary)' : 'var(--text-muted)', marginTop: '2px' }}>+LKR {a.price}</div>
                     </div>
-                    <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: isSelected ? '#6C63FF' : 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: isSelected ? 'var(--primary)' : 'var(--border-1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {isSelected && <CheckCircle size={14} color="#fff" />}
                     </div>
                   </div>
@@ -608,26 +621,26 @@ const MaintenancePage = () => {
                     { name: 'phone', label: 'Phone Number *', icon: <Phone size={14} />, type: 'tel', placeholder: '07X XXX XXXX' },
                   ].map(f => (
                     <div key={f.name}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}>{f.icon} {f.label}</label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}>{f.icon} {f.label}</label>
                       <input name={f.name} type={f.type} placeholder={f.placeholder} value={(cleaningForm as any)[f.name]} onChange={handleCleaningChange} style={inputStyle} />
                     </div>
                   ))}
                 </div>
                 <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Mail size={14} /> Email Address *</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Mail size={14} /> Email Address *</label>
                   <input name="email" type="email" placeholder="you@example.com" value={cleaningForm.email} onChange={handleCleaningChange} style={inputStyle} />
                 </div>
                 <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><MapPin size={14} /> Boarding Address *</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><MapPin size={14} /> Boarding Address *</label>
                   <input name="address" type="text" placeholder="No. 12, Temple Road, Nugegoda" value={cleaningForm.address} onChange={handleCleaningChange} style={inputStyle} />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                   <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Calendar size={14} /> Preferred Date *</label>
-                    <input name="date" type="date" value={cleaningForm.date} onChange={handleCleaningChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'dark' }} />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Calendar size={14} /> Preferred Date *</label>
+                    <input name="date" type="date" value={cleaningForm.date} onChange={handleCleaningChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'light dark' }} />
                   </div>
                   <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Clock size={14} /> Preferred Time *</label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Clock size={14} /> Preferred Time *</label>
                     <select name="time" value={cleaningForm.time} onChange={handleCleaningChange} style={{ ...inputStyle, cursor: 'pointer' }}>
                       <option value="">Select a time</option>
                       {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
@@ -635,7 +648,7 @@ const MaintenancePage = () => {
                   </div>
                 </div>
                 <div style={{ marginBottom: '24px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><FileText size={14} /> Special Instructions</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><FileText size={14} /> Special Instructions</label>
                   <textarea name="notes" placeholder="Any specific instructions for the cleaners…" value={cleaningForm.notes} onChange={handleCleaningChange} rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
                 </div>
                 <button type="submit" disabled={cleaningLoading} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: cleaningLoading ? 'rgba(108,99,255,0.4)' : 'linear-gradient(135deg, #6C63FF, #a855f7)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: cleaningLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 20px rgba(108,99,255,0.4)', transition: 'all 0.2s' }}>
@@ -644,31 +657,31 @@ const MaintenancePage = () => {
               </form>
 
               {/* Order Summary */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '24px', position: 'sticky', top: '96px' }}>
+              <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px', position: 'sticky', top: '96px' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <ChevronRight size={16} color="#6C63FF" /> Order Summary
                 </h3>
-                <div style={{ background: `rgba(${selectedPackage === 'basic' ? '108,99,255' : selectedPackage === 'deep' ? '168,85,247' : '6,182,212'},0.1)`, border: `1px solid ${pkg.color}33`, borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+                <div style={{ background: 'var(--surface-2)', border: `1px solid ${pkg.color}33`, borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                     <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{pkg.name}</span>
                     <span style={{ color: pkg.color, fontWeight: 700 }}>LKR {pkg.price.toLocaleString()}</span>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <Clock size={11} /> {pkg.duration}
                   </div>
                 </div>
                 {cleaningForm.addOns.length > 0 && (
                   <div style={{ marginBottom: '16px' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '8px', fontWeight: 600, letterSpacing: '0.5px' }}>ADD-ONS</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600, letterSpacing: '0.5px' }}>ADD-ONS</div>
                     {ADD_ONS.filter(a => cleaningForm.addOns.includes(a.id)).map(a => (
-                      <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                        <span style={{ fontSize: '0.83rem', color: 'rgba(255,255,255,0.65)' }}>{a.label}</span>
-                        <span style={{ fontSize: '0.83rem', color: '#a855f7' }}>+LKR {a.price}</span>
+                      <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border-1)' }}>
+                        <span style={{ fontSize: '0.83rem', color: 'var(--text-secondary)' }}>{a.label}</span>
+                        <span style={{ fontSize: '0.83rem', color: 'var(--primary)' }}>+LKR {a.price}</span>
                       </div>
                     ))}
                   </div>
                 )}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-1)', paddingTop: '16px' }}>
                   <span style={{ fontWeight: 700 }}>Total</span>
                   <span style={{ fontSize: '1.4rem', fontWeight: 800, background: 'linear-gradient(135deg, #6C63FF, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     LKR {totalPrice.toLocaleString()}
