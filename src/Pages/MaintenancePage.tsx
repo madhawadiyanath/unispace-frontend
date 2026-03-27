@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Wrench, Sparkles, Droplets, Zap, Hammer,
   CheckCircle, ArrowLeft, Calendar, Clock,
   MapPin, User, Phone, Mail, FileText, Star,
+  ClipboardList,
   Wind, ShieldCheck, Layers, AlertCircle, ChevronRight,
   AlertTriangle, Settings,
 } from 'lucide-react';
@@ -44,6 +45,21 @@ interface MaintenanceForm {
   time: string;
   priority: string;
   description: string;
+}
+
+type MaintenanceRequestStatus = 'pending' | 'accepted' | 'completed';
+
+interface MaintenanceRequest extends MaintenanceForm {
+  id: string;
+  type: string;
+  status: MaintenanceRequestStatus;
+  submittedAt: string;
+  requestedById?: string;
+  requestedByEmail?: string;
+  acceptedById?: string;
+  acceptedByName?: string;
+  acceptedAt?: string;
+  completedAt?: string;
 }
 
 /* ─── Cleaning Data ──────────────────────────────────────── */
@@ -187,6 +203,32 @@ const MaintenancePage = () => {
   const [maintenanceSubmitted, setMaintenanceSubmitted] = useState(false);
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
 
+  const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
+
+  const isStaffUser = useMemo(() => {
+    const t = String(currentUser?.userType || '').toLowerCase();
+    return t === 'admin' || t.includes('staff');
+  }, [currentUser?.userType]);
+
+  const loadMaintenanceRequests = () => {
+    try {
+      const raw = localStorage.getItem('maintenanceRequests');
+      const parsed = raw ? JSON.parse(raw) : [];
+      setMaintenanceRequests(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setMaintenanceRequests([]);
+    }
+  };
+
+  useEffect(() => {
+    loadMaintenanceRequests();
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'maintenanceRequests') loadMaintenanceRequests();
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   /* ── Cleaning helpers ── */
   const pkg = CLEANING_PACKAGES.find(p => p.id === selectedPackage)!;
   const addOnTotal = ADD_ONS.filter(a => cleaningForm.addOns.includes(a.id)).reduce((s, a) => s + a.price, 0);
@@ -242,10 +284,21 @@ const MaintenancePage = () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(maintenanceForm.email)) { setMaintenanceError('Please enter a valid email address.'); return; }
     setMaintenanceLoading(true);
     setTimeout(() => {
-      const request = { id: Date.now().toString(), type: activeTab, ...maintenanceForm, status: 'pending', submittedAt: new Date().toISOString() };
       try {
+        const request: MaintenanceRequest = {
+          id: Date.now().toString(),
+          type: activeTab,
+          ...maintenanceForm,
+          status: 'pending',
+          submittedAt: new Date().toISOString(),
+          requestedById: currentUser?._id,
+          requestedByEmail: currentUser?.email,
+        };
+
         const existing = JSON.parse(localStorage.getItem('maintenanceRequests') || '[]');
-        localStorage.setItem('maintenanceRequests', JSON.stringify([...existing, request]));
+        const next = [...(Array.isArray(existing) ? existing : []), request];
+        localStorage.setItem('maintenanceRequests', JSON.stringify(next));
+        setMaintenanceRequests(next);
       } catch {}
       setMaintenanceLoading(false);
       setMaintenanceSubmitted(true);
@@ -253,6 +306,49 @@ const MaintenancePage = () => {
   };
 
   const activeCat = CATEGORIES.find(c => c.id === activeTab)!;
+
+  const myMaintenanceRequests = useMemo(() => {
+    const email = currentUser?.email;
+    const id = currentUser?._id;
+    if (!email && !id) return [];
+    return maintenanceRequests
+      .filter(r => (id && r.requestedById === id) || (email && (r.requestedByEmail === email || r.email === email)))
+      .sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''));
+  }, [maintenanceRequests, currentUser?._id, currentUser?.email]);
+
+  const requestsForUserAndTab = useMemo(() => {
+    const base = maintenanceRequests
+      .filter(r => r.type === activeTab)
+      .sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''));
+    if (isStaffUser) return base;
+    return myMaintenanceRequests.filter(r => r.type === activeTab);
+  }, [maintenanceRequests, activeTab, isStaffUser, myMaintenanceRequests]);
+
+  const updateMaintenanceRequestStatus = (id: string, status: MaintenanceRequestStatus) => {
+    const next = maintenanceRequests.map(r => {
+      if (r.id !== id) return r;
+      const now = new Date().toISOString();
+      if (status === 'accepted') {
+        return {
+          ...r,
+          status,
+          acceptedById: currentUser?._id,
+          acceptedByName: currentUser?.name,
+          acceptedAt: now,
+        };
+      }
+      if (status === 'completed') {
+        return {
+          ...r,
+          status,
+          completedAt: now,
+        };
+      }
+      return { ...r, status };
+    });
+    setMaintenanceRequests(next);
+    localStorage.setItem('maintenanceRequests', JSON.stringify(next));
+  };
 
   /* ─── Input style helper ─── */
   const inputStyle: React.CSSProperties = {
@@ -687,6 +783,129 @@ const MaintenancePage = () => {
                 {maintenanceLoading ? <><Settings size={18} /> Processing…</> : <><Wrench size={18} /> Submit {activeCat.label} Request</>}
               </button>
             </form>
+
+            {/* Requests list (Staff can see/accept; owners can track) */}
+            <div style={{ marginTop: '22px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', overflow: 'hidden' }}>
+              <div style={{ padding: '18px 22px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: `${activeCat.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ClipboardList size={17} color={activeCat.color} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>
+                      {isStaffUser ? 'Requests To Handle' : 'My Requests'}
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)' }}>
+                      {requestsForUserAndTab.length} {activeCat.label.toLowerCase()} request{requestsForUserAndTab.length !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                </div>
+                <button type="button" onClick={loadMaintenanceRequests} style={{ padding: '8px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem' }}>
+                  Refresh
+                </button>
+              </div>
+
+              <div style={{ padding: '16px 22px 22px' }}>
+                {requestsForUserAndTab.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '28px 0', color: 'rgba(255,255,255,0.35)' }}>
+                    <AlertCircle size={34} color="rgba(255,255,255,0.18)" style={{ marginBottom: '10px' }} />
+                    <div style={{ fontWeight: 700, color: 'rgba(255,255,255,0.55)' }}>No requests yet</div>
+                    <div style={{ fontSize: '0.82rem', marginTop: '4px' }}>
+                      {isStaffUser
+                        ? `When owners submit ${activeCat.label.toLowerCase()} requests, they will appear here.`
+                        : `Submit a request above to see it listed here.`}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {requestsForUserAndTab.map((r) => {
+                      const statusCfg: Record<MaintenanceRequestStatus, { color: string; bg: string; border: string; label: string }> = {
+                        pending: { color: '#FCD34D', bg: 'rgba(252,211,77,0.12)', border: 'rgba(252,211,77,0.3)', label: '● Pending' },
+                        accepted: { color: '#22d3ee', bg: 'rgba(34,211,238,0.12)', border: 'rgba(34,211,238,0.3)', label: '◉ Accepted' },
+                        completed: { color: '#22c55e', bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.3)', label: '✓ Completed' },
+                      };
+                      const sc = statusCfg[r.status] || statusCfg.pending;
+                      const prCfg: Record<string, { color: string; bg: string; border: string }> = {
+                        low: { color: '#22c55e', bg: 'rgba(34,197,94,0.10)', border: 'rgba(34,197,94,0.25)' },
+                        medium: { color: '#f59e0b', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.25)' },
+                        high: { color: '#ef4444', bg: 'rgba(239,68,68,0.10)', border: 'rgba(239,68,68,0.25)' },
+                      };
+                      const pc = prCfg[r.priority] || prCfg.medium;
+
+                      return (
+                        <div key={r.id} style={{ padding: '16px 16px', borderRadius: '16px', background: 'rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: '10px' }}>
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <span style={{ padding: '4px 10px', borderRadius: '100px', background: sc.bg, color: sc.color, border: `1px solid ${sc.border}`, fontSize: '0.72rem', fontWeight: 800 }}>
+                                  {sc.label}
+                                </span>
+                                <span style={{ padding: '4px 10px', borderRadius: '100px', background: pc.bg, color: pc.color, border: `1px solid ${pc.border}`, fontSize: '0.72rem', fontWeight: 800, textTransform: 'capitalize' }}>
+                                  {r.priority} priority
+                                </span>
+                              </div>
+                              <div style={{ marginTop: '8px', fontWeight: 800, color: '#fff', fontSize: '0.95rem' }}>
+                                {r.name || 'Requester'}
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', marginTop: '2px' }}>
+                                {new Date(r.submittedAt).toLocaleString()}
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                              {isStaffUser && r.status === 'pending' && (
+                                <button type="button" onClick={() => updateMaintenanceRequestStatus(r.id, 'accepted')} style={{ padding: '8px 14px', borderRadius: '10px', background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.3)', color: '#22d3ee', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}>
+                                  Accept
+                                </button>
+                              )}
+                              {isStaffUser && r.status === 'accepted' && (
+                                <button type="button" onClick={() => updateMaintenanceRequestStatus(r.id, 'completed')} style={{ padding: '8px 14px', borderRadius: '10px', background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.25)', color: '#22c55e', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}>
+                                  Mark Completed
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                            <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Mail size={14} color={activeCat.color} /> {r.email}
+                            </div>
+                            <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Phone size={14} color={activeCat.color} /> {r.phone}
+                            </div>
+                            <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <MapPin size={14} color={activeCat.color} /> {r.address}
+                            </div>
+                            <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Calendar size={14} color={activeCat.color} /> {r.date}{r.time ? ` · ${r.time}` : ''}
+                            </div>
+                          </div>
+
+                          <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.78)', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '10px 12px', lineHeight: 1.6 }}>
+                            {r.description}
+                          </div>
+
+                          {(r.acceptedByName || r.acceptedAt || r.completedAt) && (
+                            <div style={{ marginTop: '10px', fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)' }}>
+                              {r.status !== 'pending' && (
+                                <div>
+                                  Accepted by <strong style={{ color: '#fff' }}>{r.acceptedByName || 'Staff'}</strong>
+                                  {r.acceptedAt ? ` · ${new Date(r.acceptedAt).toLocaleString()}` : ''}
+                                </div>
+                              )}
+                              {r.status === 'completed' && r.completedAt && (
+                                <div>
+                                  Completed · {new Date(r.completedAt).toLocaleString()}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
