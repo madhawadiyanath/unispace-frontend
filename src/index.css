@@ -7,9 +7,9 @@
 }
 
 :root {
-  --primary: #4F46E5;
-  --primary-dark: #5A52D5;
-  --primary-light: #C7D2FE;
+  --primary: #a855f7; /* Previous purple color */
+  --primary-dark: #6C63FF;
+  --primary-light: #d8b4fe;
   --secondary: #FF6584;
   --accent: #43E97B;
   --accent2: #38F9D7;

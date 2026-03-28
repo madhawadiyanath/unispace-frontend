@@ -5,6 +5,7 @@ import {
   MapPin, Phone, Mail, User,
   FileText, Building2, Image, AlertCircle,
 } from 'lucide-react';
+import Navbar from '../Components/Navbar';
 
 const API_BASE = 'http://localhost:5000';
 
@@ -46,11 +47,12 @@ const BoardingFormPage = () => {
 
   if (!currentUser || currentUser.userType !== 'landlord') {
     return (
-      <div style={{ minHeight: '100vh', background: '#0D0D1A', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: "'Inter', sans-serif", flexDirection: 'column', gap: '16px' }}>
-        <AlertCircle size={48} color="#FF6584" />
+      <div style={{ minHeight: '100vh', background: 'var(--app-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)', fontFamily: "'Inter', sans-serif", flexDirection: 'column', gap: '16px' }}>
+        <Navbar />
+        <AlertCircle size={48} color="var(--secondary)" style={{ marginTop: '120px' }} />
         <h2 style={{ margin: 0 }}>Access Denied</h2>
-        <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0 }}>Only landlords can submit boarding listings.</p>
-        <button onClick={() => navigate('/')} style={{ padding: '10px 24px', borderRadius: '12px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Go Home</button>
+        <p style={{ color: 'var(--text-muted)', margin: 0 }}>Only landlords can submit boarding listings.</p>
+        <button onClick={() => navigate('/')} style={{ padding: '10px 24px', borderRadius: '12px', background: 'var(--btn-primary-bg)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Go Home</button>
       </div>
     );
   }
@@ -131,20 +133,21 @@ const BoardingFormPage = () => {
 
   if (success) {
     return (
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0D0D1A, #1a0533, #0D0D1A)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', sans-serif", padding: '24px' }}>
-        <div style={{ textAlign: 'center', maxWidth: '480px' }}>
-          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(67,233,123,0.15)', border: '1px solid rgba(67,233,123,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-            <CheckCircle size={38} color="#43E97B" />
+      <div style={{ minHeight: '100vh', background: 'var(--gradient-hero)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', sans-serif", padding: '24px' }}>
+        <Navbar />
+        <div style={{ textAlign: 'center', maxWidth: '480px', marginTop: '120px' }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'color-mix(in srgb, var(--accent) 15%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 40%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+            <CheckCircle size={38} color="var(--accent)" />
           </div>
-          <h1 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.9rem', color: '#fff', margin: '0 0 12px' }}>Submitted!</h1>
-          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1rem', margin: '0 0 32px', lineHeight: 1.6 }}>
+          <h1 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.9rem', color: 'var(--text-primary)', margin: '0 0 12px' }}>Submitted!</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', margin: '0 0 32px', lineHeight: 1.6 }}>
             Your boarding listing has been submitted and is awaiting admin review. You'll be notified once it's published.
           </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => navigate('/profile')} style={{ padding: '12px 28px', borderRadius: '12px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem' }}>
+            <button onClick={() => navigate('/profile')} style={{ padding: '12px 28px', borderRadius: '12px', background: 'var(--btn-primary-bg)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem' }}>
               Back to Profile
             </button>
-            <button onClick={() => { setSuccess(false); setForm({ title: '', description: '', roomType: 'Single Room', price: '', location: '', nearUniversity: 'SLIIT', contactName: currentUser.name, contactPhone: '', contactEmail: currentUser.email }); setSelectedAmenities([]); setPhotos([]); setPreviews([]); }} style={{ padding: '12px 28px', borderRadius: '12px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.3)', color: '#a855f7', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem' }}>
+            <button onClick={() => { setSuccess(false); setForm({ title: '', description: '', roomType: 'Single Room', price: '', location: '', nearUniversity: 'SLIIT', contactName: currentUser.name, contactPhone: '', contactEmail: currentUser.email }); setSelectedAmenities([]); setPhotos([]); setPreviews([]); }} style={{ padding: '12px 28px', borderRadius: '12px', background: 'var(--surface-2)', border: '1px solid var(--border-1)', color: 'var(--primary-light)', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem' }}>
               Add Another
             </button>
           </div>
@@ -154,31 +157,21 @@ const BoardingFormPage = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0D0D1A 0%, #1a0533 50%, #0D0D1A 100%)', fontFamily: "'Inter', sans-serif", position: 'relative' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--app-bg)', fontFamily: "'Inter', sans-serif", position: 'relative' }}>
       {/* Background grid */}
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'linear-gradient(rgba(108,99,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(108,99,255,0.04) 1px, transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'linear-gradient(color-mix(in srgb, var(--accent) 4%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--accent) 4%, transparent) 1px, transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
 
       {/* Top bar */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(13,13,26,0.88)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(108,99,255,0.18)', padding: '0 32px', height: '68px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px rgba(108,99,255,0.5)' }}>
-            <Home size={18} color="#fff" />
-          </div>
-          <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.1rem', background: 'linear-gradient(135deg, #fff, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>BoardingFinder</span>
-        </Link>
-        <button onClick={() => navigate('/profile')} style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '8px 16px', borderRadius: '10px', background: 'rgba(108,99,255,0.1)', border: '1px solid rgba(108,99,255,0.25)', color: 'rgba(255,255,255,0.8)', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer' }}>
-          <ArrowLeft size={15} /> Back to Profile
-        </button>
-      </div>
+      <Navbar />
 
       {/* Main */}
-      <div style={{ maxWidth: '860px', margin: '0 auto', padding: '48px 24px 80px', position: 'relative', zIndex: 1 }}>
+      <div style={{ maxWidth: '860px', margin: '0 auto', padding: '140px 24px 80px', position: 'relative', zIndex: 1 }}>
         {/* Page heading */}
-        <div style={{ marginBottom: '36px' }}>
-          <h1 style={{ margin: 0, fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '2rem', background: 'linear-gradient(135deg, #fff 30%, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.5px' }}>
+        <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+          <h1 style={{ margin: 0, fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '2.2rem', background: 'var(--text-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.5px' }}>
             Add Boarding Listing
           </h1>
-          <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.45)', fontSize: '0.9rem' }}>
+          <p style={{ margin: '8px 0 0', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
             Fill in the details below. Your listing will be reviewed by admin before publishing.
           </p>
         </div>
@@ -186,7 +179,7 @@ const BoardingFormPage = () => {
         <form onSubmit={handleSubmit}>
 
           {/* ── Section 1: Basic Info ── */}
-          <FormSection icon={<FileText size={18} color="#a855f7" />} title="Basic Information">
+          <FormSection icon={<FileText size={18} color="var(--primary)" />} title="Basic Information">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div style={{ gridColumn: '1 / -1' }}>
                 <Label>Listing Title <Req /></Label>
@@ -212,7 +205,7 @@ const BoardingFormPage = () => {
           </FormSection>
 
           {/* ── Section 2: Location & Price ── */}
-          <FormSection icon={<MapPin size={18} color="#a855f7" />} title="Location & Price">
+          <FormSection icon={<MapPin size={18} color="var(--primary)" />} title="Location & Price">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div style={{ gridColumn: '1 / -1' }}>
                 <Label>Full Address / Location <Req /></Label>
@@ -221,7 +214,7 @@ const BoardingFormPage = () => {
               <div>
                 <Label>Monthly Rent (LKR) <Req /></Label>
                 <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '0.78rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.3px' }}>Rs.</span>
+                  <span style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.3px' }}>Rs.</span>
                   <input name="price" type="number" min="1" value={form.price} onChange={handleChange} placeholder="12000" style={{ ...inputStyle, paddingLeft: '44px' }} />
                 </div>
               </div>
@@ -229,7 +222,7 @@ const BoardingFormPage = () => {
           </FormSection>
 
           {/* ── Section 3: Amenities ── */}
-          <FormSection icon={<Building2 size={18} color="#a855f7" />} title="Amenities">
+          <FormSection icon={<Building2 size={18} color="var(--primary)" />} title="Amenities">
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
               {ALL_AMENITIES.map(amenity => {
                 const selected = selectedAmenities.includes(amenity);
@@ -240,12 +233,12 @@ const BoardingFormPage = () => {
                     onClick={() => toggleAmenity(amenity)}
                     style={{
                       padding: '8px 18px', borderRadius: '100px',
-                      background: selected ? 'linear-gradient(135deg, #6C63FF, #a855f7)' : 'rgba(255,255,255,0.05)',
-                      border: selected ? 'none' : '1px solid rgba(255,255,255,0.12)',
-                      color: selected ? '#fff' : 'rgba(255,255,255,0.65)',
+                      background: selected ? 'var(--btn-primary-bg)' : 'var(--surface-2)',
+                      border: selected ? 'none' : '1px solid var(--border-1)',
+                      color: selected ? '#fff' : 'var(--text-secondary)',
                       fontSize: '0.85rem', fontWeight: selected ? 600 : 400,
                       cursor: 'pointer', transition: 'all 0.2s',
-                      boxShadow: selected ? '0 4px 14px rgba(108,99,255,0.4)' : 'none',
+                      boxShadow: selected ? 'var(--shadow-1)' : 'none',
                     }}
                   >
                     {amenity}
@@ -256,26 +249,26 @@ const BoardingFormPage = () => {
           </FormSection>
 
           {/* ── Section 4: Contact Info ── */}
-          <FormSection icon={<Phone size={18} color="#a855f7" />} title="Contact Information">
+          <FormSection icon={<Phone size={18} color="var(--primary)" />} title="Contact Information">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <Label>Contact Name <Req /></Label>
                 <div style={{ position: 'relative' }}>
-                  <User size={15} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                  <User size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                   <input name="contactName" value={form.contactName} onChange={handleChange} placeholder="Your full name" style={{ ...inputStyle, paddingLeft: '38px' }} />
                 </div>
               </div>
               <div>
                 <Label>Phone Number</Label>
                 <div style={{ position: 'relative' }}>
-                  <Phone size={15} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                  <Phone size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                   <input name="contactPhone" value={form.contactPhone} onChange={handleChange} placeholder="07X XXX XXXX" style={{ ...inputStyle, paddingLeft: '38px' }} />
                 </div>
               </div>
               <div style={{ gridColumn: '1 / -1' }}>
                 <Label>Contact Email</Label>
                 <div style={{ position: 'relative' }}>
-                  <Mail size={15} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                  <Mail size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                   <input name="contactEmail" type="email" value={form.contactEmail} onChange={handleChange} placeholder="your@email.com" style={{ ...inputStyle, paddingLeft: '38px' }} />
                 </div>
               </div>
@@ -283,22 +276,22 @@ const BoardingFormPage = () => {
           </FormSection>
 
           {/* ── Section 5: Photos ── */}
-          <FormSection icon={<Image size={18} color="#a855f7" />} title={`Photos (${photos.length}/5)`}>
+          <FormSection icon={<Image size={18} color="var(--primary)" />} title={`Photos (${photos.length}/5)`}>
             {/* Upload area */}
             {photos.length < 5 && (
               <div
                 onClick={() => fileInputRef.current?.click()}
                 style={{
-                  border: '2px dashed rgba(108,99,255,0.35)', borderRadius: '16px',
+                  border: '2px dashed var(--border-1)', borderRadius: '16px',
                   padding: '36px 24px', textAlign: 'center', cursor: 'pointer',
                   transition: 'all 0.2s', marginBottom: photos.length ? '16px' : 0,
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = '#6C63FF'; (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.06)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.35)'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary)'; (e.currentTarget as HTMLElement).style.background = 'color-mix(in srgb, var(--primary) 10%, transparent)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-1)'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
               >
-                <Upload size={28} color="#a855f7" style={{ marginBottom: '10px' }} />
-                <p style={{ margin: 0, color: '#fff', fontWeight: 600, fontSize: '0.95rem' }}>Click to upload photos</p>
-                <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>Up to 5 photos · JPG, PNG, WEBP · Max 5 MB each</p>
+                <Upload size={28} color="var(--primary)" style={{ marginBottom: '10px' }} />
+                <p style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.95rem' }}>Click to upload photos</p>
+                <p style={{ margin: '6px 0 0', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Up to 5 photos · JPG, PNG, WEBP · Max 5 MB each</p>
               </div>
             )}
             <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={handlePhotoSelect} style={{ display: 'none' }} />
@@ -307,7 +300,7 @@ const BoardingFormPage = () => {
             {previews.length > 0 && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px' }}>
                 {previews.map((src, i) => (
-                  <div key={i} style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', aspectRatio: '1', border: '1px solid rgba(108,99,255,0.2)' }}>
+                  <div key={i} style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', aspectRatio: '1', border: '1px solid var(--border-1)' }}>
                     <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     <button
                       type="button"
@@ -317,7 +310,7 @@ const BoardingFormPage = () => {
                       <X size={14} />
                     </button>
                     {i === 0 && (
-                      <div style={{ position: 'absolute', bottom: '6px', left: '6px', background: 'rgba(108,99,255,0.9)', borderRadius: '6px', padding: '2px 8px', fontSize: '0.65rem', fontWeight: 700, color: '#fff' }}>COVER</div>
+                      <div style={{ position: 'absolute', bottom: '6px', left: '6px', background: 'var(--primary)', borderRadius: '6px', padding: '2px 8px', fontSize: '0.65rem', fontWeight: 700, color: '#fff' }}>COVER</div>
                     )}
                   </div>
                 ))}
@@ -339,10 +332,10 @@ const BoardingFormPage = () => {
             disabled={loading}
             style={{
               width: '100%', padding: '16px', borderRadius: '16px',
-              background: loading ? 'rgba(108,99,255,0.4)' : 'linear-gradient(135deg, #6C63FF, #a855f7)',
+              background: loading ? 'var(--surface-2)' : 'var(--btn-primary-bg)',
               color: '#fff', fontSize: '1rem', fontWeight: 700, border: 'none',
               cursor: loading ? 'not-allowed' : 'pointer',
-              boxShadow: loading ? 'none' : '0 8px 24px rgba(108,99,255,0.5)',
+              boxShadow: loading ? 'none' : 'var(--btn-primary-shadow)',
               transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
             }}
           >
@@ -358,8 +351,8 @@ const BoardingFormPage = () => {
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.25); }
-        select option { background: #1a1a30; color: #fff; }
+        input::placeholder, textarea::placeholder { color: var(--text-muted); }
+        select option { background: var(--surface-1); color: var(--text-primary); }
       `}</style>
     </div>
   );
@@ -368,25 +361,25 @@ const BoardingFormPage = () => {
 /* ── Helpers ── */
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '11px 14px',
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid rgba(108,99,255,0.2)',
-  borderRadius: '12px', color: '#fff',
+  background: 'var(--surface-2)',
+  border: '1px solid var(--border-1)',
+  borderRadius: '12px', color: 'var(--text-primary)',
   fontSize: '0.9rem', outline: 'none',
   boxSizing: 'border-box', transition: 'border-color 0.2s',
   fontFamily: "'Inter', sans-serif",
 };
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '7px' }}>{children}</div>
+  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '7px' }}>{children}</div>
 );
 
 const Req = () => <span style={{ color: '#FF6584', marginLeft: '2px' }}>*</span>;
 
 const FormSection = ({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) => (
-  <div style={{ background: 'rgba(18,18,40,0.8)', backdropFilter: 'blur(20px)', border: '1px solid rgba(108,99,255,0.18)', borderRadius: '20px', padding: '28px', marginBottom: '20px' }}>
+  <div style={{ background: 'var(--surface-1)', backdropFilter: 'blur(20px)', border: '1px solid var(--border-1)', borderRadius: '20px', padding: '28px', marginBottom: '20px' }}>
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '22px' }}>
-      <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'rgba(108,99,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{icon}</div>
-      <h3 style={{ margin: 0, fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#fff' }}>{title}</h3>
+      <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'color-mix(in srgb, var(--primary) 15%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{icon}</div>
+      <h3 style={{ margin: 0, fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>{title}</h3>
     </div>
     {children}
   </div>
