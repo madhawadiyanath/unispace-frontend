@@ -205,10 +205,15 @@ const BoardingDetailsPage = () => {
         const amt = Number(advanceAmount);
         if (!boarding || isNaN(amt) || amt <= 0) { setAdvanceError('Please enter a valid amount.'); return; }
         
-        // Validation: Student must pay exactly 50% of monthly rent as advance
-        const requiredAdvance = boarding.price / 2;
-        if (amt !== requiredAdvance) {
-            setAdvanceError(`Advance must be exactly 50% of monthly rent. Required: LKR ${requiredAdvance.toLocaleString()}`);
+        // Validation: Student must pay at least 50% of monthly rent, but can pay more up to full rent
+        const minAdvance = boarding.price / 2;
+        const maxAdvance = boarding.price;
+        if (amt < minAdvance) {
+            setAdvanceError(`Minimum advance is 50% of monthly rent: LKR ${minAdvance.toLocaleString()}`);
+            return;
+        }
+        if (amt > maxAdvance) {
+            setAdvanceError(`Maximum advance is the full monthly rent: LKR ${maxAdvance.toLocaleString()}`);
             return;
         }
         
@@ -637,7 +642,7 @@ const BoardingDetailsPage = () => {
                                                     <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Advance Amount (LKR)</div>
                                                     <div style={{ marginBottom: '8px', padding: '10px 12px', borderRadius: '10px', background: 'rgba(108,99,255,0.08)', border: '1px solid rgba(108,99,255,0.25)', fontSize: '0.8rem', color: '#C4B5FD', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                         <span>💡</span>
-                                                        <span>Pay 50% of monthly rent: <strong>LKR {(boarding.price / 2).toLocaleString()}</strong></span>
+                                                        <span>Pay at least 50% (LKR {(boarding.price / 2).toLocaleString()}) or up to full rent (LKR {boarding.price.toLocaleString()})</span>
                                                     </div>
                                                     <input
                                                         type="number"
@@ -659,33 +664,49 @@ const BoardingDetailsPage = () => {
                                                 </div>
 
                                                 {/* Fee Breakdown */}
-                                                {amt > 0 && (
-                                                    <div style={{ marginBottom: '14px', padding: '12px 14px', borderRadius: '10px', background: amt === (boarding.price / 2) ? 'rgba(67,233,123,0.1)' : 'rgba(255,107,107,0.08)', border: `1px solid ${amt === (boarding.price / 2) ? 'rgba(67,233,123,0.3)' : 'rgba(255,107,107,0.3)'}` }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
-                                                            <span>Your advance:</span>
-                                                            <span style={{ color: '#fff', fontWeight: 700 }}>LKR {amt.toLocaleString()}</span>
-                                                        </div>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
-                                                            <span>Required amount (50%):</span>
-                                                            <span style={{ color: '#43E97B', fontWeight: 700 }}>LKR {(boarding.price / 2).toLocaleString()}</span>
-                                                        </div>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
-                                                            <span>Platform fee (12%):</span>
-                                                            <span style={{ color: '#FCD34D', fontWeight: 700 }}>− LKR {platformFee.toLocaleString()}</span>
-                                                        </div>
-                                                        {amt === (boarding.price / 2) ? (
-                                                            <div style={{ borderTop: '1px solid rgba(67,233,123,0.3)', paddingTop: '7px', display: 'flex', justifyContent: 'space-between', fontSize: '0.87rem', alignItems: 'center' }}>
-                                                                <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 600 }}>✅ Amount is correct</span>
-                                                                <span style={{ color: '#43E97B', fontWeight: 800 }}>LKR {landlordAmt.toLocaleString()}</span>
+                                                {amt > 0 && (() => {
+                                                    const minAdvance = boarding.price / 2;
+                                                    const maxAdvance = boarding.price;
+                                                    const isValid = amt >= minAdvance && amt <= maxAdvance;
+                                                    const isTooLow = amt < minAdvance;
+                                                    const isTooHigh = amt > maxAdvance;
+                                                    return (
+                                                        <div style={{ marginBottom: '14px', padding: '12px 14px', borderRadius: '10px', background: isValid ? 'rgba(67,233,123,0.1)' : 'rgba(255,107,107,0.08)', border: `1px solid ${isValid ? 'rgba(67,233,123,0.3)' : 'rgba(255,107,107,0.3)'}` }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
+                                                                <span>Your advance:</span>
+                                                                <span style={{ color: '#fff', fontWeight: 700 }}>LKR {amt.toLocaleString()}</span>
                                                             </div>
-                                                        ) : (
-                                                            <div style={{ borderTop: '1px solid rgba(255,107,107,0.3)', paddingTop: '7px', display: 'flex', justifyContent: 'space-between', fontSize: '0.87rem', alignItems: 'center' }}>
-                                                                <span style={{ color: '#FF6B6B', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>⚠ Amount mismatch</span>
-                                                                <span style={{ color: '#FF6B6B', fontWeight: 800 }}>Difference: LKR {Math.abs(amt - (boarding.price / 2)).toLocaleString()}</span>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
+                                                                <span>Minimum required (50%):</span>
+                                                                <span style={{ color: '#43E97B', fontWeight: 700 }}>LKR {minAdvance.toLocaleString()}</span>
                                                             </div>
-                                                        )}
-                                                    </div>
-                                                )}
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
+                                                                <span>Maximum allowed:</span>
+                                                                <span style={{ color: '#FCD34D', fontWeight: 700 }}>LKR {maxAdvance.toLocaleString()}</span>
+                                                            </div>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
+                                                                <span>Platform fee (12%):</span>
+                                                                <span style={{ color: '#FCD34D', fontWeight: 700 }}>− LKR {platformFee.toLocaleString()}</span>
+                                                            </div>
+                                                            {isValid ? (
+                                                                <div style={{ borderTop: '1px solid rgba(67,233,123,0.3)', paddingTop: '7px', display: 'flex', justifyContent: 'space-between', fontSize: '0.87rem', alignItems: 'center' }}>
+                                                                    <span style={{ color: '#43E97B', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>✅ Amount accepted</span>
+                                                                    <span style={{ color: '#43E97B', fontWeight: 800 }}>LKR {landlordAmt.toLocaleString()}</span>
+                                                                </div>
+                                                            ) : (
+                                                                <div style={{ borderTop: '1px solid rgba(255,107,107,0.3)', paddingTop: '7px', display: 'flex', justifyContent: 'space-between', fontSize: '0.87rem', alignItems: 'center' }}>
+                                                                    <span style={{ color: '#FF6B6B', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                                        ⚠ {isTooLow ? 'Amount too low' : 'Amount exceeds'}
+                                                                    </span>
+                                                                    <span style={{ color: '#FF6B6B', fontWeight: 800 }}>
+                                                                        {isTooLow ? `Min: LKR ${minAdvance.toLocaleString()}` : `Max: LKR ${maxAdvance.toLocaleString()}`}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })()}
+                                                
 
                                                 {/* Payment Method */}
                                                 <div style={{ marginBottom: '12px' }}>
