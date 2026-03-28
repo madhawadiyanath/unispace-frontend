@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Wrench, Sparkles, Droplets, Zap, Hammer,
   CheckCircle, ArrowLeft, Calendar, Clock,
   MapPin, User, Phone, Mail, FileText, Star,
+  ClipboardList,
   Wind, ShieldCheck, Layers, AlertCircle, ChevronRight,
   AlertTriangle, Settings,
 } from 'lucide-react';
@@ -44,6 +45,21 @@ interface MaintenanceForm {
   time: string;
   priority: string;
   description: string;
+}
+
+type MaintenanceRequestStatus = 'pending' | 'accepted' | 'completed';
+
+interface MaintenanceRequest extends MaintenanceForm {
+  id: string;
+  type: string;
+  status: MaintenanceRequestStatus;
+  submittedAt: string;
+  requestedById?: string;
+  requestedByEmail?: string;
+  acceptedById?: string;
+  acceptedByName?: string;
+  acceptedAt?: string;
+  completedAt?: string;
 }
 
 /* ─── Cleaning Data ──────────────────────────────────────── */
@@ -187,6 +203,32 @@ const MaintenancePage = () => {
   const [maintenanceSubmitted, setMaintenanceSubmitted] = useState(false);
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
 
+  const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
+
+  const isStaffUser = useMemo(() => {
+    const t = String(currentUser?.userType || '').toLowerCase();
+    return t === 'admin' || t.includes('staff');
+  }, [currentUser?.userType]);
+
+  const loadMaintenanceRequests = () => {
+    try {
+      const raw = localStorage.getItem('maintenanceRequests');
+      const parsed = raw ? JSON.parse(raw) : [];
+      setMaintenanceRequests(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setMaintenanceRequests([]);
+    }
+  };
+
+  useEffect(() => {
+    loadMaintenanceRequests();
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'maintenanceRequests') loadMaintenanceRequests();
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   /* ── Cleaning helpers ── */
   const pkg = CLEANING_PACKAGES.find(p => p.id === selectedPackage)!;
   const addOnTotal = ADD_ONS.filter(a => cleaningForm.addOns.includes(a.id)).reduce((s, a) => s + a.price, 0);
@@ -242,10 +284,21 @@ const MaintenancePage = () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(maintenanceForm.email)) { setMaintenanceError('Please enter a valid email address.'); return; }
     setMaintenanceLoading(true);
     setTimeout(() => {
-      const request = { id: Date.now().toString(), type: activeTab, ...maintenanceForm, status: 'pending', submittedAt: new Date().toISOString() };
       try {
+        const request: MaintenanceRequest = {
+          id: Date.now().toString(),
+          type: activeTab,
+          ...maintenanceForm,
+          status: 'pending',
+          submittedAt: new Date().toISOString(),
+          requestedById: currentUser?._id,
+          requestedByEmail: currentUser?.email,
+        };
+
         const existing = JSON.parse(localStorage.getItem('maintenanceRequests') || '[]');
-        localStorage.setItem('maintenanceRequests', JSON.stringify([...existing, request]));
+        const next = [...(Array.isArray(existing) ? existing : []), request];
+        localStorage.setItem('maintenanceRequests', JSON.stringify(next));
+        setMaintenanceRequests(next);
       } catch {}
       setMaintenanceLoading(false);
       setMaintenanceSubmitted(true);
@@ -254,14 +307,57 @@ const MaintenancePage = () => {
 
   const activeCat = CATEGORIES.find(c => c.id === activeTab)!;
 
+  const myMaintenanceRequests = useMemo(() => {
+    const email = currentUser?.email;
+    const id = currentUser?._id;
+    if (!email && !id) return [];
+    return maintenanceRequests
+      .filter(r => (id && r.requestedById === id) || (email && (r.requestedByEmail === email || r.email === email)))
+      .sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''));
+  }, [maintenanceRequests, currentUser?._id, currentUser?.email]);
+
+  const requestsForUserAndTab = useMemo(() => {
+    const base = maintenanceRequests
+      .filter(r => r.type === activeTab)
+      .sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''));
+    if (isStaffUser) return base;
+    return myMaintenanceRequests.filter(r => r.type === activeTab);
+  }, [maintenanceRequests, activeTab, isStaffUser, myMaintenanceRequests]);
+
+  const updateMaintenanceRequestStatus = (id: string, status: MaintenanceRequestStatus) => {
+    const next = maintenanceRequests.map(r => {
+      if (r.id !== id) return r;
+      const now = new Date().toISOString();
+      if (status === 'accepted') {
+        return {
+          ...r,
+          status,
+          acceptedById: currentUser?._id,
+          acceptedByName: currentUser?.name,
+          acceptedAt: now,
+        };
+      }
+      if (status === 'completed') {
+        return {
+          ...r,
+          status,
+          completedAt: now,
+        };
+      }
+      return { ...r, status };
+    });
+    setMaintenanceRequests(next);
+    localStorage.setItem('maintenanceRequests', JSON.stringify(next));
+  };
+
   /* ─── Input style helper ─── */
   const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '12px 16px',
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.12)',
+    background: 'var(--input-bg)',
+    border: '1px solid var(--input-border)',
     borderRadius: '10px',
-    color: '#fff',
+    color: 'var(--input-text)',
     fontSize: '0.9rem',
     outline: 'none',
     boxSizing: 'border-box',
@@ -271,31 +367,44 @@ const MaintenancePage = () => {
   /* ─── Cleaning success ─── */
   if (cleaningSubmitted) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0D0D1A', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--app-bg)', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', color: 'var(--text-primary)' }}>
         <div style={{ maxWidth: '520px', width: '100%', textAlign: 'center' }}>
           <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 0 40px rgba(108,99,255,0.5)', animation: 'pulse-glow 3s ease-in-out infinite' }}>
             <CheckCircle size={48} color="#fff" />
           </div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', margin: '0 0 12px' }}>Booking Confirmed! 🎉</h1>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', lineHeight: 1.7, margin: '0 0 32px' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px' }}>Booking Confirmed! 🎉</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.7, margin: '0 0 32px' }}>
             Your <strong style={{ color: '#a855f7' }}>{pkg.name}</strong> has been booked for{' '}
-            <strong style={{ color: '#fff' }}>{cleaningForm.date}</strong> at{' '}
-            <strong style={{ color: '#fff' }}>{cleaningForm.time}</strong>.<br />
+            <strong style={{ color: 'var(--text-primary)' }}>{cleaningForm.date}</strong> at{' '}
+            <strong style={{ color: 'var(--text-primary)' }}>{cleaningForm.time}</strong>.<br />
             A confirmation will be sent to <strong style={{ color: '#6C63FF' }}>{cleaningForm.email}</strong>.
           </p>
-          <div style={{ background: 'rgba(108,99,255,0.08)', border: '1px solid rgba(108,99,255,0.2)', borderRadius: '16px', padding: '20px', marginBottom: '32px', textAlign: 'left' }}>
-            {[['Service', pkg.name], ['Address', cleaningForm.address], ['Date & Time', `${cleaningForm.date} · ${cleaningForm.time}`], ['Total', `LKR ${totalPrice.toLocaleString()}`]].map(([label, val]) => (
-              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.85rem' }}>{label}</span>
-                <span style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600 }}>{val}</span>
+          <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '16px', padding: '20px', marginBottom: '32px', textAlign: 'left' }}>
+            {[
+              ['Service', pkg.name],
+              ['Address', cleaningForm.address],
+              ['Date & Time', `${cleaningForm.date} · ${cleaningForm.time}`],
+              ['Total', `LKR ${totalPrice.toLocaleString()}`],
+            ].map(([label, val], idx, arr) => (
+              <div
+                key={label}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '8px 0',
+                  borderBottom: idx === arr.length - 1 ? 'none' : '1px solid var(--border-1)',
+                }}
+              >
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{label}</span>
+                <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600 }}>{val}</span>
               </div>
             ))}
           </div>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => { setCleaningSubmitted(false); setCleaningForm({ name: currentUser?.name || '', phone: '', email: currentUser?.email || '', address: '', date: '', time: '', packageId: 'deep', addOns: [], notes: '' }); setSelectedPackage('deep'); }} style={{ padding: '12px 24px', borderRadius: '12px', background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>
+            <button onClick={() => { setCleaningSubmitted(false); setCleaningForm({ name: currentUser?.name || '', phone: '', email: currentUser?.email || '', address: '', date: '', time: '', packageId: 'deep', addOns: [], notes: '' }); setSelectedPackage('deep'); }} style={{ padding: '12px 24px', borderRadius: '12px', background: 'var(--btn-ghost-bg)', border: '1px solid var(--btn-ghost-border)', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>
               Book Another
             </button>
-            <button onClick={() => navigate('/')} style={{ padding: '12px 24px', borderRadius: '12px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', border: 'none', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>
+            <button onClick={() => navigate('/')} style={{ padding: '12px 24px', borderRadius: '12px', background: 'var(--btn-primary-bg)', border: 'none', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', boxShadow: 'var(--btn-primary-shadow-sm)' }}>
               Back to Home
             </button>
           </div>
@@ -308,21 +417,21 @@ const MaintenancePage = () => {
   /* ─── Maintenance success ─── */
   if (maintenanceSubmitted) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0D0D1A', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--app-bg)', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', color: 'var(--text-primary)' }}>
         <div style={{ maxWidth: '520px', width: '100%', textAlign: 'center' }}>
           <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: `linear-gradient(135deg, ${activeCat.color}, ${activeCat.color}99)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: `0 0 40px ${activeCat.color}55` }}>
             <CheckCircle size={48} color="#fff" />
           </div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', margin: '0 0 12px' }}>Request Submitted! ✅</h1>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', lineHeight: 1.7, margin: '0 0 32px' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px' }}>Request Submitted! ✅</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.7, margin: '0 0 32px' }}>
             Your <strong style={{ color: activeCat.color }}>{activeCat.label}</strong> request has been received.<br />
             Our team will contact you at <strong style={{ color: '#6C63FF' }}>{maintenanceForm.email}</strong> shortly.
           </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => { setMaintenanceSubmitted(false); setMaintenanceForm({ name: currentUser?.name || '', phone: '', email: currentUser?.email || '', address: '', date: '', time: '', priority: 'medium', description: '' }); }} style={{ padding: '12px 24px', borderRadius: '12px', background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>
+            <button onClick={() => { setMaintenanceSubmitted(false); setMaintenanceForm({ name: currentUser?.name || '', phone: '', email: currentUser?.email || '', address: '', date: '', time: '', priority: 'medium', description: '' }); }} style={{ padding: '12px 24px', borderRadius: '12px', background: 'var(--btn-ghost-bg)', border: '1px solid var(--btn-ghost-border)', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>
               New Request
             </button>
-            <button onClick={() => navigate('/')} style={{ padding: '12px 24px', borderRadius: '12px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', border: 'none', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>
+            <button onClick={() => navigate('/')} style={{ padding: '12px 24px', borderRadius: '12px', background: 'var(--btn-primary-bg)', border: 'none', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', boxShadow: 'var(--btn-primary-shadow-sm)' }}>
               Back to Home
             </button>
           </div>
@@ -333,28 +442,28 @@ const MaintenancePage = () => {
 
   /* ─── Main Page ─── */
   return (
-    <div style={{ minHeight: '100vh', background: '#0D0D1A', fontFamily: "'Inter', sans-serif", color: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--app-bg)', fontFamily: "'Inter', sans-serif", color: 'var(--text-primary)' }}>
       <Navbar />
 
       {/* ── Hero Banner ── */}
-      <div style={{ paddingTop: '120px', paddingBottom: '56px', background: 'linear-gradient(160deg, rgba(108,99,255,0.12) 0%, rgba(168,85,247,0.07) 50%, transparent 100%)', borderBottom: '1px solid rgba(108,99,255,0.12)', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ paddingTop: '120px', paddingBottom: '56px', background: 'var(--gradient-hero)', borderBottom: '1px solid var(--border-1)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '-60px', right: '10%', width: '300px', height: '300px', borderRadius: '50%', background: 'rgba(108,99,255,0.07)', filter: 'blur(60px)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: '-40px', left: '5%', width: '220px', height: '220px', borderRadius: '50%', background: 'rgba(168,85,247,0.06)', filter: 'blur(50px)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px', textAlign: 'center' }}>
-          <button onClick={() => navigate('/')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '8px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.25)', color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem', cursor: 'pointer', marginBottom: '28px' }}>
+          <button onClick={() => navigate('/')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '8px', background: 'var(--nav-link-hover-bg)', border: '1px solid var(--btn-ghost-border)', color: 'var(--nav-link)', fontSize: '0.8rem', cursor: 'pointer', marginBottom: '28px' }}>
             <ArrowLeft size={14} /> Back to Home
           </button>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(108,99,255,0.1)', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '100px', padding: '6px 16px', marginBottom: '20px' }}>
-            <Wrench size={14} color="#6C63FF" />
-            <span style={{ fontSize: '0.8rem', color: '#6C63FF', fontWeight: 600, letterSpacing: '1px' }}>MAINTENANCE SERVICES</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--nav-link-hover-bg)', border: '1px solid var(--btn-ghost-border)', borderRadius: '100px', padding: '6px 16px', marginBottom: '20px' }}>
+            <Wrench size={14} color="var(--primary)" />
+            <span style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600, letterSpacing: '1px' }}>MAINTENANCE SERVICES</span>
           </div>
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, margin: '0 0 16px', lineHeight: 1.15 }}>
             Keep Your Boarding{' '}
-            <span style={{ background: 'linear-gradient(135deg, #6C63FF, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <span style={{ background: 'var(--gradient-purple)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Well Maintained
             </span>
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1rem', maxWidth: '540px', margin: '0 auto 36px', lineHeight: 1.7 }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', maxWidth: '540px', margin: '0 auto 36px', lineHeight: 1.7 }}>
             From routine cleaning to urgent repairs — one place to manage all your boarding maintenance needs.
           </p>
           {/* Trust badges */}
@@ -365,7 +474,7 @@ const MaintenancePage = () => {
               { icon: <Clock size={15} color="#a855f7" />, label: 'On-Time Guarantee' },
               { icon: <CheckCircle size={15} color="#22c55e" />, label: '100% Satisfaction' },
             ].map(b => (
-              <div key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '7px', color: 'rgba(255,255,255,0.6)', fontSize: '0.83rem' }}>
+              <div key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '7px', color: 'var(--text-secondary)', fontSize: '0.83rem' }}>
                 {b.icon} {b.label}
               </div>
             ))}
@@ -386,22 +495,22 @@ const MaintenancePage = () => {
                   display: 'flex', alignItems: 'center', gap: '12px',
                   padding: '16px 20px',
                   borderRadius: '14px',
-                  background: isActive ? `rgba(${cat.id === 'cleaning' ? '108,99,255' : cat.id === 'plumbing' ? '6,182,212' : cat.id === 'electrical' ? '245,158,11' : '34,197,94'},0.15)` : 'rgba(255,255,255,0.04)',
-                  border: `2px solid ${isActive ? cat.color : 'rgba(255,255,255,0.08)'}`,
+                  background: isActive ? `rgba(${cat.id === 'cleaning' ? '108,99,255' : cat.id === 'plumbing' ? '6,182,212' : cat.id === 'electrical' ? '245,158,11' : '34,197,94'},0.15)` : 'var(--surface-1)',
+                  border: `2px solid ${isActive ? cat.color : 'var(--border-1)'}`,
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                   textAlign: 'left',
                   boxShadow: isActive ? `0 4px 20px ${cat.color}30` : 'none',
                 }}
-                onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.border = `2px solid ${cat.color}55`; (e.currentTarget as HTMLElement).style.background = isActive ? '' : 'rgba(255,255,255,0.07)'; }}
-                onMouseLeave={e => { if (!isActive) { (e.currentTarget as HTMLElement).style.border = '2px solid rgba(255,255,255,0.08)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; } }}
+                onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.border = `2px solid ${cat.color}55`; (e.currentTarget as HTMLElement).style.background = isActive ? '' : 'var(--surface-2)'; }}
+                onMouseLeave={e => { if (!isActive) { (e.currentTarget as HTMLElement).style.border = '2px solid var(--border-1)'; (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)'; } }}
               >
                 <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: `${cat.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: cat.color }}>
                   {cat.icon}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: isActive ? '#fff' : 'rgba(255,255,255,0.8)' }}>{cat.label}</div>
-                  <div style={{ fontSize: '0.73rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{cat.description}</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: isActive ? 'var(--text-primary)' : 'var(--text-primary)' }}>{cat.label}</div>
+                  <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginTop: '2px' }}>{cat.description}</div>
                 </div>
               </button>
             );
@@ -418,13 +527,13 @@ const MaintenancePage = () => {
               </div>
               <div>
                 <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800 }}>Cleaning Service</h2>
-                <p style={{ margin: 0, fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)' }}>Professional room & boarding cleaning — affordable, flexible, trusted</p>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)' }}>Professional room & boarding cleaning — affordable, flexible, trusted</p>
               </div>
             </div>
 
             {/* Packages */}
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 6px' }}>Choose Your Package</h3>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', margin: '0 0 24px' }}>All prices in LKR · GST included</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', margin: '0 0 24px' }}>All prices in LKR · GST included</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '48px' }}>
               {CLEANING_PACKAGES.map(p => {
                 const isSelected = selectedPackage === p.id;
@@ -434,29 +543,29 @@ const MaintenancePage = () => {
                     onClick={() => selectPackage(p.id)}
                     style={{
                       position: 'relative',
-                      background: isSelected ? `rgba(${p.id === 'basic' ? '108,99,255' : p.id === 'deep' ? '168,85,247' : '6,182,212'},0.12)` : 'rgba(255,255,255,0.03)',
-                      border: `2px solid ${isSelected ? p.color : 'rgba(255,255,255,0.08)'}`,
+                      background: isSelected ? 'var(--surface-2)' : 'var(--surface-1)',
+                      border: `2px solid ${isSelected ? p.color : 'var(--border-1)'}`,
                       borderRadius: '18px', padding: '24px', cursor: 'pointer', transition: 'all 0.25s',
-                      boxShadow: isSelected ? `0 6px 24px ${p.color}30` : 'none',
+                      boxShadow: isSelected ? `0 10px 34px ${p.color}20` : 'none',
                     }}
                     onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.border = `2px solid ${p.color}55`; }}
-                    onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.border = '2px solid rgba(255,255,255,0.08)'; }}
+                    onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.border = '2px solid var(--border-1)'; }}
                   >
                     {p.popular && (
-                      <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', borderRadius: '100px', padding: '4px 14px', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap', letterSpacing: '1px' }}>
+                      <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: 'var(--btn-primary-bg)', borderRadius: '100px', padding: '4px 14px', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap', letterSpacing: '1px', color: '#fff' }}>
                         ⭐ MOST POPULAR
                       </div>
                     )}
                     <div style={{ marginBottom: '12px' }}>{p.icon}</div>
                     <h3 style={{ margin: '0 0 4px', fontSize: '1.1rem', fontWeight: 700 }}>{p.name}</h3>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', margin: '0 0 14px' }}>{p.description}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: '0 0 14px' }}>{p.description}</p>
                     <div style={{ fontSize: '1.6rem', fontWeight: 800, color: p.color, marginBottom: '4px' }}>LKR {p.price.toLocaleString()}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', marginBottom: '18px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-muted)', fontSize: '0.78rem', marginBottom: '18px' }}>
                       <Clock size={12} /> {p.duration}
                     </div>
                     <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '7px' }}>
                       {p.features.map(f => (
-                        <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.65)' }}>
+                        <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                           <CheckCircle size={13} color={p.color} /> {f}
                         </li>
                       ))}
@@ -477,16 +586,16 @@ const MaintenancePage = () => {
                     onClick={() => toggleAddOn(a.id)}
                     style={{
                       padding: '14px 16px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s',
-                      background: isSelected ? 'rgba(108,99,255,0.15)' : 'rgba(255,255,255,0.03)',
-                      border: `1.5px solid ${isSelected ? '#6C63FF' : 'rgba(255,255,255,0.08)'}`,
+                      background: isSelected ? 'var(--nav-link-hover-bg)' : 'var(--surface-1)',
+                      border: `1.5px solid ${isSelected ? 'var(--primary)' : 'var(--border-1)'}`,
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>{a.label}</div>
-                      <div style={{ fontSize: '0.75rem', color: isSelected ? '#a855f7' : 'rgba(255,255,255,0.4)', marginTop: '2px' }}>+LKR {a.price}</div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{a.label}</div>
+                      <div style={{ fontSize: '0.75rem', color: isSelected ? 'var(--primary)' : 'var(--text-muted)', marginTop: '2px' }}>+LKR {a.price}</div>
                     </div>
-                    <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: isSelected ? '#6C63FF' : 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: isSelected ? 'var(--primary)' : 'var(--border-1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {isSelected && <CheckCircle size={14} color="#fff" />}
                     </div>
                   </div>
@@ -512,26 +621,26 @@ const MaintenancePage = () => {
                     { name: 'phone', label: 'Phone Number *', icon: <Phone size={14} />, type: 'tel', placeholder: '07X XXX XXXX' },
                   ].map(f => (
                     <div key={f.name}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}>{f.icon} {f.label}</label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}>{f.icon} {f.label}</label>
                       <input name={f.name} type={f.type} placeholder={f.placeholder} value={(cleaningForm as any)[f.name]} onChange={handleCleaningChange} style={inputStyle} />
                     </div>
                   ))}
                 </div>
                 <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Mail size={14} /> Email Address *</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Mail size={14} /> Email Address *</label>
                   <input name="email" type="email" placeholder="you@example.com" value={cleaningForm.email} onChange={handleCleaningChange} style={inputStyle} />
                 </div>
                 <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><MapPin size={14} /> Boarding Address *</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><MapPin size={14} /> Boarding Address *</label>
                   <input name="address" type="text" placeholder="No. 12, Temple Road, Nugegoda" value={cleaningForm.address} onChange={handleCleaningChange} style={inputStyle} />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                   <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Calendar size={14} /> Preferred Date *</label>
-                    <input name="date" type="date" value={cleaningForm.date} onChange={handleCleaningChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'dark' }} />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Calendar size={14} /> Preferred Date *</label>
+                    <input name="date" type="date" value={cleaningForm.date} onChange={handleCleaningChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'light dark' }} />
                   </div>
                   <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Clock size={14} /> Preferred Time *</label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Clock size={14} /> Preferred Time *</label>
                     <select name="time" value={cleaningForm.time} onChange={handleCleaningChange} style={{ ...inputStyle, cursor: 'pointer' }}>
                       <option value="">Select a time</option>
                       {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
@@ -539,7 +648,7 @@ const MaintenancePage = () => {
                   </div>
                 </div>
                 <div style={{ marginBottom: '24px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><FileText size={14} /> Special Instructions</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><FileText size={14} /> Special Instructions</label>
                   <textarea name="notes" placeholder="Any specific instructions for the cleaners…" value={cleaningForm.notes} onChange={handleCleaningChange} rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
                 </div>
                 <button type="submit" disabled={cleaningLoading} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: cleaningLoading ? 'rgba(108,99,255,0.4)' : 'linear-gradient(135deg, #6C63FF, #a855f7)', border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: cleaningLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 20px rgba(108,99,255,0.4)', transition: 'all 0.2s' }}>
@@ -548,31 +657,31 @@ const MaintenancePage = () => {
               </form>
 
               {/* Order Summary */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '24px', position: 'sticky', top: '96px' }}>
+              <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px', position: 'sticky', top: '96px' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <ChevronRight size={16} color="#6C63FF" /> Order Summary
                 </h3>
-                <div style={{ background: `rgba(${selectedPackage === 'basic' ? '108,99,255' : selectedPackage === 'deep' ? '168,85,247' : '6,182,212'},0.1)`, border: `1px solid ${pkg.color}33`, borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+                <div style={{ background: 'var(--surface-2)', border: `1px solid ${pkg.color}33`, borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                     <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{pkg.name}</span>
                     <span style={{ color: pkg.color, fontWeight: 700 }}>LKR {pkg.price.toLocaleString()}</span>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <Clock size={11} /> {pkg.duration}
                   </div>
                 </div>
                 {cleaningForm.addOns.length > 0 && (
                   <div style={{ marginBottom: '16px' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '8px', fontWeight: 600, letterSpacing: '0.5px' }}>ADD-ONS</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600, letterSpacing: '0.5px' }}>ADD-ONS</div>
                     {ADD_ONS.filter(a => cleaningForm.addOns.includes(a.id)).map(a => (
-                      <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                        <span style={{ fontSize: '0.83rem', color: 'rgba(255,255,255,0.65)' }}>{a.label}</span>
-                        <span style={{ fontSize: '0.83rem', color: '#a855f7' }}>+LKR {a.price}</span>
+                      <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border-1)' }}>
+                        <span style={{ fontSize: '0.83rem', color: 'var(--text-secondary)' }}>{a.label}</span>
+                        <span style={{ fontSize: '0.83rem', color: 'var(--primary)' }}>+LKR {a.price}</span>
                       </div>
                     ))}
                   </div>
                 )}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-1)', paddingTop: '16px' }}>
                   <span style={{ fontWeight: 700 }}>Total</span>
                   <span style={{ fontSize: '1.4rem', fontWeight: 800, background: 'linear-gradient(135deg, #6C63FF, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     LKR {totalPrice.toLocaleString()}
@@ -592,13 +701,13 @@ const MaintenancePage = () => {
         {activeTab !== 'cleaning' && (
           <div style={{ maxWidth: '720px', margin: '0 auto', paddingBottom: '80px' }}>
             {/* Tab sub-header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', padding: '20px 24px', borderRadius: '16px', background: `rgba(${activeTab === 'plumbing' ? '6,182,212' : activeTab === 'electrical' ? '245,158,11' : '34,197,94'},0.08)`, border: `1px solid ${activeCat.color}33` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', padding: '20px 24px', borderRadius: '16px', background: 'var(--surface-2)', border: `1px solid ${activeCat.color}33` }}>
               <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: `${activeCat.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: activeCat.color, flexShrink: 0 }}>
                 {activeCat.icon}
               </div>
               <div>
                 <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800 }}>{activeCat.label}</h2>
-                <p style={{ margin: 0, fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)', marginTop: '2px' }}>{activeCat.description}</p>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>{activeCat.description}</p>
               </div>
             </div>
 
@@ -610,14 +719,14 @@ const MaintenancePage = () => {
                   ? ['Power outages', 'Switch & socket repairs', 'Light fitting issues', 'Fuse box problems', 'Fan installation', 'Wiring inspection']
                   : ['Door & window repairs', 'Wall cracks & patches', 'Furniture assembly', 'Ceiling fan fixing', 'Lock & key issues', 'General handyman work']
               ).map(item => (
-                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)' }}>
+                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', borderRadius: '10px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                   <CheckCircle size={13} color={activeCat.color} /> {item}
                 </div>
               ))}
             </div>
 
             {/* Request Form */}
-            <form onSubmit={handleMaintenanceSubmit} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '28px' }}>
+            <form onSubmit={handleMaintenanceSubmit} style={{ background: 'var(--surface-2)', border: '1px solid var(--border-1)', borderRadius: '20px', padding: '28px' }}>
               <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Wrench size={16} color={activeCat.color} /> Submit a Request
               </h3>
@@ -633,26 +742,26 @@ const MaintenancePage = () => {
                   { name: 'phone', label: 'Phone Number *', icon: <Phone size={14} />, type: 'tel', placeholder: '07X XXX XXXX' },
                 ].map(f => (
                   <div key={f.name}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}>{f.icon} {f.label}</label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}>{f.icon} {f.label}</label>
                     <input name={f.name} type={f.type} placeholder={f.placeholder} value={(maintenanceForm as any)[f.name]} onChange={handleMaintenanceChange} style={inputStyle} />
                   </div>
                 ))}
               </div>
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Mail size={14} /> Email Address *</label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Mail size={14} /> Email Address *</label>
                 <input name="email" type="email" placeholder="you@example.com" value={maintenanceForm.email} onChange={handleMaintenanceChange} style={inputStyle} />
               </div>
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><MapPin size={14} /> Boarding Address *</label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><MapPin size={14} /> Boarding Address *</label>
                 <input name="address" type="text" placeholder="No. 12, Temple Road, Nugegoda" value={maintenanceForm.address} onChange={handleMaintenanceChange} style={inputStyle} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                 <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Calendar size={14} /> Preferred Date *</label>
-                  <input name="date" type="date" value={maintenanceForm.date} onChange={handleMaintenanceChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'dark' }} />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Calendar size={14} /> Preferred Date *</label>
+                  <input name="date" type="date" value={maintenanceForm.date} onChange={handleMaintenanceChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'light dark' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><Clock size={14} /> Preferred Time</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Clock size={14} /> Preferred Time</label>
                   <select name="time" value={maintenanceForm.time} onChange={handleMaintenanceChange} style={{ ...inputStyle, cursor: 'pointer' }}>
                     <option value="">Select a time</option>
                     {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
@@ -660,7 +769,7 @@ const MaintenancePage = () => {
                 </div>
               </div>
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><AlertTriangle size={14} /> Priority Level</label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><AlertTriangle size={14} /> Priority Level</label>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   {[{ id: 'low', label: 'Low', color: '#22c55e' }, { id: 'medium', label: 'Medium', color: '#f59e0b' }, { id: 'high', label: 'High', color: '#ef4444' }].map(p => (
                     <button
@@ -668,9 +777,9 @@ const MaintenancePage = () => {
                       type="button"
                       onClick={() => setMaintenanceForm(prev => ({ ...prev, priority: p.id }))}
                       style={{
-                        flex: 1, padding: '10px', borderRadius: '10px', border: `1.5px solid ${maintenanceForm.priority === p.id ? p.color : 'rgba(255,255,255,0.1)'}`,
+                        flex: 1, padding: '10px', borderRadius: '10px', border: `1.5px solid ${maintenanceForm.priority === p.id ? p.color : 'var(--border-1)'}`,
                         background: maintenanceForm.priority === p.id ? `${p.color}22` : 'transparent',
-                        color: maintenanceForm.priority === p.id ? p.color : 'rgba(255,255,255,0.5)',
+                        color: maintenanceForm.priority === p.id ? p.color : 'var(--text-muted)',
                         fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.15s',
                       }}
                     >
@@ -680,13 +789,136 @@ const MaintenancePage = () => {
                 </div>
               </div>
               <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}><FileText size={14} /> Issue Description *</label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><FileText size={14} /> Issue Description *</label>
                 <textarea name="description" placeholder={`Describe the ${activeCat.label.toLowerCase()} issue in detail…`} value={maintenanceForm.description} onChange={handleMaintenanceChange} rows={4} style={{ ...inputStyle, resize: 'vertical' }} />
               </div>
               <button type="submit" disabled={maintenanceLoading} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: maintenanceLoading ? `${activeCat.color}66` : `linear-gradient(135deg, ${activeCat.color}, ${activeCat.color}bb)`, border: 'none', color: '#fff', fontSize: '1rem', fontWeight: 700, cursor: maintenanceLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: `0 4px 20px ${activeCat.color}44`, transition: 'all 0.2s' }}>
                 {maintenanceLoading ? <><Settings size={18} /> Processing…</> : <><Wrench size={18} /> Submit {activeCat.label} Request</>}
               </button>
             </form>
+
+            {/* Requests list (Staff can see/accept; owners can track) */}
+            <div style={{ marginTop: '22px', background: 'var(--surface-2)', border: '1px solid var(--border-1)', borderRadius: '20px', overflow: 'hidden' }}>
+              <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border-1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: `${activeCat.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ClipboardList size={17} color={activeCat.color} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>
+                      {isStaffUser ? 'Requests To Handle' : 'My Requests'}
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      {requestsForUserAndTab.length} {activeCat.label.toLowerCase()} request{requestsForUserAndTab.length !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                </div>
+                <button type="button" onClick={loadMaintenanceRequests} style={{ padding: '8px 14px', borderRadius: '10px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem' }}>
+                  Refresh
+                </button>
+              </div>
+
+              <div style={{ padding: '16px 22px 22px' }}>
+                {requestsForUserAndTab.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '28px 0', color: 'var(--text-muted)' }}>
+                    <AlertCircle size={34} color="var(--text-muted)" style={{ marginBottom: '10px' }} />
+                    <div style={{ fontWeight: 700, color: 'var(--text-secondary)' }}>No requests yet</div>
+                    <div style={{ fontSize: '0.82rem', marginTop: '4px' }}>
+                      {isStaffUser
+                        ? `When owners submit ${activeCat.label.toLowerCase()} requests, they will appear here.`
+                        : `Submit a request above to see it listed here.`}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {requestsForUserAndTab.map((r) => {
+                      const statusCfg: Record<MaintenanceRequestStatus, { color: string; bg: string; border: string; label: string }> = {
+                        pending: { color: '#FCD34D', bg: 'rgba(252,211,77,0.12)', border: 'rgba(252,211,77,0.3)', label: '● Pending' },
+                        accepted: { color: '#22d3ee', bg: 'rgba(34,211,238,0.12)', border: 'rgba(34,211,238,0.3)', label: '◉ Accepted' },
+                        completed: { color: '#22c55e', bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.3)', label: '✓ Completed' },
+                      };
+                      const sc = statusCfg[r.status] || statusCfg.pending;
+                      const prCfg: Record<string, { color: string; bg: string; border: string }> = {
+                        low: { color: '#22c55e', bg: 'rgba(34,197,94,0.10)', border: 'rgba(34,197,94,0.25)' },
+                        medium: { color: '#f59e0b', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.25)' },
+                        high: { color: '#ef4444', bg: 'rgba(239,68,68,0.10)', border: 'rgba(239,68,68,0.25)' },
+                      };
+                      const pc = prCfg[r.priority] || prCfg.medium;
+
+                      return (
+                        <div key={r.id} style={{ padding: '16px 16px', borderRadius: '16px', background: 'var(--surface-1)', border: '1px solid var(--border-1)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: '10px' }}>
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <span style={{ padding: '4px 10px', borderRadius: '100px', background: sc.bg, color: sc.color, border: `1px solid ${sc.border}`, fontSize: '0.72rem', fontWeight: 800 }}>
+                                  {sc.label}
+                                </span>
+                                <span style={{ padding: '4px 10px', borderRadius: '100px', background: pc.bg, color: pc.color, border: `1px solid ${pc.border}`, fontSize: '0.72rem', fontWeight: 800, textTransform: 'capitalize' }}>
+                                  {r.priority} priority
+                                </span>
+                              </div>
+                              <div style={{ marginTop: '8px', fontWeight: 800, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                                {r.name || 'Requester'}
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                {new Date(r.submittedAt).toLocaleString()}
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                              {isStaffUser && r.status === 'pending' && (
+                                <button type="button" onClick={() => updateMaintenanceRequestStatus(r.id, 'accepted')} style={{ padding: '8px 14px', borderRadius: '10px', background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.3)', color: '#22d3ee', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}>
+                                  Accept
+                                </button>
+                              )}
+                              {isStaffUser && r.status === 'accepted' && (
+                                <button type="button" onClick={() => updateMaintenanceRequestStatus(r.id, 'completed')} style={{ padding: '8px 14px', borderRadius: '10px', background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.25)', color: '#22c55e', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}>
+                                  Mark Completed
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Mail size={14} color={activeCat.color} /> {r.email}
+                            </div>
+                            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Phone size={14} color={activeCat.color} /> {r.phone}
+                            </div>
+                            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <MapPin size={14} color={activeCat.color} /> {r.address}
+                            </div>
+                            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Calendar size={14} color={activeCat.color} /> {r.date}{r.time ? ` · ${r.time}` : ''}
+                            </div>
+                          </div>
+
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'var(--surface-3)', border: '1px solid var(--border-1)', borderRadius: '12px', padding: '10px 12px', lineHeight: 1.6 }}>
+                            {r.description}
+                          </div>
+
+                          {(r.acceptedByName || r.acceptedAt || r.completedAt) && (
+                            <div style={{ marginTop: '10px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                              {r.status !== 'pending' && (
+                                <div>
+                                  Accepted by <strong style={{ color: 'var(--text-primary)' }}>{r.acceptedByName || 'Staff'}</strong>
+                                  {r.acceptedAt ? ` · ${new Date(r.acceptedAt).toLocaleString()}` : ''}
+                                </div>
+                              )}
+                              {r.status === 'completed' && r.completedAt && (
+                                <div>
+                                  Completed · {new Date(r.completedAt).toLocaleString()}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
@@ -698,9 +930,9 @@ const MaintenancePage = () => {
         @keyframes pulse-glow { 0%,100%{box-shadow:0 0 30px rgba(108,99,255,0.4)} 50%{box-shadow:0 0 60px rgba(168,85,247,0.7)} }
         @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
         .spin { animation: spin 1s linear infinite; }
-        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.25); }
-        input:focus, textarea:focus, select:focus { border-color: rgba(108,99,255,0.5) !important; background: rgba(108,99,255,0.06) !important; }
-        select option { background: #1a1a2e; color: #fff; }
+        input::placeholder, textarea::placeholder { color: var(--text-muted); }
+        input:focus, textarea:focus, select:focus { border-color: var(--input-focus-border) !important; box-shadow: var(--input-focus-ring) !important; }
+        select option { background: var(--select-option-bg); color: var(--text-primary); }
         @media (max-width: 768px) {
           .cleaning-grid { grid-template-columns: 1fr !important; }
         }

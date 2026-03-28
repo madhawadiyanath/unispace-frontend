@@ -58,9 +58,10 @@ const Features = () => {
             id="features"
             style={{
                 padding: '100px 24px',
-                background: 'linear-gradient(180deg, #0D0D1A 0%, #13132A 100%)',
+                background: 'linear-gradient(180deg, var(--app-bg) 0%, var(--app-bg-2) 100%)',
                 position: 'relative',
                 overflow: 'hidden',
+                color: 'var(--text-primary)',
             }}
         >
             {/* Background Decoration */}
@@ -117,7 +118,7 @@ const Features = () => {
                             Find Your Home
                         </span>
                     </h2>
-                    <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1.05rem', maxWidth: '520px', margin: '0 auto' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', maxWidth: '520px', margin: '0 auto' }}>
                         We've built every tool a campus student needs to find, compare, and secure the perfect boarding house.
                     </p>
                 </div>
@@ -199,7 +200,7 @@ const Features = () => {
                             >
                                 {feature.title}
                             </h3>
-                            <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.875rem', lineHeight: 1.7 }}>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.7 }}>
                                 {feature.description}
                             </p>
 
@@ -223,8 +224,8 @@ const Features = () => {
                 {/* Amenity Tags */}
                 <div
                     style={{
-                        background: 'rgba(255,255,255,0.03)',
-                        border: '1px solid rgba(255,255,255,0.08)',
+                        background: 'var(--surface-2)',
+                        border: '1px solid var(--border-1)',
                         borderRadius: '20px',
                         padding: '28px 36px',
                         display: 'flex',
@@ -236,7 +237,7 @@ const Features = () => {
                 >
                     <div>
                         <h4 style={{ fontWeight: 700, marginBottom: '6px' }}>Filter by Amenities</h4>
-                        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.85rem' }}>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                             Find exactly what you need
                         </p>
                     </div>
@@ -250,24 +251,24 @@ const Features = () => {
                                     gap: '8px',
                                     padding: '10px 18px',
                                     borderRadius: '100px',
-                                    background: 'rgba(108,99,255,0.12)',
-                                    border: '1px solid rgba(108,99,255,0.25)',
-                                    color: 'rgba(255,255,255,0.8)',
+                                    background: 'var(--nav-link-hover-bg)',
+                                    border: '1px solid var(--btn-ghost-border)',
+                                    color: 'var(--text-primary)',
                                     fontSize: '0.875rem',
                                     fontWeight: 500,
                                     cursor: 'pointer',
                                     transition: 'all 0.2s',
                                 }}
                                 onMouseEnter={(el) => {
-                                    (el.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.25)';
-                                    (el.currentTarget as HTMLElement).style.color = '#fff';
+                                    (el.currentTarget as HTMLElement).style.background = 'var(--surface-3)';
+                                    (el.currentTarget as HTMLElement).style.color = 'var(--text-primary)';
                                 }}
                                 onMouseLeave={(el) => {
-                                    (el.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.12)';
-                                    (el.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.8)';
+                                    (el.currentTarget as HTMLElement).style.background = 'var(--nav-link-hover-bg)';
+                                    (el.currentTarget as HTMLElement).style.color = 'var(--text-primary)';
                                 }}
                             >
-                                <span style={{ color: '#6C63FF' }}>{e.icon}</span>
+                                <span style={{ color: 'var(--primary)' }}>{e.icon}</span>
                                 {e.label}
                             </div>
                         ))}
