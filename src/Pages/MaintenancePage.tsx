@@ -258,6 +258,8 @@ const MaintenancePage = () => {
     return t === 'admin' || t.includes('staff');
   }, [currentUser?.userType]);
 
+  const sanitizePhone10 = (value: string) => value.replace(/\D/g, '').slice(0, 10);
+
   const loadMaintenanceRequests = async () => {
     try {
       if (!currentUser?._id) {
@@ -295,7 +297,9 @@ const MaintenancePage = () => {
   const totalPrice = (pkg?.price ?? 0) + addOnTotal;
 
   const handleCleaningChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setCleaningForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    const nextValue = name === 'phone' ? sanitizePhone10(String(value)) : value;
+    setCleaningForm(prev => ({ ...prev, [name]: nextValue }));
     setCleaningError('');
   };
 
@@ -317,7 +321,7 @@ const MaintenancePage = () => {
       setCleaningError('Please fill in all required fields.'); return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaningForm.email)) { setCleaningError('Please enter a valid email address.'); return; }
-    if (!/^\d{9,12}$/.test(cleaningForm.phone.replace(/[\s\-+]/g, ''))) { setCleaningError('Please enter a valid phone number.'); return; }
+    if (!/^\d{10}$/.test(sanitizePhone10(cleaningForm.phone))) { setCleaningError('Phone number must be exactly 10 digits (numbers only).'); return; }
     setCleaningLoading(true);
     setTimeout(() => {
       const newBooking = { id: Date.now().toString(), ...cleaningForm, status: 'pending', submittedAt: new Date().toISOString() };
@@ -332,7 +336,9 @@ const MaintenancePage = () => {
 
   /* ── Maintenance helpers ── */
   const handleMaintenanceChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setMaintenanceForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    const nextValue = name === 'phone' ? sanitizePhone10(String(value)) : value;
+    setMaintenanceForm(prev => ({ ...prev, [name]: nextValue }));
     setMaintenanceError('');
   };
 
@@ -342,6 +348,7 @@ const MaintenancePage = () => {
       setMaintenanceError('Please fill in all required fields.'); return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(maintenanceForm.email)) { setMaintenanceError('Please enter a valid email address.'); return; }
+    if (!/^\d{10}$/.test(sanitizePhone10(maintenanceForm.phone))) { setMaintenanceError('Phone number must be exactly 10 digits (numbers only).'); return; }
     if (!currentUser?._id) {
       setMaintenanceError('Please log in to submit a request.');
       return;
@@ -702,7 +709,18 @@ const MaintenancePage = () => {
                   ].map(f => (
                     <div key={f.name}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}>{f.icon} {f.label}</label>
-                      <input name={f.name} type={f.type} placeholder={f.placeholder} value={(cleaningForm as any)[f.name]} onChange={handleCleaningChange} style={inputStyle} />
+                      <input
+                        name={f.name}
+                        type={f.type}
+                        placeholder={f.placeholder}
+                        value={(cleaningForm as any)[f.name]}
+                        onChange={handleCleaningChange}
+                        inputMode={f.name === 'phone' ? 'numeric' : undefined}
+                        pattern={f.name === 'phone' ? '\\d{10}' : undefined}
+                        maxLength={f.name === 'phone' ? 10 : undefined}
+                        autoComplete={f.name === 'phone' ? 'tel' : undefined}
+                        style={inputStyle}
+                      />
                     </div>
                   ))}
                 </div>
@@ -823,7 +841,18 @@ const MaintenancePage = () => {
                 ].map(f => (
                   <div key={f.name}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}>{f.icon} {f.label}</label>
-                    <input name={f.name} type={f.type} placeholder={f.placeholder} value={(maintenanceForm as any)[f.name]} onChange={handleMaintenanceChange} style={inputStyle} />
+                    <input
+                      name={f.name}
+                      type={f.type}
+                      placeholder={f.placeholder}
+                      value={(maintenanceForm as any)[f.name]}
+                      onChange={handleMaintenanceChange}
+                      inputMode={f.name === 'phone' ? 'numeric' : undefined}
+                      pattern={f.name === 'phone' ? '\\d{10}' : undefined}
+                      maxLength={f.name === 'phone' ? 10 : undefined}
+                      autoComplete={f.name === 'phone' ? 'tel' : undefined}
+                      style={inputStyle}
+                    />
                   </div>
                 ))}
               </div>
