@@ -68,7 +68,7 @@ const FeaturedListings = () => {
             .catch(() => {});
     }, []);
 
-    const filters = ['All', 'Near NSBM', 'Near UOC', 'Near SLIIT', 'Budget', 'Premium'];
+    const filters = ['All','Near SLIIT', 'Near NSBM', 'Near UOC',  'Budget', 'Premium'];
 
     const listings: Listing[] = [
         {
