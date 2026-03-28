@@ -49,7 +49,7 @@ const BoardingFormPage = () => {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--app-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)', fontFamily: "'Inter', sans-serif", flexDirection: 'column', gap: '16px' }}>
         <Navbar />
-        <AlertCircle size={48} color="var(--secondary)" style={{ marginTop: '80px' }} />
+        <AlertCircle size={48} color="var(--secondary)" style={{ marginTop: '120px' }} />
         <h2 style={{ margin: 0 }}>Access Denied</h2>
         <p style={{ color: 'var(--text-muted)', margin: 0 }}>Only landlords can submit boarding listings.</p>
         <button onClick={() => navigate('/')} style={{ padding: '10px 24px', borderRadius: '12px', background: 'var(--btn-primary-bg)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Go Home</button>
@@ -135,7 +135,7 @@ const BoardingFormPage = () => {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--gradient-hero)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', sans-serif", padding: '24px' }}>
         <Navbar />
-        <div style={{ textAlign: 'center', maxWidth: '480px', marginTop: '80px' }}>
+        <div style={{ textAlign: 'center', maxWidth: '480px', marginTop: '120px' }}>
           <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'color-mix(in srgb, var(--accent) 15%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 40%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <CheckCircle size={38} color="var(--accent)" />
           </div>
@@ -165,13 +165,13 @@ const BoardingFormPage = () => {
       <Navbar />
 
       {/* Main */}
-      <div style={{ maxWidth: '860px', margin: '0 auto', padding: '48px 24px 80px', position: 'relative', zIndex: 1 }}>
+      <div style={{ maxWidth: '860px', margin: '0 auto', padding: '140px 24px 80px', position: 'relative', zIndex: 1 }}>
         {/* Page heading */}
-        <div style={{ marginBottom: '36px' }}>
-          <h1 style={{ margin: 0, fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '2rem', background: 'var(--text-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.5px' }}>
+        <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+          <h1 style={{ margin: 0, fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '2.2rem', background: 'var(--text-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.5px' }}>
             Add Boarding Listing
           </h1>
-          <p style={{ margin: '6px 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+          <p style={{ margin: '8px 0 0', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
             Fill in the details below. Your listing will be reviewed by admin before publishing.
           </p>
         </div>
