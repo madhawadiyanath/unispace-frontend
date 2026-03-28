@@ -427,7 +427,7 @@ const Hero = () => {
                                 Modern Studio Room
                             </h3>
                             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '12px' }}>
-                                📍 2 min walk from NSBM
+                                📍 2 min walk from SLIIT
                             </p>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div>

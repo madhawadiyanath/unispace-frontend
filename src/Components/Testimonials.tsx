@@ -7,7 +7,7 @@ const Testimonials = () => {
     const testimonials = [
         {
             name: 'Kavindi Perera',
-            university: 'NSBM Green University',
+            university: 'SLIIT',
             year: '2nd Year – IT',
             rating: 5,
             text: 'BoardingFinder made finding a room near NSBM so easy! I found a verified listing within 10 minutes and moved in within a week. The reviews from other students were super helpful.',
@@ -16,7 +16,7 @@ const Testimonials = () => {
         },
         {
             name: 'Tharaka Jayawardena',
-            university: 'University of Colombo',
+            university: 'SLIIT',
             year: '3rd Year – CS',
             rating: 5,
             text: 'The distance filter was a game-changer. I could see exactly how far each boarding house was from my faculty. Saved so much time compared to Facebook groups!',
