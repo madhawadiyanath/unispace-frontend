@@ -25,7 +25,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:5000';
 
 interface Boarding {
   _id: string;
@@ -70,7 +70,7 @@ interface IssueReport {
   createdAt: string;
 }
 
-type MaintenanceRequestStatus = 'pending' | 'accepted' | 'completed';
+type MaintenanceRequestStatus = 'pending' | 'accepted' | 'completed' | 'rejected';
 
 interface MaintenanceRequest {
   id: string;
@@ -91,7 +91,53 @@ interface MaintenanceRequest {
   acceptedByName?: string;
   acceptedAt?: string;
   completedAt?: string;
+  rejectedAt?: string;
 }
+
+type ApiMaintenanceRequest = {
+  _id: string;
+  requesterId: string;
+  requesterName?: string;
+  requesterEmail?: string;
+  requesterPhone?: string;
+  address: string;
+  category: string;
+  priority: string;
+  preferredDate: string;
+  preferredTime?: string;
+  description: string;
+  status: MaintenanceRequestStatus;
+  acceptedById?: string;
+  acceptedByName?: string;
+  acceptedAt?: string;
+  completedAt?: string;
+  rejectedAt?: string;
+  createdAt?: string;
+};
+
+const mapApiMaintenanceRequest = (r: ApiMaintenanceRequest): MaintenanceRequest => {
+  return {
+    id: r._id,
+    type: r.category,
+    status: r.status,
+    submittedAt: r.createdAt || '',
+    name: r.requesterName || '',
+    phone: r.requesterPhone || '',
+    email: r.requesterEmail || '',
+    address: r.address,
+    date: r.preferredDate,
+    time: r.preferredTime || '',
+    priority: r.priority,
+    description: r.description,
+    requestedById: r.requesterId,
+    requestedByEmail: r.requesterEmail || '',
+    acceptedById: r.acceptedById,
+    acceptedByName: r.acceptedByName,
+    acceptedAt: r.acceptedAt,
+    completedAt: r.completedAt,
+    rejectedAt: r.rejectedAt,
+  };
+};
 
 interface UserData {
   _id: string;
@@ -152,32 +198,17 @@ const UserProfilePage = () => {
         .catch(() => {})
         .finally(() => setLoadingIssues(false));
 
-      // Load maintenance requests (stored locally by MaintenancePage)
-      try {
-        const raw = localStorage.getItem('maintenanceRequests');
-        const parsed = raw ? JSON.parse(raw) : [];
-        setMaintenanceRequests(Array.isArray(parsed) ? parsed : []);
-      } catch {
-        setMaintenanceRequests([]);
-      }
+      // Fetch maintenance requests for this owner
+      fetch(`${API_BASE}/maintenance/requester/${encodeURIComponent(user._id)}`)
+        .then(r => r.json())
+        .then(data => {
+          const list = (data?.requests || []) as ApiMaintenanceRequest[];
+          const mapped = Array.isArray(list) ? list.map(mapApiMaintenanceRequest) : [];
+          setMaintenanceRequests(mapped);
+        })
+        .catch(() => setMaintenanceRequests([]));
     }
   }, [navigate]);
-
-  useEffect(() => {
-    if (!currentUser || currentUser.userType !== 'landlord') return;
-    const onStorage = (e: StorageEvent) => {
-      if (e.key !== 'maintenanceRequests') return;
-      try {
-        const raw = localStorage.getItem('maintenanceRequests');
-        const parsed = raw ? JSON.parse(raw) : [];
-        setMaintenanceRequests(Array.isArray(parsed) ? parsed : []);
-      } catch {
-        setMaintenanceRequests([]);
-      }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, [currentUser]);
 
   const acceptedMaintenanceForOwner = useMemo(() => {
     if (!currentUser) return [];
@@ -891,13 +922,15 @@ const UserProfilePage = () => {
               </div>
               <button
                 onClick={() => {
-                  try {
-                    const raw = localStorage.getItem('maintenanceRequests');
-                    const parsed = raw ? JSON.parse(raw) : [];
-                    setMaintenanceRequests(Array.isArray(parsed) ? parsed : []);
-                  } catch {
-                    setMaintenanceRequests([]);
-                  }
+                  if (!currentUser?._id) return;
+                  fetch(`${API_BASE}/maintenance/requester/${encodeURIComponent(currentUser._id)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                      const list = (data?.requests || []) as ApiMaintenanceRequest[];
+                      const mapped = Array.isArray(list) ? list.map(mapApiMaintenanceRequest) : [];
+                      setMaintenanceRequests(mapped);
+                    })
+                    .catch(() => setMaintenanceRequests([]));
                 }}
                 style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '8px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.65)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
               >
