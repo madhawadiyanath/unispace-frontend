@@ -233,7 +233,7 @@ const BoardingFormPage = () => {
                     onClick={() => toggleAmenity(amenity)}
                     style={{
                       padding: '8px 18px', borderRadius: '100px',
-                      background: selected ? 'var(--primary)' : 'var(--surface-2)',
+                      background: selected ? 'var(--btn-primary-bg)' : 'var(--surface-2)',
                       border: selected ? 'none' : '1px solid var(--border-1)',
                       color: selected ? '#fff' : 'var(--text-secondary)',
                       fontSize: '0.85rem', fontWeight: selected ? 600 : 400,
@@ -332,10 +332,10 @@ const BoardingFormPage = () => {
             disabled={loading}
             style={{
               width: '100%', padding: '16px', borderRadius: '16px',
-              background: loading ? 'var(--surface-2)' : 'var(--primary)',
+              background: loading ? 'var(--surface-2)' : 'var(--btn-primary-bg)',
               color: '#fff', fontSize: '1rem', fontWeight: 700, border: 'none',
               cursor: loading ? 'not-allowed' : 'pointer',
-              boxShadow: loading ? 'none' : 'var(--shadow-1)',
+              boxShadow: loading ? 'none' : 'var(--btn-primary-shadow)',
               transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
             }}
           >
