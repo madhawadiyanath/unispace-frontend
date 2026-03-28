@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+    import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, MapPin, Share2, Heart, ChevronLeft, ChevronRight,
@@ -243,12 +243,12 @@ const BoardingDetailsPage = () => {
     /* ── Loading ── */
     if (loading) {
         return (
-            <div style={{ minHeight: '100vh', background: '#0D0D1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '18px', fontFamily: "'Inter', sans-serif" }}>
+            <div style={{ minHeight: '100vh', background: 'var(--app-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '18px', fontFamily: "'Inter', sans-serif" }}>
                 <div style={{ position: 'relative', width: '64px', height: '64px' }}>
-                    <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '3px solid rgba(108,99,255,0.15)', borderTopColor: '#6C63FF', animation: 'spin 0.9s linear infinite' }} />
-                    <div style={{ position: 'absolute', inset: '10px', borderRadius: '50%', border: '3px solid rgba(168,85,247,0.15)', borderTopColor: '#a855f7', animation: 'spin 1.3s linear infinite reverse' }} />
+                    <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '3px solid rgba(108,99,255,0.15)', borderTopColor: 'var(--primary)', animation: 'spin 0.9s linear infinite' }} />
+                    <div style={{ position: 'absolute', inset: '10px', borderRadius: '50%', border: '3px solid rgba(168,85,247,0.15)', borderTopColor: 'var(--accent)', animation: 'spin 1.3s linear infinite reverse' }} />
                 </div>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.95rem', margin: 0 }}>Loading boarding details…</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0 }}>Loading boarding details…</p>
                 <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
         );
@@ -257,11 +257,11 @@ const BoardingDetailsPage = () => {
     /* ── Not Found ── */
     if (notFound || !boarding) {
         return (
-            <div style={{ minHeight: '100vh', background: '#0D0D1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '14px', fontFamily: "'Inter', sans-serif", color: '#fff', textAlign: 'center', padding: '24px' }}>
+            <div style={{ minHeight: '100vh', background: 'var(--app-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '14px', fontFamily: "'Inter', sans-serif", color: 'var(--text-primary)', textAlign: 'center', padding: '24px' }}>
                 <div style={{ fontSize: '5rem', marginBottom: '4px' }}>🏚️</div>
                 <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Boarding Not Found</h2>
-                <p style={{ color: 'rgba(255,255,255,0.4)', margin: 0, fontSize: '0.95rem' }}>This listing may have been removed or is unavailable.</p>
-                <button onClick={() => navigate(-1)} style={{ marginTop: '16px', padding: '12px 32px', borderRadius: '14px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', border: 'none', color: '#fff', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', boxShadow: '0 8px 24px rgba(108,99,255,0.4)' }}>
+                <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.95rem' }}>This listing may have been removed or is unavailable.</p>
+                <button onClick={() => navigate(-1)} style={{ marginTop: '16px', padding: '12px 32px', borderRadius: '14px', background: 'var(--btn-primary-bg)', border: 'none', color: '#fff', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', boxShadow: 'var(--btn-primary-shadow)' }}>
                     ← Go Back
                 </button>
                 <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -275,8 +275,7 @@ const BoardingDetailsPage = () => {
 
     /* ── Page ── */
     return (
-        <div style={{ minHeight: '100vh', background: '#0D0D1A', fontFamily: "'Inter', sans-serif", color: '#fff' }}>
-
+        <div style={{ minHeight: '100vh', background: 'var(--app-bg)', fontFamily: "'Inter', sans-serif", color: 'var(--text-primary)' }}>
             {/* ══════════════════════════════════════
                 HERO
             ══════════════════════════════════════ */}
@@ -304,8 +303,8 @@ const BoardingDetailsPage = () => {
                 )}
 
                 {/* Multi-layer overlay */}
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #0D0D1A 0%, rgba(13,13,26,0.65) 35%, rgba(13,13,26,0.25) 65%, rgba(13,13,26,0.55) 100%)' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(108,99,255,0.18) 0%, transparent 55%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--app-bg) 0%, transparent 100%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(var(--primary-rgb, 108,99,255), 0.18) 0%, transparent 55%)' }} />
 
                 {/* ── Top navbar ── */}
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20, padding: '22px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -401,7 +400,7 @@ const BoardingDetailsPage = () => {
                         </div>
 
                         {/* Photo counter */}
-                        <div style={{ position: 'absolute', top: '80px', right: '24px', zIndex: 20, padding: '5px 14px', borderRadius: '100px', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.8)' }}>
+                        <div style={{ position: 'absolute', top: '160px', right: '24px', zIndex: 20, padding: '5px 14px', borderRadius: '100px', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.8)' }}>
                             {activePhoto + 1} / {photos.length}
                         </div>
                     </>
@@ -433,15 +432,15 @@ const BoardingDetailsPage = () => {
                         )}
 
                         {/* ── About ── */}
-                        <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(108,99,255,0.15)', borderRadius: '22px', padding: '30px' }}>
+                        <div style={{ background: 'var(--search-panel-bg)', border: '1px solid var(--border-1)', borderRadius: '22px', padding: '30px' }}>
                             <SectionTitle>About This Place</SectionTitle>
-                            <p style={{ color: 'rgba(255,255,255,0.72)', lineHeight: 1.85, margin: 0, fontSize: '0.96rem' }}>
+                            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.85, margin: 0, fontSize: '0.96rem' }}>
                                 {boarding.description}
                             </p>
                         </div>
 
                         {/* ── Room Details ── */}
-                        <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(108,99,255,0.15)', borderRadius: '22px', padding: '30px' }}>
+                        <div style={{ background: 'var(--search-panel-bg)', border: '1px solid var(--border-1)', borderRadius: '22px', padding: '30px' }}>
                             <SectionTitle>Room Details</SectionTitle>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }} className="bd-inner-grid">
                                 {[
@@ -452,14 +451,14 @@ const BoardingDetailsPage = () => {
                                     { icon: '🏠', label: 'Landlord',        value: boarding.landlordName || 'N/A' },
                                     { icon: '📅', label: 'Listed On',       value: new Date(boarding.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) },
                                 ].map(({ icon, label, value }) => (
-                                    <div key={label} style={{ padding: '15px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)', transition: 'background 0.2s' }}
-                                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.08)'; }}
-                                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.035)'; }}
+                                    <div key={label} style={{ padding: '15px 18px', borderRadius: '14px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', transition: 'background 0.2s' }}
+                                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-3)'; }}
+                                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)'; }}
                                     >
-                                        <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <span style={{ fontSize: '0.9rem' }}>{icon}</span>{label}
                                         </div>
-                                        <div style={{ fontSize: '0.94rem', color: '#fff', fontWeight: 600 }}>{value}</div>
+                                        <div style={{ fontSize: '0.94rem', color: 'var(--text-primary)', fontWeight: 600 }}>{value}</div>
                                     </div>
                                 ))}
                             </div>
@@ -467,18 +466,18 @@ const BoardingDetailsPage = () => {
 
                         {/* ── Amenities ── */}
                         {boarding.amenities?.length > 0 && (
-                            <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(108,99,255,0.15)', borderRadius: '22px', padding: '30px' }}>
+                            <div style={{ background: 'var(--search-panel-bg)', border: '1px solid var(--border-1)', borderRadius: '22px', padding: '30px' }}>
                                 <SectionTitle>Amenities & Facilities</SectionTitle>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))', gap: '10px' }}>
                                     {boarding.amenities.map(a => {
                                         const am = amenityMap[a] || { icon: '✓', color: '#6C63FF' };
                                         return (
-                                            <div key={a} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '13px 16px', borderRadius: '14px', background: 'rgba(108,99,255,0.07)', border: '1px solid rgba(108,99,255,0.16)', transition: 'all 0.2s', cursor: 'default' }}
-                                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.14)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; }}
-                                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.07)'; (e.currentTarget as HTMLElement).style.transform = 'none'; }}
+                                            <div key={a} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '13px 16px', borderRadius: '14px', background: 'var(--surface-2)', border: '1px solid var(--border-1)', transition: 'all 0.2s', cursor: 'default' }}
+                                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-3)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; }}
+                                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)'; (e.currentTarget as HTMLElement).style.transform = 'none'; }}
                                             >
                                                 <span style={{ fontSize: '1.3rem', lineHeight: 1 }}>{am.icon}</span>
-                                                <span style={{ color: '#c4b5fd', fontSize: '0.85rem', fontWeight: 600 }}>{a}</span>
+                                                <span style={{ color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 600 }}>{a}</span>
                                             </div>
                                         );
                                     })}
@@ -487,56 +486,56 @@ const BoardingDetailsPage = () => {
                         )}
 
                         {/* ── Location ── */}
-                        <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(108,99,255,0.15)', borderRadius: '22px', padding: '30px' }}>
+                        <div style={{ background: 'var(--search-panel-bg)', border: '1px solid var(--border-1)', borderRadius: '22px', padding: '30px' }}>
                             <SectionTitle>Location</SectionTitle>
-                            <div style={{ borderRadius: '16px', overflow: 'hidden', height: '220px', background: 'linear-gradient(135deg, rgba(108,99,255,0.1) 0%, rgba(13,13,26,0.8) 100%)', border: '1px solid rgba(108,99,255,0.15)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', position: 'relative' }}>
+                            <div style={{ borderRadius: '16px', overflow: 'hidden', height: '220px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', position: 'relative' }}>
                                 {/* Grid dots background */}
                                 <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.15 }} xmlns="http://www.w3.org/2000/svg">
                                     <defs>
                                         <pattern id="dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
-                                            <circle cx="2" cy="2" r="1.5" fill="#6C63FF" />
+                                            <circle cx="2" cy="2" r="1.5" fill="var(--primary)" />
                                         </pattern>
                                     </defs>
                                     <rect width="100%" height="100%" fill="url(#dots)" />
                                 </svg>
                                 {/* Glow */}
-                                <div style={{ position: 'absolute', width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(108,99,255,0.2)', filter: 'blur(32px)' }} />
-                                <div style={{ position: 'relative', zIndex: 2, width: '52px', height: '52px', borderRadius: '50%', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 24px rgba(108,99,255,0.6)' }}>
+                                <div style={{ position: 'absolute', width: '120px', height: '120px', borderRadius: '50%', background: 'color-mix(in srgb, var(--primary) 20%, transparent)', filter: 'blur(32px)' }} />
+                                <div style={{ position: 'relative', zIndex: 2, width: '52px', height: '52px', borderRadius: '50%', background: 'var(--gradient-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-glow)' }}>
                                     <MapPin size={22} color="#fff" />
                                 </div>
-                                <p style={{ position: 'relative', zIndex: 2, color: 'rgba(255,255,255,0.85)', margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>{boarding.location}</p>
+                                <p style={{ position: 'relative', zIndex: 2, color: 'var(--text-primary)', margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>{boarding.location}</p>
                                 {boarding.nearUniversity && (
-                                    <p style={{ position: 'relative', zIndex: 2, color: 'rgba(255,255,255,0.42)', margin: 0, fontSize: '0.82rem' }}>📍 Near {boarding.nearUniversity}</p>
+                                    <p style={{ position: 'relative', zIndex: 2, color: 'var(--text-secondary)', margin: 0, fontSize: '0.82rem' }}>📍 Near {boarding.nearUniversity}</p>
                                 )}
                             </div>
                         </div>
                     </div>
 
                     {/* ── RIGHT SIDEBAR ── */}
-                    <div style={{ position: 'sticky', top: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ position: 'sticky', top: '104px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
                         {/* Price card */}
-                        <div style={{ background: 'rgba(14,14,35,0.97)', border: '1px solid rgba(108,99,255,0.35)', borderRadius: '22px', padding: '28px', boxShadow: '0 24px 70px rgba(108,99,255,0.18)' }}>
+                        <div style={{ background: 'var(--search-panel-bg)', border: '1px solid var(--border-1)', borderRadius: '22px', padding: '28px', boxShadow: 'var(--search-panel-shadow)' }}>
 
                             {/* Price */}
-                            <div style={{ marginBottom: '22px', paddingBottom: '22px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-                                <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.38)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '8px' }}>Monthly Rent</div>
+                            <div style={{ marginBottom: '22px', paddingBottom: '22px', borderBottom: '1px solid var(--border-1)' }}>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '8px' }}>Monthly Rent</div>
                                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                                    <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: '2.5rem', fontWeight: 900, background: 'linear-gradient(135deg, #6C63FF, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1 }}>
+                                    <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: '2.5rem', fontWeight: 900, background: 'var(--gradient-purple)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1 }}>
                                         LKR {boarding.price?.toLocaleString()}
                                     </span>
                                 </div>
-                                <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)', marginTop: '3px' }}>per month</div>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '3px' }}>per month</div>
                             </div>
 
                             {/* Quick facts */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '13px', marginBottom: '24px' }}>
                                 {[
-                                    { icon: <Home size={14} />, label: boarding.roomType, color: '#6C63FF' },
-                                    { icon: <MapPin size={14} />, label: boarding.location, color: '#a855f7' },
-                                    { icon: <GraduationCap size={14} />, label: boarding.nearUniversity ? `Near ${boarding.nearUniversity}` : 'University area', color: '#38F9D7' },
+                                    { icon: <Home size={14} />, label: boarding.roomType, color: 'var(--primary)' },
+                                    { icon: <MapPin size={14} />, label: boarding.location, color: 'var(--primary-dark)' },
+                                    { icon: <GraduationCap size={14} />, label: boarding.nearUniversity ? `Near ${boarding.nearUniversity}` : 'University area', color: 'var(--accent2)' },
                                 ].map(({ icon, label, color }) => (
-                                    <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', color: 'rgba(255,255,255,0.68)' }}>
+                                    <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                                         <span style={{ color, flexShrink: 0 }}>{icon}</span>
                                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
                                     </div>
@@ -549,15 +548,15 @@ const BoardingDetailsPage = () => {
                                 disabled={!isAvailable}
                                 style={{
                                     width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
-                                    background: isAvailable ? 'linear-gradient(135deg, #6C63FF, #a855f7)' : 'rgba(255,255,255,0.06)',
-                                    border: 'none', color: isAvailable ? '#fff' : 'rgba(255,255,255,0.25)',
+                                    background: isAvailable ? 'var(--btn-primary-bg)' : 'var(--surface-2)',
+                                    border: 'none', color: isAvailable ? '#fff' : 'var(--text-muted)',
                                     fontWeight: 700, fontSize: '0.95rem', cursor: isAvailable ? 'pointer' : 'not-allowed',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                    boxShadow: isAvailable ? '0 8px 28px rgba(108,99,255,0.45)' : 'none',
+                                    boxShadow: isAvailable ? 'var(--btn-primary-shadow)' : 'none',
                                     transition: 'all 0.25s',
                                 }}
-                                onMouseEnter={e => { if (isAvailable) { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 14px 36px rgba(108,99,255,0.6)'; } }}
-                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = isAvailable ? '0 8px 28px rgba(108,99,255,0.45)' : 'none'; }}
+                                onMouseEnter={e => { if (isAvailable) { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLElement).style.boxShadow = 'var(--btn-primary-shadow-hover)'; } }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = isAvailable ? 'var(--btn-primary-shadow)' : 'none'; }}
                             >
                                 <MessageCircle size={18} />
                                 {isAvailable ? (showContact ? 'Hide Contact Info' : 'Contact Landlord') : 'Currently Occupied'}
@@ -568,15 +567,15 @@ const BoardingDetailsPage = () => {
                                 onClick={handleAddToCart}
                                 style={{
                                     width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
-                                    background: cartAdded ? 'rgba(67,233,123,0.2)' : 'rgba(108,99,255,0.12)',
-                                    border: cartAdded ? '1px solid rgba(67,233,123,0.4)' : '1px solid rgba(108,99,255,0.3)',
-                                    color: cartAdded ? '#43E97B' : 'rgba(196,181,253,0.9)',
+                                    background: cartAdded ? 'color-mix(in srgb, var(--accent) 20%, transparent)' : 'var(--surface-1)',
+                                    border: cartAdded ? '1px solid color-mix(in srgb, var(--accent) 40%, transparent)' : '1px solid var(--border-1)',
+                                    color: cartAdded ? 'var(--accent)' : 'var(--primary-light)',
                                     fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                     transition: 'all 0.25s',
                                 }}
-                                onMouseEnter={e => { if (!cartAdded) { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.22)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.5)'; } }}
-                                onMouseLeave={e => { if (!cartAdded) { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.12)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.3)'; } }}
+                                onMouseEnter={e => { if (!cartAdded) { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary)'; } }}
+                                onMouseLeave={e => { if (!cartAdded) { (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-1)'; } }}
                             >
                                 <ShoppingCart size={18} />
                                 {cartAdded ? '✓ Added to Cart' : 'Add to Cart'}
@@ -593,15 +592,15 @@ const BoardingDetailsPage = () => {
                                     }}
                                     style={{
                                         width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
-                                        background: showAdvanceForm ? 'rgba(67,233,123,0.15)' : 'rgba(67,233,123,0.07)',
-                                        border: `1px solid ${showAdvanceForm ? 'rgba(67,233,123,0.5)' : 'rgba(67,233,123,0.28)'}`,
-                                        color: '#43E97B',
+                                        background: showAdvanceForm ? 'color-mix(in srgb, var(--accent) 15%, transparent)' : 'color-mix(in srgb, var(--accent) 7%, transparent)',
+                                        border: `1px solid ${showAdvanceForm ? 'color-mix(in srgb, var(--accent) 50%, transparent)' : 'color-mix(in srgb, var(--accent) 28%, transparent)'}`,
+                                        color: 'var(--accent)',
                                         fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                         transition: 'all 0.25s',
                                     }}
-                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(67,233,123,0.18)'; }}
-                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showAdvanceForm ? 'rgba(67,233,123,0.15)' : 'rgba(67,233,123,0.07)'; }}
+                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'color-mix(in srgb, var(--accent) 18%, transparent)'; }}
+                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showAdvanceForm ? 'color-mix(in srgb, var(--accent) 15%, transparent)' : 'color-mix(in srgb, var(--accent) 7%, transparent)'; }}
                                 >
                                     {showAdvanceForm ? <><X size={17} /> Cancel Payment</> : <><CreditCard size={17} /> Pay Advance</>}
                                 </button>
@@ -613,12 +612,12 @@ const BoardingDetailsPage = () => {
                                 const platformFee = Math.round(amt * 0.12);
                                 const landlordAmt = amt - platformFee;
                                 return (
-                                    <div style={{ borderRadius: '16px', background: 'rgba(67,233,123,0.05)', border: '1px solid rgba(67,233,123,0.22)', padding: '18px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
-                                        <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#43E97B', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <div style={{ borderRadius: '16px', background: 'color-mix(in srgb, var(--accent) 5%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 22%, transparent)', padding: '18px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
+                                        <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <CreditCard size={12} /> Advance Payment · 12% Platform Fee
                                         </div>
                                         {advanceSent ? (
-                                            <div style={{ textAlign: 'center', padding: '16px 0', color: '#43E97B', fontWeight: 700, fontSize: '0.92rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                            <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--accent)', fontWeight: 700, fontSize: '0.92rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                                                 <span style={{ fontSize: '2rem' }}>✅</span>
                                                 Advance payment submitted! The finance manager will confirm it shortly.
                                             </div>
@@ -626,7 +625,7 @@ const BoardingDetailsPage = () => {
                                             <>
                                                 {/* Amount Input */}
                                                 <div style={{ marginBottom: '12px' }}>
-                                                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Advance Amount (LKR)</div>
+                                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Advance Amount (LKR)</div>
                                                     <input
                                                         type="number"
                                                         min="1"
@@ -635,38 +634,38 @@ const BoardingDetailsPage = () => {
                                                         placeholder={`e.g. ${boarding.price}`}
                                                         style={{
                                                             width: '100%', boxSizing: 'border-box', padding: '10px 13px',
-                                                            background: 'rgba(0,0,0,0.3)',
-                                                            border: '1px solid rgba(67,233,123,0.25)',
-                                                            borderRadius: '10px', color: '#fff',
+                                                            background: 'var(--input-bg)',
+                                                            border: '1px solid var(--input-border)',
+                                                            borderRadius: '10px', color: 'var(--text-primary)',
                                                             fontSize: '1rem', fontWeight: 700, outline: 'none',
                                                             fontFamily: "'Inter', sans-serif",
                                                         }}
-                                                        onFocus={e => { e.currentTarget.style.borderColor = 'rgba(67,233,123,0.6)'; }}
-                                                        onBlur={e => { e.currentTarget.style.borderColor = 'rgba(67,233,123,0.25)'; }}
+                                                        onFocus={e => { e.currentTarget.style.borderColor = 'var(--accent)'; }}
+                                                        onBlur={e => { e.currentTarget.style.borderColor = 'var(--input-border)'; }}
                                                     />
                                                 </div>
 
                                                 {/* Fee Breakdown */}
                                                 {amt > 0 && (
-                                                    <div style={{ marginBottom: '14px', padding: '12px 14px', borderRadius: '10px', background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
+                                                    <div style={{ marginBottom: '14px', padding: '12px 14px', borderRadius: '10px', background: 'var(--surface-1)', border: '1px solid var(--border-1)' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '7px' }}>
                                                             <span>Your advance:</span>
-                                                            <span style={{ color: '#fff', fontWeight: 700 }}>LKR {amt.toLocaleString()}</span>
+                                                            <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>LKR {amt.toLocaleString()}</span>
                                                         </div>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '7px' }}>
                                                             <span>Platform fee (12%):</span>
                                                             <span style={{ color: '#FCD34D', fontWeight: 700 }}>− LKR {platformFee.toLocaleString()}</span>
                                                         </div>
-                                                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.09)', paddingTop: '7px', display: 'flex', justifyContent: 'space-between', fontSize: '0.87rem' }}>
-                                                            <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 600 }}>Landlord receives:</span>
-                                                            <span style={{ color: '#43E97B', fontWeight: 800 }}>LKR {landlordAmt.toLocaleString()}</span>
+                                                        <div style={{ borderTop: '1px solid var(--border-1)', paddingTop: '7px', display: 'flex', justifyContent: 'space-between', fontSize: '0.87rem' }}>
+                                                            <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Landlord receives:</span>
+                                                            <span style={{ color: 'var(--accent)', fontWeight: 800 }}>LKR {landlordAmt.toLocaleString()}</span>
                                                         </div>
                                                     </div>
                                                 )}
 
                                                 {/* Payment Method */}
                                                 <div style={{ marginBottom: '12px' }}>
-                                                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Payment Method</div>
+                                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Payment Method</div>
                                                     <div style={{ display: 'flex', gap: '6px' }}>
                                                         {([
                                                             { id: 'card',          label: '💳 Card' },
@@ -679,9 +678,9 @@ const BoardingDetailsPage = () => {
                                                                 onClick={() => setAdvanceMethod(m.id)}
                                                                 style={{
                                                                     flex: 1, padding: '8px 4px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
-                                                                    background: advanceMethod === m.id ? 'rgba(67,233,123,0.18)' : 'rgba(255,255,255,0.04)',
-                                                                    border: `1.5px solid ${advanceMethod === m.id ? '#43E97B' : 'rgba(255,255,255,0.1)'}`,
-                                                                    color: advanceMethod === m.id ? '#43E97B' : 'rgba(255,255,255,0.5)',
+                                                                    background: advanceMethod === m.id ? 'color-mix(in srgb, var(--accent) 18%, transparent)' : 'var(--surface-1)',
+                                                                    border: `1.5px solid ${advanceMethod === m.id ? 'var(--accent)' : 'var(--border-1)'}`,
+                                                                    color: advanceMethod === m.id ? 'var(--accent)' : 'var(--text-muted)',
                                                                 }}
                                                             >{m.label}</button>
                                                         ))}
@@ -689,7 +688,7 @@ const BoardingDetailsPage = () => {
                                                 </div>
 
                                                 {advanceError && (
-                                                    <p style={{ color: '#FF6584', fontSize: '0.78rem', margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: '5px' }}>⚠ {advanceError}</p>
+                                                    <p style={{ color: 'var(--secondary)', fontSize: '0.78rem', margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: '5px' }}>⚠ {advanceError}</p>
                                                 )}
                                                 <button
                                                     onClick={handlePayAdvance}
@@ -697,15 +696,14 @@ const BoardingDetailsPage = () => {
                                                     style={{
                                                         width: '100%', padding: '12px', borderRadius: '12px',
                                                         background: advanceSending || !advanceAmount || Number(advanceAmount) <= 0
-                                                            ? 'rgba(67,233,123,0.08)'
-                                                            : 'linear-gradient(135deg, #43E97B, #38F9D7)',
+                                                            ? 'var(--surface-2)'
+                                                            : 'var(--gradient-green)',
                                                         border: 'none',
-                                                        color: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 ? 'rgba(255,255,255,0.3)' : '#0D0D1A',
+                                                        color: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 ? 'var(--text-muted)' : '#0D0D1A',
                                                         fontWeight: 700, fontSize: '0.9rem',
                                                         cursor: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 ? 'not-allowed' : 'pointer',
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
                                                         transition: 'all 0.2s',
-                                                        boxShadow: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 ? 'none' : '0 6px 20px rgba(67,233,123,0.35)',
                                                     }}
                                                 >
                                                     {advanceSending
@@ -725,15 +723,15 @@ const BoardingDetailsPage = () => {
                                     onClick={() => { setShowChat(c => !c); setChatSent(false); setChatError(''); }}
                                     style={{
                                         width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
-                                        background: showChat ? 'rgba(56,249,215,0.15)' : 'rgba(56,249,215,0.07)',
-                                        border: `1px solid ${showChat ? 'rgba(56,249,215,0.5)' : 'rgba(56,249,215,0.25)'}`,
-                                        color: '#38F9D7',
+                                        background: showChat ? 'color-mix(in srgb, var(--accent2) 15%, transparent)' : 'color-mix(in srgb, var(--accent2) 7%, transparent)',
+                                        border: `1px solid ${showChat ? 'color-mix(in srgb, var(--accent2) 50%, transparent)' : 'color-mix(in srgb, var(--accent2) 25%, transparent)'}`,
+                                        color: 'var(--accent2)',
                                         fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                         transition: 'all 0.25s',
                                     }}
-                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(56,249,215,0.18)'; }}
-                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showChat ? 'rgba(56,249,215,0.15)' : 'rgba(56,249,215,0.07)'; }}
+                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'color-mix(in srgb, var(--accent2) 18%, transparent)'; }}
+                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showChat ? 'color-mix(in srgb, var(--accent2) 15%, transparent)' : 'color-mix(in srgb, var(--accent2) 7%, transparent)'; }}
                                 >
                                     {showChat ? <><X size={17} /> Close Chat</> : <><MessageCircle size={17} /> Chat with Owner</>}
                                 </button>
@@ -741,13 +739,13 @@ const BoardingDetailsPage = () => {
 
                             {/* ── Inline Chat Form ── */}
                             {showChat && isAvailable && (
-                                <div style={{ borderRadius: '16px', background: 'rgba(56,249,215,0.05)', border: '1px solid rgba(56,249,215,0.2)', padding: '18px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
-                                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#38F9D7', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ borderRadius: '16px', background: 'color-mix(in srgb, var(--accent2) 5%, transparent)', border: '1px solid color-mix(in srgb, var(--accent2) 20%, transparent)', padding: '18px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
+                                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--accent2)', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <MessageCircle size={12} /> Message to {boarding.landlordName || 'Owner'}
                                     </div>
 
                                     {chatSent ? (
-                                        <div style={{ textAlign: 'center', padding: '16px 0', color: '#43E97B', fontWeight: 700, fontSize: '0.95rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--accent2)', fontWeight: 700, fontSize: '0.95rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                                             <span style={{ fontSize: '2rem' }}>✅</span>
                                             Message sent! The owner will reply in your profile inbox.
                                         </div>
@@ -761,20 +759,20 @@ const BoardingDetailsPage = () => {
                                                 rows={4}
                                                 style={{
                                                     width: '100%', boxSizing: 'border-box',
-                                                    background: 'rgba(0,0,0,0.3)',
-                                                    border: '1px solid rgba(56,249,215,0.25)',
+                                                    background: 'var(--input-bg)',
+                                                    border: '1px solid var(--input-border)',
                                                     borderRadius: '12px', padding: '12px 14px',
-                                                    color: '#fff', fontSize: '0.875rem', lineHeight: 1.6,
+                                                    color: 'var(--text-primary)', fontSize: '0.875rem', lineHeight: 1.6,
                                                     resize: 'vertical', outline: 'none',
                                                     fontFamily: "'Inter', sans-serif",
                                                     marginBottom: '10px',
                                                     transition: 'border-color 0.2s',
                                                 }}
-                                                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(56,249,215,0.6)'; }}
-                                                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(56,249,215,0.25)'; }}
+                                                onFocus={e => { e.currentTarget.style.borderColor = 'var(--accent2)'; }}
+                                                onBlur={e => { e.currentTarget.style.borderColor = 'var(--input-border)'; }}
                                             />
                                             {chatError && (
-                                                <p style={{ color: '#FF6584', fontSize: '0.78rem', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                <p style={{ color: 'var(--secondary)', fontSize: '0.78rem', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                                     ⚠ {chatError}
                                                 </p>
                                             )}
@@ -784,15 +782,14 @@ const BoardingDetailsPage = () => {
                                                 style={{
                                                     width: '100%', padding: '12px', borderRadius: '12px',
                                                     background: chatSending || !chatMessage.trim()
-                                                        ? 'rgba(56,249,215,0.08)'
-                                                        : 'linear-gradient(135deg, #38F9D7, #43E97B)',
+                                                        ? 'var(--surface-2)'
+                                                        : 'var(--gradient-green)',
                                                     border: 'none',
-                                                    color: chatSending || !chatMessage.trim() ? 'rgba(255,255,255,0.3)' : '#0D0D1A',
+                                                    color: chatSending || !chatMessage.trim() ? 'var(--text-muted)' : '#0D0D1A',
                                                     fontWeight: 700, fontSize: '0.9rem',
                                                     cursor: chatSending || !chatMessage.trim() ? 'not-allowed' : 'pointer',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
                                                     transition: 'all 0.2s',
-                                                    boxShadow: chatSending || !chatMessage.trim() ? 'none' : '0 6px 20px rgba(56,249,215,0.35)',
                                                 }}
                                             >
                                                 {chatSending
@@ -810,28 +807,28 @@ const BoardingDetailsPage = () => {
                                 onClick={() => { setShowIssueForm(c => !c); setIssueSent(false); setIssueError(''); }}
                                 style={{
                                     width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
-                                    background: showIssueForm ? 'rgba(252,211,77,0.15)' : 'rgba(252,211,77,0.07)',
-                                    border: `1px solid ${showIssueForm ? 'rgba(252,211,77,0.5)' : 'rgba(252,211,77,0.25)'}`,
-                                    color: '#FCD34D',
+                                    background: showIssueForm ? 'var(--danger-soft-bg-hover)' : 'var(--danger-soft-bg)',
+                                    border: `1px solid ${showIssueForm ? 'var(--danger-soft-border)' : 'var(--danger-soft-bg-hover)'}`,
+                                    color: 'var(--danger-soft-text)',
                                     fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                     transition: 'all 0.25s',
                                 }}
-                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(252,211,77,0.18)'; }}
-                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showIssueForm ? 'rgba(252,211,77,0.15)' : 'rgba(252,211,77,0.07)'; }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--danger-soft-bg-hover)'; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showIssueForm ? 'var(--danger-soft-bg-hover)' : 'var(--danger-soft-bg)'; }}
                             >
                                 {showIssueForm ? <><X size={17} /> Cancel Report</> : <><AlertTriangle size={17} /> Report an Issue</>}
                             </button>
 
                             {/* ── Inline Issue Report Form ── */}
                             {showIssueForm && (
-                                <div style={{ borderRadius: '16px', background: 'rgba(252,211,77,0.05)', border: '1px solid rgba(252,211,77,0.2)', padding: '18px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
-                                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#FCD34D', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ borderRadius: '16px', background: 'var(--danger-soft-bg)', border: '1px solid var(--danger-soft-border)', padding: '18px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
+                                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--danger-soft-text)', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <AlertTriangle size={12} /> Report Issue to {boarding.landlordName || 'Owner'}
                                     </div>
 
                                     {issueSent ? (
-                                        <div style={{ textAlign: 'center', padding: '16px 0', color: '#43E97B', fontWeight: 700, fontSize: '0.92rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--accent)', fontWeight: 700, fontSize: '0.92rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                                             <span style={{ fontSize: '2rem' }}>✅</span>
                                             Issue reported! The owner has been notified.
                                         </div>
@@ -839,7 +836,7 @@ const BoardingDetailsPage = () => {
                                         <>
                                             {/* Issue Type */}
                                             <div style={{ marginBottom: '12px' }}>
-                                                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Issue Type</div>
+                                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Issue Type</div>
                                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
                                                     {[
                                                         { id: 'cleaning',   label: '🧹 Cleaning',  color: '#6C63FF' },
@@ -853,9 +850,9 @@ const BoardingDetailsPage = () => {
                                                             onClick={() => setIssueType(t.id)}
                                                             style={{
                                                                 padding: '8px 6px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
-                                                                background: issueType === t.id ? `${t.color}22` : 'rgba(255,255,255,0.04)',
-                                                                border: `1.5px solid ${issueType === t.id ? t.color : 'rgba(255,255,255,0.1)'}`,
-                                                                color: issueType === t.id ? t.color : 'rgba(255,255,255,0.5)',
+                                                                background: issueType === t.id ? `${t.color}22` : 'var(--surface-1)',
+                                                                border: `1.5px solid ${issueType === t.id ? t.color : 'var(--border-1)'}`,
+                                                                color: issueType === t.id ? t.color : 'var(--text-secondary)',
                                                             }}
                                                         >{t.label}</button>
                                                     ))}
@@ -864,12 +861,12 @@ const BoardingDetailsPage = () => {
 
                                             {/* Priority */}
                                             <div style={{ marginBottom: '12px' }}>
-                                                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Priority</div>
+                                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Priority</div>
                                                 <div style={{ display: 'flex', gap: '6px' }}>
                                                     {[
                                                         { id: 'low',    label: 'Low',    color: '#22c55e' },
                                                         { id: 'medium', label: 'Medium', color: '#f59e0b' },
-                                                        { id: 'high',   label: 'High',   color: '#ef4444' },
+                                                        { id: 'high',   label: 'High',   color: 'var(--secondary)' },
                                                     ].map(p => (
                                                         <button
                                                             key={p.id}
@@ -877,9 +874,9 @@ const BoardingDetailsPage = () => {
                                                             onClick={() => setIssuePriority(p.id)}
                                                             style={{
                                                                 flex: 1, padding: '7px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
-                                                                background: issuePriority === p.id ? `${p.color}22` : 'rgba(255,255,255,0.04)',
-                                                                border: `1.5px solid ${issuePriority === p.id ? p.color : 'rgba(255,255,255,0.1)'}`,
-                                                                color: issuePriority === p.id ? p.color : 'rgba(255,255,255,0.45)',
+                                                                background: issuePriority === p.id ? `${p.color}22` : 'var(--surface-1)',
+                                                                border: `1.5px solid ${issuePriority === p.id ? p.color : 'var(--border-1)'}`,
+                                                                color: issuePriority === p.id ? p.color : 'var(--text-secondary)',
                                                             }}
                                                         >{p.label}</button>
                                                     ))}
@@ -894,33 +891,32 @@ const BoardingDetailsPage = () => {
                                                 rows={3}
                                                 style={{
                                                     width: '100%', boxSizing: 'border-box',
-                                                    background: 'rgba(0,0,0,0.3)',
-                                                    border: '1px solid rgba(252,211,77,0.25)',
+                                                    background: 'var(--input-bg)',
+                                                    border: '1px solid var(--input-border)',
                                                     borderRadius: '12px', padding: '10px 12px',
-                                                    color: '#fff', fontSize: '0.875rem', lineHeight: 1.6,
+                                                    color: 'var(--text-primary)', fontSize: '0.875rem', lineHeight: 1.6,
                                                     resize: 'vertical', outline: 'none',
                                                     fontFamily: "'Inter', sans-serif",
                                                     marginBottom: '10px',
                                                 }}
-                                                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(252,211,77,0.6)'; }}
-                                                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(252,211,77,0.25)'; }}
+                                                onFocus={e => { e.currentTarget.style.borderColor = 'var(--secondary)'; }}
+                                                onBlur={e => { e.currentTarget.style.borderColor = 'var(--input-border)'; }}
                                             />
                                             {issueError && (
-                                                <p style={{ color: '#ef4444', fontSize: '0.78rem', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '5px' }}>⚠ {issueError}</p>
+                                                <p style={{ color: 'var(--secondary)', fontSize: '0.78rem', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '5px' }}>⚠ {issueError}</p>
                                             )}
                                             <button
                                                 onClick={handleReportIssue}
                                                 disabled={issueSending || !issueDescription.trim()}
                                                 style={{
                                                     width: '100%', padding: '11px', borderRadius: '12px',
-                                                    background: issueSending || !issueDescription.trim() ? 'rgba(252,211,77,0.08)' : 'linear-gradient(135deg, #FCD34D, #f59e0b)',
+                                                    background: issueSending || !issueDescription.trim() ? 'var(--surface-2)' : 'var(--danger-soft-text)',
                                                     border: 'none',
-                                                    color: issueSending || !issueDescription.trim() ? 'rgba(255,255,255,0.3)' : '#0D0D1A',
+                                                    color: issueSending || !issueDescription.trim() ? 'var(--text-muted)' : '#FFF',
                                                     fontWeight: 700, fontSize: '0.9rem',
                                                     cursor: issueSending || !issueDescription.trim() ? 'not-allowed' : 'pointer',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
                                                     transition: 'all 0.2s',
-                                                    boxShadow: issueSending || !issueDescription.trim() ? 'none' : '0 6px 20px rgba(252,211,77,0.3)',
                                                 }}
                                             >
                                                 {issueSending
@@ -935,23 +931,23 @@ const BoardingDetailsPage = () => {
 
                             {/* Contact details reveal */}
                             {showContact && isAvailable && (
-                                <div style={{ borderRadius: '14px', background: 'rgba(108,99,255,0.08)', border: '1px solid rgba(108,99,255,0.22)', padding: '18px', display: 'flex', flexDirection: 'column', gap: '11px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
-                                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#a855f7', textTransform: 'uppercase', letterSpacing: '0.7px' }}>Contact Details</div>
+                                <div style={{ borderRadius: '14px', background: 'var(--surface-2)', border: '1px solid var(--border-1)', padding: '18px', display: 'flex', flexDirection: 'column', gap: '11px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
+                                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.7px' }}>Contact Details</div>
 
                                     {boarding.contactName && (
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', color: 'rgba(255,255,255,0.8)' }}>
-                                            <User size={14} color="#6C63FF" style={{ flexShrink: 0 }} />
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                                            <User size={14} color="var(--primary)" style={{ flexShrink: 0 }} />
                                             {boarding.contactName}
                                         </div>
                                     )}
                                     {boarding.contactPhone && (
-                                        <a href={`tel:${boarding.contactPhone}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', color: '#43E97B', textDecoration: 'none', fontWeight: 600 }}>
+                                        <a href={`tel:${boarding.contactPhone}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
                                             <Phone size={14} style={{ flexShrink: 0 }} />
                                             {boarding.contactPhone}
                                         </a>
                                     )}
                                     {boarding.contactEmail && (
-                                        <a href={`mailto:${boarding.contactEmail}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.82rem', color: '#38F9D7', textDecoration: 'none', fontWeight: 600, wordBreak: 'break-all' }}>
+                                        <a href={`mailto:${boarding.contactEmail}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.82rem', color: 'var(--accent2)', textDecoration: 'none', fontWeight: 600, wordBreak: 'break-all' }}>
                                             <Mail size={14} style={{ flexShrink: 0 }} />
                                             {boarding.contactEmail}
                                         </a>
@@ -973,38 +969,38 @@ const BoardingDetailsPage = () => {
                             {/* Share button */}
                             <button
                                 onClick={handleShare}
-                                style={{ width: '100%', padding: '11px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.55)', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', transition: 'all 0.2s' }}
-                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)'; (e.currentTarget as HTMLElement).style.color = '#fff'; }}
-                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)'; }}
+                                style={{ width: '100%', padding: '11px', borderRadius: '12px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', transition: 'all 0.2s' }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-3)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; }}
                             >
                                 <Share2 size={15} /> {copied ? '✓ Link Copied!' : 'Share Listing'}
                             </button>
                         </div>
 
                         {/* Verified badge */}
-                        <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(67,233,123,0.2)', borderRadius: '18px', padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(67,233,123,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                <Check size={20} color="#43E97B" />
+                        <div style={{ background: 'var(--search-panel-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'color-mix(in srgb, var(--accent) 12%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <Check size={20} color="var(--accent)" />
                             </div>
                             <div>
-                                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#43E97B', marginBottom: '2px' }}>Verified Listing</div>
-                                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>Reviewed and approved by our admin team.</div>
+                                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--accent)', marginBottom: '2px' }}>Verified Listing</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>Reviewed and approved by our admin team.</div>
                             </div>
                         </div>
 
                         {/* Safety tips */}
-                        <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(252,211,77,0.2)', borderRadius: '18px', padding: '20px 22px' }}>
+                        <div style={{ background: 'var(--search-panel-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '20px 22px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                                <Shield size={16} color="#FCD34D" />
-                                <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#FCD34D' }}>Safety Tips</span>
+                                <Shield size={16} color="var(--secondary)" />
+                                <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--secondary)' }}>Safety Tips</span>
                             </div>
                             {[
                                 'Always visit in person before paying.',
                                 'Never transfer money without meeting first.',
                                 'Verify landlord identity with a receipt.',
                             ].map((tip, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: i < 2 ? '9px' : 0, fontSize: '0.78rem', color: 'rgba(255,255,255,0.48)', lineHeight: 1.55 }}>
-                                    <span style={{ color: '#FCD34D', flexShrink: 0, marginTop: '1px' }}>•</span> {tip}
+                                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: i < 2 ? '9px' : 0, fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+                                    <span style={{ color: 'var(--secondary)', flexShrink: 0, marginTop: '1px' }}>•</span> {tip}
                                 </div>
                             ))}
                         </div>
@@ -1015,7 +1011,7 @@ const BoardingDetailsPage = () => {
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
                 @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-                input::placeholder { color: rgba(255,255,255,0.25); }
+                input::placeholder, textarea::placeholder { color: var(--text-muted); }
                 @media (max-width: 900px) {
                     .bd-grid { grid-template-columns: 1fr !important; }
                     .bd-inner-grid { grid-template-columns: 1fr 1fr !important; }
@@ -1030,8 +1026,8 @@ const BoardingDetailsPage = () => {
 
 /* ── Reusable section heading ── */
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-    <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.15rem', fontWeight: 800, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <span style={{ display: 'inline-block', width: '4px', height: '22px', background: 'linear-gradient(to bottom, #6C63FF, #a855f7)', borderRadius: '2px', flexShrink: 0 }} />
+    <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.15rem', fontWeight: 800, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-primary)' }}>
+        <span style={{ display: 'inline-block', width: '4px', height: '22px', background: 'var(--gradient-purple)', borderRadius: '2px', flexShrink: 0 }} />
         {children}
     </h2>
 );
