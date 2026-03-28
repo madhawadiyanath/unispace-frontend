@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Home, ArrowLeft, Upload, X, CheckCircle,
-  MapPin, DollarSign, Phone, Mail, User,
+  MapPin, Phone, Mail, User,
   FileText, Building2, Image, AlertCircle,
 } from 'lucide-react';
 
@@ -221,8 +221,8 @@ const BoardingFormPage = () => {
               <div>
                 <Label>Monthly Rent (LKR) <Req /></Label>
                 <div style={{ position: 'relative' }}>
-                  <DollarSign size={15} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                  <input name="price" type="number" min="1" value={form.price} onChange={handleChange} placeholder="12000" style={{ ...inputStyle, paddingLeft: '38px' }} />
+                  <span style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '0.78rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.3px' }}>Rs.</span>
+                  <input name="price" type="number" min="1" value={form.price} onChange={handleChange} placeholder="12000" style={{ ...inputStyle, paddingLeft: '44px' }} />
                 </div>
               </div>
             </div>

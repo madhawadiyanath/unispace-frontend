@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, MapPin, Wifi, Coffee, ArrowRight, Heart, Shield, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 
@@ -68,7 +68,7 @@ const FeaturedListings = () => {
             .catch(() => {});
     }, []);
 
-    const filters = ['All', 'Near NSBM', 'Near UOC', 'Near SLIIT', 'Budget', 'Premium'];
+    const filters = ['All','Near SLIIT', 'Near NSBM', 'Near UOC',  'Budget', 'Premium'];
 
     const listings: Listing[] = [
         {
@@ -194,7 +194,7 @@ const FeaturedListings = () => {
         return matchSearch && matchFilter;
     });
 
-    const amenityIcons: Record<string, JSX.Element> = {
+    const amenityIcons: Record<string, ReactNode> = {
         WiFi: <Wifi size={12} />,
         AC: <span>❄️</span>,
         Meals: <Coffee size={12} />,
@@ -212,7 +212,7 @@ const FeaturedListings = () => {
             id="listings"
             style={{
                 padding: '100px 24px',
-                background: '#13132A',
+                background: 'var(--app-bg-2)',
                 position: 'relative',
             }}
         >
@@ -234,15 +234,15 @@ const FeaturedListings = () => {
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '8px',
-                                background: 'rgba(255,101,132,0.1)',
-                                border: '1px solid rgba(255,101,132,0.3)',
+                                background: 'var(--danger-soft-bg)',
+                                border: '1px solid var(--danger-soft-border)',
                                 borderRadius: '100px',
                                 padding: '6px 16px',
                                 marginBottom: '16px',
                             }}
                         >
-                            <Heart size={14} color="#FF6584" />
-                            <span style={{ fontSize: '0.8rem', color: '#FF6584', fontWeight: 600 }}>
+                            <Heart size={14} color="var(--danger-soft-text)" />
+                            <span style={{ fontSize: '0.8rem', color: 'var(--danger-soft-text)', fontWeight: 600 }}>
                                 Featured Listings
                             </span>
                         </div>
@@ -257,7 +257,7 @@ const FeaturedListings = () => {
                             Handpicked{' '}
                             <span
                                 style={{
-                                    background: 'linear-gradient(135deg, #FF6584, #a855f7)',
+                                    background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
                                     WebkitBackgroundClip: 'text',
                                     WebkitTextFillColor: 'transparent',
                                 }}
@@ -272,7 +272,7 @@ const FeaturedListings = () => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '6px',
-                            color: '#6C63FF',
+                            color: 'var(--primary)',
                             fontWeight: 600,
                             fontSize: '0.9rem',
                             transition: 'gap 0.2s',
@@ -292,7 +292,7 @@ const FeaturedListings = () => {
                 <div style={{ position: 'relative', maxWidth: '520px', marginBottom: '24px' }}>
                     <Search
                         size={16}
-                        color="rgba(255,255,255,0.35)"
+                        color="var(--input-icon)"
                         style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
                     />
                     <input
@@ -303,21 +303,21 @@ const FeaturedListings = () => {
                         style={{
                             width: '100%',
                             padding: '14px 44px 14px 46px',
-                            background: 'rgba(255,255,255,0.06)',
-                            border: '1px solid rgba(108,99,255,0.25)',
+                            background: 'var(--input-bg)',
+                            border: '1px solid var(--input-border)',
                             borderRadius: '14px',
-                            color: '#fff',
+                            color: 'var(--input-text)',
                             fontSize: '0.92rem',
                             outline: 'none',
                             boxSizing: 'border-box',
                             transition: 'border-color 0.2s, box-shadow 0.2s',
                         }}
                         onFocus={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(108,99,255,0.6)';
-                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(108,99,255,0.12)';
+                            e.currentTarget.style.borderColor = 'var(--input-focus-border)';
+                            e.currentTarget.style.boxShadow = 'var(--input-focus-ring)';
                         }}
                         onBlur={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(108,99,255,0.25)';
+                            e.currentTarget.style.borderColor = 'var(--input-border)';
                             e.currentTarget.style.boxShadow = 'none';
                         }}
                     />
@@ -326,9 +326,9 @@ const FeaturedListings = () => {
                             onClick={() => setSearchQuery('')}
                             style={{
                                 position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
-                                background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%',
+                                background: 'var(--surface-2)', border: '1px solid var(--border-1)', borderRadius: '50%',
                                 width: '22px', height: '22px', display: 'flex', alignItems: 'center',
-                                justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,0.6)',
+                                justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)',
                             }}
                         >
                             <X size={12} />
@@ -361,16 +361,16 @@ const FeaturedListings = () => {
                                 transition: 'all 0.2s',
                                 background:
                                     activeFilter === filter
-                                        ? 'linear-gradient(135deg, #6C63FF, #a855f7)'
-                                        : 'rgba(255,255,255,0.05)',
+                                        ? 'var(--btn-primary-bg)'
+                                        : 'var(--surface-2)',
                                 border:
                                     activeFilter === filter
                                         ? 'none'
-                                        : '1px solid rgba(255,255,255,0.1)',
-                                color: activeFilter === filter ? '#fff' : 'rgba(255,255,255,0.6)',
+                                        : '1px solid var(--border-1)',
+                                color: activeFilter === filter ? '#fff' : 'var(--text-secondary)',
                                 boxShadow:
                                     activeFilter === filter
-                                        ? '0 4px 15px rgba(108,99,255,0.4)'
+                                        ? 'var(--btn-primary-shadow-sm)'
                                         : 'none',
                             }}
                         >
@@ -389,9 +389,9 @@ const FeaturedListings = () => {
                     className="listings-grid"
                 >
                     {displayListings.length === 0 && (
-                        <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', color: 'rgba(255,255,255,0.3)' }}>
+                        <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
                             <Search size={40} style={{ marginBottom: '14px', opacity: 0.4 }} />
-                            <p style={{ fontSize: '1rem', margin: '0 0 6px', color: 'rgba(255,255,255,0.45)' }}>No boardings found</p>
+                            <p style={{ fontSize: '1rem', margin: '0 0 6px', color: 'var(--text-secondary)' }}>No boardings found</p>
                             <p style={{ fontSize: '0.85rem', margin: 0 }}>Try a different search term or clear the filter.</p>
                         </div>
                     )}
@@ -399,8 +399,8 @@ const FeaturedListings = () => {
                         <div
                             key={listing.id}
                             style={{
-                                background: 'rgba(20, 20, 45, 0.7)',
-                                border: '1px solid rgba(255,255,255,0.08)',
+                                background: 'var(--card-bg)',
+                                border: '1px solid var(--border-1)',
                                 borderRadius: '20px',
                                 overflow: 'hidden',
                                 transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -410,13 +410,13 @@ const FeaturedListings = () => {
                                 const el = e.currentTarget as HTMLElement;
                                 el.style.transform = 'translateY(-6px)';
                                 el.style.boxShadow = '0 24px 60px rgba(0,0,0,0.4)';
-                                el.style.borderColor = 'rgba(108,99,255,0.3)';
+                                el.style.borderColor = 'var(--nav-border)';
                             }}
                             onMouseLeave={(e) => {
                                 const el = e.currentTarget as HTMLElement;
                                 el.style.transform = 'translateY(0)';
                                 el.style.boxShadow = 'none';
-                                el.style.borderColor = 'rgba(255,255,255,0.08)';
+                                el.style.borderColor = 'var(--border-1)';
                             }}
                         >
                             {/* Image Area */}
@@ -449,7 +449,7 @@ const FeaturedListings = () => {
                                             padding: '4px 12px',
                                             fontSize: '0.7rem',
                                             fontWeight: 700,
-                                            color: '#0D0D1A',
+                                            color: 'var(--badge-success-text)',
                                         }}
                                     >
                                         {listing.badge}
@@ -462,12 +462,12 @@ const FeaturedListings = () => {
                                         position: 'absolute',
                                         top: '14px',
                                         right: '50px',
-                                        background: listing.available ? 'rgba(67,233,123,0.9)' : 'rgba(255,101,132,0.9)',
+                                        background: listing.available ? 'rgba(67,233,123,0.9)' : 'rgba(255,122,89,0.9)',
                                         borderRadius: '8px',
                                         padding: '4px 10px',
                                         fontSize: '0.65rem',
                                         fontWeight: 700,
-                                        color: '#0D0D1A',
+                                        color: 'var(--badge-success-text)',
                                     }}
                                 >
                                     {listing.available ? '● AVAILABLE' : '● OCCUPIED'}
@@ -484,7 +484,7 @@ const FeaturedListings = () => {
                                         height: '34px',
                                         borderRadius: '10px',
                                         background: likedCards.includes(listing.id)
-                                            ? 'rgba(255,101,132,0.9)'
+                                            ? 'rgba(255,122,89,0.9)'
                                             : 'rgba(0,0,0,0.4)',
                                         backdropFilter: 'blur(10px)',
                                         border: '1px solid rgba(255,255,255,0.15)',
@@ -511,8 +511,8 @@ const FeaturedListings = () => {
                                         display: 'inline-block',
                                         padding: '3px 10px',
                                         borderRadius: '6px',
-                                        background: 'rgba(108,99,255,0.15)',
-                                        color: '#a855f7',
+                                        background: 'var(--nav-link-hover-bg)',
+                                        color: 'var(--primary)',
                                         fontSize: '0.7rem',
                                         fontWeight: 600,
                                         marginBottom: '10px',
@@ -530,12 +530,12 @@ const FeaturedListings = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '4px',
-                                        color: 'rgba(255,255,255,0.5)',
+                                        color: 'var(--text-secondary)',
                                         fontSize: '0.8rem',
                                         marginBottom: '12px',
                                     }}
                                 >
-                                    <MapPin size={13} color="#6C63FF" />
+                                    <MapPin size={13} color="var(--primary)" />
                                     {listing.location} · Near {listing.university}
                                 </div>
 
@@ -557,8 +557,8 @@ const FeaturedListings = () => {
                                                 gap: '4px',
                                                 padding: '4px 10px',
                                                 borderRadius: '8px',
-                                                background: 'rgba(255,255,255,0.06)',
-                                                color: 'rgba(255,255,255,0.65)',
+                                                background: 'var(--surface-2)',
+                                                color: 'var(--text-secondary)',
                                                 fontSize: '0.72rem',
                                                 fontWeight: 500,
                                             }}
@@ -575,21 +575,21 @@ const FeaturedListings = () => {
                                         display: 'flex',
                                         justifyContent: 'space-between',
                                         alignItems: 'center',
-                                        borderTop: '1px solid rgba(255,255,255,0.06)',
+                                        borderTop: '1px solid var(--border-1)',
                                         paddingTop: '14px',
                                     }}
                                 >
                                     <div>
-                                        <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#6C63FF' }}>
+                                        <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary)' }}>
                                             LKR {listing.price.toLocaleString()}
                                         </span>
-                                        <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>/month</span>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>/month</span>
                                     </div>
                                     {listing.rating > 0 && (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                             <Star size={13} color="#FFD700" fill="#FFD700" />
                                             <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{listing.rating}</span>
-                                            <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                                                 ({listing.reviews})
                                             </span>
                                         </div>
@@ -608,9 +608,9 @@ const FeaturedListings = () => {
                                         padding: '11px',
                                         borderRadius: '12px',
                                         background: listing.available
-                                            ? 'linear-gradient(135deg, #6C63FF, #a855f7)'
-                                            : 'rgba(255,255,255,0.08)',
-                                        color: listing.available ? '#fff' : 'rgba(255,255,255,0.4)',
+                                            ? 'var(--btn-primary-bg)'
+                                            : 'var(--surface-2)',
+                                        color: listing.available ? '#fff' : 'var(--text-muted)',
                                         fontSize: '0.875rem',
                                         fontWeight: 600,
                                         cursor: listing.available ? 'pointer' : 'not-allowed',
@@ -624,7 +624,7 @@ const FeaturedListings = () => {
                                     onMouseEnter={(e) => {
                                         if (listing.available) {
                                             (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
-                                            (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 20px rgba(108,99,255,0.5)';
+                                            (e.currentTarget as HTMLElement).style.boxShadow = 'var(--btn-primary-shadow)';
                                         }
                                     }}
                                     onMouseLeave={(e) => {
@@ -658,9 +658,9 @@ const FeaturedListings = () => {
                             width: '40px',
                             height: '40px',
                             borderRadius: '10px',
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            color: 'rgba(255,255,255,0.6)',
+                            background: 'var(--surface-2)',
+                            border: '1px solid var(--border-1)',
+                            color: 'var(--text-secondary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -678,10 +678,10 @@ const FeaturedListings = () => {
                                 borderRadius: '10px',
                                 background:
                                     p === 1
-                                        ? 'linear-gradient(135deg, #6C63FF, #a855f7)'
-                                        : 'rgba(255,255,255,0.05)',
-                                border: p === 1 ? 'none' : '1px solid rgba(255,255,255,0.1)',
-                                color: p === 1 ? '#fff' : 'rgba(255,255,255,0.6)',
+                                        ? 'var(--btn-primary-bg)'
+                                        : 'var(--surface-2)',
+                                border: p === 1 ? 'none' : '1px solid var(--border-1)',
+                                color: p === 1 ? '#fff' : 'var(--text-secondary)',
                                 fontSize: '0.875rem',
                                 fontWeight: p === 1 ? 700 : 400,
                                 cursor: 'pointer',
@@ -696,9 +696,9 @@ const FeaturedListings = () => {
                             width: '40px',
                             height: '40px',
                             borderRadius: '10px',
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            color: 'rgba(255,255,255,0.6)',
+                            background: 'var(--surface-2)',
+                            border: '1px solid var(--border-1)',
+                            color: 'var(--text-secondary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',

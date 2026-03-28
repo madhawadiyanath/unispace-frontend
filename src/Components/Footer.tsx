@@ -18,8 +18,8 @@ const Footer = () => {
     return (
         <footer
             style={{
-                background: 'linear-gradient(180deg, #0D0D1A 0%, #070714 100%)',
-                borderTop: '1px solid rgba(108,99,255,0.15)',
+                background: 'var(--footer-bg)',
+                borderTop: '1px solid var(--footer-border)',
                 position: 'relative',
                 overflow: 'hidden',
             }}
@@ -27,8 +27,8 @@ const Footer = () => {
             {/* CTA Section */}
             <div
                 style={{
-                    background: 'linear-gradient(135deg, rgba(108,99,255,0.12), rgba(168,85,247,0.08))',
-                    borderBottom: '1px solid rgba(108,99,255,0.1)',
+                    background: 'var(--footer-cta-bg)',
+                    borderBottom: '1px solid var(--footer-cta-border)',
                     padding: '56px 24px',
                 }}
             >
@@ -55,7 +55,7 @@ const Footer = () => {
                             Ready to Find Your{' '}
                             <span
                                 style={{
-                                    background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                                    background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
                                     WebkitBackgroundClip: 'text',
                                     WebkitTextFillColor: 'transparent',
                                 }}
@@ -63,7 +63,7 @@ const Footer = () => {
                                 Perfect Boarding?
                             </span>
                         </h2>
-                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1rem' }}>
+                        <p style={{ color: 'var(--footer-muted)', fontSize: '1rem' }}>
                             Join 8,500+ students who found their ideal home through BoardingFinder.
                         </p>
                     </div>
@@ -73,23 +73,23 @@ const Footer = () => {
                             style={{
                                 padding: '14px 28px',
                                 borderRadius: '12px',
-                                background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                                background: 'var(--btn-primary-bg)',
                                 color: '#fff',
                                 fontWeight: 700,
                                 fontSize: '0.95rem',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '8px',
-                                boxShadow: '0 8px 25px rgba(108,99,255,0.4)',
+                                boxShadow: 'var(--btn-primary-shadow)',
                                 transition: 'all 0.2s',
                             }}
                             onMouseEnter={(e) => {
                                 (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
-                                (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 35px rgba(108,99,255,0.6)';
+                                (e.currentTarget as HTMLElement).style.boxShadow = 'var(--btn-primary-shadow-hover)';
                             }}
                             onMouseLeave={(e) => {
                                 (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                                (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 25px rgba(108,99,255,0.4)';
+                                (e.currentTarget as HTMLElement).style.boxShadow = 'var(--btn-primary-shadow)';
                             }}
                         >
                             Start Searching <ArrowRight size={16} />
@@ -99,18 +99,18 @@ const Footer = () => {
                             style={{
                                 padding: '14px 28px',
                                 borderRadius: '12px',
-                                border: '1px solid rgba(108,99,255,0.35)',
-                                color: 'rgba(255,255,255,0.85)',
+                                border: '1px solid var(--btn-ghost-border)',
+                                color: 'var(--footer-link)',
                                 fontWeight: 600,
                                 fontSize: '0.95rem',
                                 transition: 'all 0.2s',
                             }}
                             onMouseEnter={(e) => {
-                                (e.currentTarget as HTMLElement).style.borderColor = '#6C63FF';
-                                (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.1)';
+                                (e.currentTarget as HTMLElement).style.borderColor = 'var(--nav-border)';
+                                (e.currentTarget as HTMLElement).style.background = 'var(--nav-link-hover-bg)';
                             }}
                             onMouseLeave={(e) => {
-                                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.35)';
+                                (e.currentTarget as HTMLElement).style.borderColor = 'var(--btn-ghost-border)';
                                 (e.currentTarget as HTMLElement).style.background = 'transparent';
                             }}
                         >
@@ -139,11 +139,11 @@ const Footer = () => {
                                     width: '44px',
                                     height: '44px',
                                     borderRadius: '14px',
-                                    background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                                    background: 'var(--btn-primary-bg)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    boxShadow: '0 0 20px rgba(108,99,255,0.4)',
+                                    boxShadow: 'var(--shadow-glow)',
                                 }}
                             >
                                 <Home size={22} color="#fff" />
@@ -154,19 +154,19 @@ const Footer = () => {
                                         fontFamily: "'Outfit', sans-serif",
                                         fontWeight: 800,
                                         fontSize: '1.2rem',
-                                        background: 'linear-gradient(135deg, #fff, #a855f7)',
+                                        background: 'linear-gradient(135deg, var(--footer-text), var(--primary))',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
                                     }}
                                 >
                                     BoardingFinder
                                 </div>
-                                <div style={{ fontSize: '0.6rem', color: 'rgba(108,99,255,0.7)', letterSpacing: '2px', fontWeight: 600 }}>
+                                <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '2px', fontWeight: 600 }}>
                                     CAMPUS EDITION
                                 </div>
                             </div>
                         </a>
-                        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.875rem', lineHeight: 1.8, marginBottom: '24px' }}>
+                        <p style={{ color: 'var(--footer-muted)', fontSize: '0.875rem', lineHeight: 1.8, marginBottom: '24px' }}>
                             Sri Lanka's most trusted boarding house platform for university students. Safe, verified, and affordable.
                         </p>
 
@@ -183,11 +183,11 @@ const Footer = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '10px',
-                                        color: 'rgba(255,255,255,0.5)',
+                                        color: 'var(--footer-muted)',
                                         fontSize: '0.8rem',
                                     }}
                                 >
-                                    <span style={{ color: '#6C63FF' }}>{item.icon}</span>
+                                    <span style={{ color: 'var(--primary)' }}>{item.icon}</span>
                                     {item.text}
                                 </div>
                             ))}
@@ -204,12 +204,12 @@ const Footer = () => {
                                         width: '38px',
                                         height: '38px',
                                         borderRadius: '10px',
-                                        background: 'rgba(255,255,255,0.05)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        background: 'var(--surface-2)',
+                                        border: '1px solid var(--border-1)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        color: 'rgba(255,255,255,0.5)',
+                                        color: 'var(--footer-muted)',
                                         transition: 'all 0.2s',
                                     }}
                                     onMouseEnter={(e) => {
@@ -219,9 +219,9 @@ const Footer = () => {
                                         (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
                                     }}
                                     onMouseLeave={(e) => {
-                                        (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)';
-                                        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)';
-                                        (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.5)';
+                                        (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)';
+                                        (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-1)';
+                                        (e.currentTarget as HTMLElement).style.color = 'var(--footer-muted)';
                                         (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
                                     }}
                                 >
@@ -239,7 +239,7 @@ const Footer = () => {
                                     fontWeight: 700,
                                     fontSize: '0.9rem',
                                     marginBottom: '18px',
-                                    color: '#fff',
+                                    color: 'var(--footer-text)',
                                     letterSpacing: '0.5px',
                                 }}
                             >
@@ -251,17 +251,17 @@ const Footer = () => {
                                         <a
                                             href="#"
                                             style={{
-                                                color: 'rgba(255,255,255,0.45)',
+                                                color: 'var(--footer-link)',
                                                 fontSize: '0.85rem',
                                                 transition: 'all 0.2s',
                                                 display: 'inline-block',
                                             }}
                                             onMouseEnter={(e) => {
-                                                (e.currentTarget as HTMLElement).style.color = '#a855f7';
+                                                (e.currentTarget as HTMLElement).style.color = 'var(--primary)';
                                                 (e.currentTarget as HTMLElement).style.paddingLeft = '6px';
                                             }}
                                             onMouseLeave={(e) => {
-                                                (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)';
+                                                (e.currentTarget as HTMLElement).style.color = 'var(--footer-link)';
                                                 (e.currentTarget as HTMLElement).style.paddingLeft = '0';
                                             }}
                                         >
@@ -277,7 +277,7 @@ const Footer = () => {
                 {/* Bottom Bar */}
                 <div
                     style={{
-                        borderTop: '1px solid rgba(255,255,255,0.06)',
+                        borderTop: '1px solid var(--border-1)',
                         paddingTop: '24px',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -286,11 +286,11 @@ const Footer = () => {
                         gap: '16px',
                     }}
                 >
-                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                         © 2025 BoardingFinder. All rights reserved.
                     </p>
-                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        Made with <Heart size={13} color="#FF6584" fill="#FF6584" style={{ display: 'inline' }} /> for Sri Lankan students
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        Made with <Heart size={13} color="var(--primary)" fill="var(--primary)" style={{ display: 'inline' }} /> for Sri Lankan students
                     </p>
                     <div style={{ display: 'flex', gap: '20px' }}>
                         {['Privacy Policy', 'Terms of Service', 'Cookies'].map((link) => (
@@ -298,12 +298,12 @@ const Footer = () => {
                                 key={link}
                                 href="#"
                                 style={{
-                                    color: 'rgba(255,255,255,0.3)',
+                                    color: 'var(--text-muted)',
                                     fontSize: '0.8rem',
                                     transition: 'color 0.2s',
                                 }}
-                                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)')}
-                                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.3)')}
+                                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)')}
+                                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-muted)')}
                             >
                                 {link}
                             </a>
