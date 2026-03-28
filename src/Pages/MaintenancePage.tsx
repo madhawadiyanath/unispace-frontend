@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import Navbar from '../Components/Navbar';
 
+const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:5000';
+
 /* ─── Types ─────────────────────────────────────────────── */
 interface ServicePackage {
   id: string;
@@ -47,7 +49,7 @@ interface MaintenanceForm {
   description: string;
 }
 
-type MaintenanceRequestStatus = 'pending' | 'accepted' | 'completed';
+type MaintenanceRequestStatus = 'pending' | 'accepted' | 'completed' | 'rejected';
 
 interface MaintenanceRequest extends MaintenanceForm {
   id: string;
@@ -60,7 +62,53 @@ interface MaintenanceRequest extends MaintenanceForm {
   acceptedByName?: string;
   acceptedAt?: string;
   completedAt?: string;
+  rejectedAt?: string;
 }
+
+type ApiMaintenanceRequest = {
+  _id: string;
+  requesterId: string;
+  requesterName?: string;
+  requesterEmail?: string;
+  requesterPhone?: string;
+  address: string;
+  category: string;
+  priority: string;
+  preferredDate: string;
+  preferredTime?: string;
+  description: string;
+  status: MaintenanceRequestStatus;
+  acceptedById?: string;
+  acceptedByName?: string;
+  acceptedAt?: string;
+  completedAt?: string;
+  rejectedAt?: string;
+  createdAt?: string;
+};
+
+const mapApiMaintenanceRequest = (r: ApiMaintenanceRequest): MaintenanceRequest => {
+  return {
+    id: r._id,
+    type: r.category,
+    status: r.status,
+    submittedAt: r.createdAt || '',
+    name: r.requesterName || '',
+    phone: r.requesterPhone || '',
+    email: r.requesterEmail || '',
+    address: r.address,
+    date: r.preferredDate,
+    time: r.preferredTime || '',
+    priority: r.priority,
+    description: r.description,
+    requestedById: r.requesterId,
+    requestedByEmail: r.requesterEmail || '',
+    acceptedById: r.acceptedById,
+    acceptedByName: r.acceptedByName,
+    acceptedAt: r.acceptedAt,
+    completedAt: r.completedAt,
+    rejectedAt: r.rejectedAt,
+  };
+};
 
 /* ─── Cleaning Data ──────────────────────────────────────── */
 const CLEANING_PACKAGES: ServicePackage[] = [
@@ -210,24 +258,36 @@ const MaintenancePage = () => {
     return t === 'admin' || t.includes('staff');
   }, [currentUser?.userType]);
 
-  const loadMaintenanceRequests = () => {
+  const loadMaintenanceRequests = async () => {
     try {
-      const raw = localStorage.getItem('maintenanceRequests');
-      const parsed = raw ? JSON.parse(raw) : [];
-      setMaintenanceRequests(Array.isArray(parsed) ? parsed : []);
+      if (!currentUser?._id) {
+        setMaintenanceRequests([]);
+        return;
+      }
+
+      // Cleaning is handled separately (local booking workflow), so don't fetch maintenance for that tab.
+      if (activeTab === 'cleaning') {
+        setMaintenanceRequests([]);
+        return;
+      }
+
+      const url = isStaffUser
+        ? `${API_BASE}/maintenance?category=${encodeURIComponent(activeTab)}`
+        : `${API_BASE}/maintenance/requester/${encodeURIComponent(currentUser._id)}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      const list = (data?.requests || []) as ApiMaintenanceRequest[];
+      const mapped = Array.isArray(list) ? list.map(mapApiMaintenanceRequest) : [];
+      setMaintenanceRequests(isStaffUser ? mapped : mapped.filter(r => r.type === activeTab));
     } catch {
       setMaintenanceRequests([]);
     }
   };
 
   useEffect(() => {
-    loadMaintenanceRequests();
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === 'maintenanceRequests') loadMaintenanceRequests();
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
+    void loadMaintenanceRequests();
+  }, [activeTab, isStaffUser, currentUser?._id]);
 
   /* ── Cleaning helpers ── */
   const pkg = CLEANING_PACKAGES.find(p => p.id === selectedPackage)!;
@@ -282,27 +342,46 @@ const MaintenancePage = () => {
       setMaintenanceError('Please fill in all required fields.'); return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(maintenanceForm.email)) { setMaintenanceError('Please enter a valid email address.'); return; }
-    setMaintenanceLoading(true);
-    setTimeout(() => {
-      try {
-        const request: MaintenanceRequest = {
-          id: Date.now().toString(),
-          type: activeTab,
-          ...maintenanceForm,
-          status: 'pending',
-          submittedAt: new Date().toISOString(),
-          requestedById: currentUser?._id,
-          requestedByEmail: currentUser?.email,
-        };
+    if (!currentUser?._id) {
+      setMaintenanceError('Please log in to submit a request.');
+      return;
+    }
 
-        const existing = JSON.parse(localStorage.getItem('maintenanceRequests') || '[]');
-        const next = [...(Array.isArray(existing) ? existing : []), request];
-        localStorage.setItem('maintenanceRequests', JSON.stringify(next));
-        setMaintenanceRequests(next);
-      } catch {}
-      setMaintenanceLoading(false);
-      setMaintenanceSubmitted(true);
-    }, 1200);
+    setMaintenanceLoading(true);
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/maintenance`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            requesterId: currentUser._id,
+            requesterName: maintenanceForm.name,
+            requesterEmail: maintenanceForm.email,
+            requesterPhone: maintenanceForm.phone,
+            address: maintenanceForm.address,
+            category: activeTab,
+            priority: maintenanceForm.priority,
+            preferredDate: maintenanceForm.date,
+            preferredTime: maintenanceForm.time,
+            description: maintenanceForm.description,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          setMaintenanceError(data?.message || 'Failed to submit request.');
+          return;
+        }
+
+        // Refresh list so staff/owner sees the new request immediately.
+        await loadMaintenanceRequests();
+        setMaintenanceSubmitted(true);
+      } catch {
+        setMaintenanceError('Failed to submit request.');
+      } finally {
+        setMaintenanceLoading(false);
+      }
+    })();
   };
 
   const activeCat = CATEGORIES.find(c => c.id === activeTab)!;
@@ -325,29 +404,25 @@ const MaintenancePage = () => {
   }, [maintenanceRequests, activeTab, isStaffUser, myMaintenanceRequests]);
 
   const updateMaintenanceRequestStatus = (id: string, status: MaintenanceRequestStatus) => {
-    const next = maintenanceRequests.map(r => {
-      if (r.id !== id) return r;
-      const now = new Date().toISOString();
-      if (status === 'accepted') {
-        return {
-          ...r,
-          status,
-          acceptedById: currentUser?._id,
-          acceptedByName: currentUser?.name,
-          acceptedAt: now,
-        };
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/maintenance/${encodeURIComponent(id)}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            status,
+            acceptedById: currentUser?._id,
+            acceptedByName: currentUser?.name,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) return;
+        const updated = mapApiMaintenanceRequest(data.request as ApiMaintenanceRequest);
+        setMaintenanceRequests(prev => prev.map(r => r.id === id ? updated : r));
+      } catch {
+        // keep UI as-is on failure
       }
-      if (status === 'completed') {
-        return {
-          ...r,
-          status,
-          completedAt: now,
-        };
-      }
-      return { ...r, status };
-    });
-    setMaintenanceRequests(next);
-    localStorage.setItem('maintenanceRequests', JSON.stringify(next));
+    })();
   };
 
   /* ─── Input style helper ─── */
@@ -362,6 +437,11 @@ const MaintenancePage = () => {
     outline: 'none',
     boxSizing: 'border-box',
     fontFamily: "'Inter', sans-serif",
+  };
+
+  const openNativeDatePicker = (e: React.MouseEvent<HTMLInputElement>) => {
+    const input = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+    input.showPicker?.();
   };
 
   /* ─── Cleaning success ─── */
@@ -637,7 +717,7 @@ const MaintenancePage = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                   <div>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Calendar size={14} /> Preferred Date *</label>
-                    <input name="date" type="date" value={cleaningForm.date} onChange={handleCleaningChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'light dark' }} />
+                    <input name="date" type="date" value={cleaningForm.date} onClick={openNativeDatePicker} onChange={handleCleaningChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'light dark' }} />
                   </div>
                   <div>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Clock size={14} /> Preferred Time *</label>
@@ -758,7 +838,7 @@ const MaintenancePage = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Calendar size={14} /> Preferred Date *</label>
-                  <input name="date" type="date" value={maintenanceForm.date} onChange={handleMaintenanceChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'light dark' }} />
+                  <input name="date" type="date" value={maintenanceForm.date} onClick={openNativeDatePicker} onChange={handleMaintenanceChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'light dark' }} />
                 </div>
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Clock size={14} /> Preferred Time</label>
@@ -836,6 +916,7 @@ const MaintenancePage = () => {
                         pending: { color: '#FCD34D', bg: 'rgba(252,211,77,0.12)', border: 'rgba(252,211,77,0.3)', label: '● Pending' },
                         accepted: { color: '#22d3ee', bg: 'rgba(34,211,238,0.12)', border: 'rgba(34,211,238,0.3)', label: '◉ Accepted' },
                         completed: { color: '#22c55e', bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.3)', label: '✓ Completed' },
+                        rejected: { color: '#ef4444', bg: 'rgba(239,68,68,0.10)', border: 'rgba(239,68,68,0.25)', label: '✕ Rejected' },
                       };
                       const sc = statusCfg[r.status] || statusCfg.pending;
                       const prCfg: Record<string, { color: string; bg: string; border: string }> = {
