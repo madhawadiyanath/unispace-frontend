@@ -6,6 +6,8 @@ import {
   ClipboardList, ChevronRight, Wrench, Droplets, Zap, Hammer, AlertCircle,
 } from 'lucide-react';
 
+const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:5000';
+
 /* ─── Types ──────────────────────────────────────────────── */
 interface BookingRequest {
   id: string;
@@ -22,7 +24,7 @@ interface BookingRequest {
   submittedAt: string;
 }
 
-type MaintenanceRequestStatus = 'pending' | 'accepted' | 'completed';
+type MaintenanceRequestStatus = 'pending' | 'accepted' | 'completed' | 'rejected';
 
 interface MaintenanceRequest {
   id: string;
@@ -43,7 +45,53 @@ interface MaintenanceRequest {
   acceptedByName?: string;
   acceptedAt?: string;
   completedAt?: string;
+  rejectedAt?: string;
 }
+
+type ApiMaintenanceRequest = {
+  _id: string;
+  requesterId: string;
+  requesterName?: string;
+  requesterEmail?: string;
+  requesterPhone?: string;
+  address: string;
+  category: string;
+  priority: string;
+  preferredDate: string;
+  preferredTime?: string;
+  description: string;
+  status: MaintenanceRequestStatus;
+  acceptedById?: string;
+  acceptedByName?: string;
+  acceptedAt?: string;
+  completedAt?: string;
+  rejectedAt?: string;
+  createdAt?: string;
+};
+
+const mapApiMaintenanceRequest = (r: ApiMaintenanceRequest): MaintenanceRequest => {
+  return {
+    id: r._id,
+    type: r.category,
+    status: r.status,
+    submittedAt: r.createdAt || '',
+    name: r.requesterName || '',
+    phone: r.requesterPhone || '',
+    email: r.requesterEmail || '',
+    address: r.address,
+    date: r.preferredDate,
+    time: r.preferredTime || '',
+    priority: r.priority,
+    description: r.description,
+    requestedById: r.requesterId,
+    requestedByEmail: r.requesterEmail || '',
+    acceptedById: r.acceptedById,
+    acceptedByName: r.acceptedByName,
+    acceptedAt: r.acceptedAt,
+    completedAt: r.completedAt,
+    rejectedAt: r.rejectedAt,
+  };
+};
 
 const PACKAGE_NAMES: Record<string, string> = {
   basic: 'Basic Clean',
@@ -69,6 +117,18 @@ const CleaningStaffDashboard = () => {
 
   const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
 
+  const loadMaintenanceRequests = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/maintenance`);
+      const data = await res.json();
+      const list = (data?.requests || []) as ApiMaintenanceRequest[];
+      const mapped = Array.isArray(list) ? list.map(mapApiMaintenanceRequest) : [];
+      setMaintenanceRequests(mapped);
+    } catch {
+      setMaintenanceRequests([]);
+    }
+  };
+
   useEffect(() => {
     const userType = String(currentUser?.userType || '').toLowerCase();
     const isStaff = userType === 'admin' || userType.includes('staff');
@@ -81,21 +141,7 @@ const CleaningStaffDashboard = () => {
       try { setBookings(JSON.parse(saved)); } catch {}
     }
 
-    const maintenanceSaved = localStorage.getItem('maintenanceRequests');
-    if (maintenanceSaved) {
-      try { setMaintenanceRequests(JSON.parse(maintenanceSaved)); } catch {}
-    }
-
     const onStorage = (e: StorageEvent) => {
-      if (e.key === 'maintenanceRequests') {
-        try {
-          const raw = localStorage.getItem('maintenanceRequests');
-          const parsed = raw ? JSON.parse(raw) : [];
-          setMaintenanceRequests(Array.isArray(parsed) ? parsed : []);
-        } catch {
-          setMaintenanceRequests([]);
-        }
-      }
       if (e.key === 'cleaningBookings') {
         try {
           const raw = localStorage.getItem('cleaningBookings');
@@ -107,6 +153,7 @@ const CleaningStaffDashboard = () => {
       }
     };
     window.addEventListener('storage', onStorage);
+    void loadMaintenanceRequests();
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
@@ -123,29 +170,25 @@ const CleaningStaffDashboard = () => {
   };
 
   const updateMaintenanceStatus = (id: string, status: MaintenanceRequestStatus) => {
-    const now = new Date().toISOString();
-    const updated = maintenanceRequests.map(r => {
-      if (r.id !== id) return r;
-      if (status === 'accepted') {
-        return {
-          ...r,
-          status,
-          acceptedById: currentUser?._id,
-          acceptedByName: currentUser?.name,
-          acceptedAt: now,
-        };
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/maintenance/${encodeURIComponent(id)}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            status,
+            acceptedById: currentUser?._id,
+            acceptedByName: currentUser?.name,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) return;
+        const updated = mapApiMaintenanceRequest(data.request as ApiMaintenanceRequest);
+        setMaintenanceRequests(prev => prev.map(r => r.id === id ? updated : r));
+      } catch {
+        // keep UI as-is on failure
       }
-      if (status === 'completed') {
-        return {
-          ...r,
-          status,
-          completedAt: now,
-        };
-      }
-      return { ...r, status };
-    });
-    setMaintenanceRequests(updated);
-    localStorage.setItem('maintenanceRequests', JSON.stringify(updated));
+    })();
   };
 
   const pending   = bookings.filter(b => b.status === 'pending');
@@ -440,13 +483,7 @@ const CleaningStaffDashboard = () => {
               </button>
               <button
                 onClick={() => {
-                  try {
-                    const raw = localStorage.getItem('maintenanceRequests');
-                    const parsed = raw ? JSON.parse(raw) : [];
-                    setMaintenanceRequests(Array.isArray(parsed) ? parsed : []);
-                  } catch {
-                    setMaintenanceRequests([]);
-                  }
+                  void loadMaintenanceRequests();
                 }}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.65)', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}
               >
@@ -474,6 +511,7 @@ const CleaningStaffDashboard = () => {
                   pending: { color: '#FCD34D', bg: 'rgba(252,211,77,0.12)', border: 'rgba(252,211,77,0.3)', label: '● Pending' },
                   accepted: { color: '#22d3ee', bg: 'rgba(34,211,238,0.12)', border: 'rgba(34,211,238,0.3)', label: '◉ Accepted' },
                   completed: { color: '#43E97B', bg: 'rgba(67,233,123,0.12)', border: 'rgba(67,233,123,0.3)', label: '✓ Completed' },
+                  rejected: { color: '#fb7185', bg: 'rgba(251,113,133,0.12)', border: 'rgba(251,113,133,0.3)', label: '✕ Rejected' },
                 };
                 const s = statusMap[req.status];
 
