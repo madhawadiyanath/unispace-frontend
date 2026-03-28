@@ -204,6 +204,14 @@ const BoardingDetailsPage = () => {
     const handlePayAdvance = async () => {
         const amt = Number(advanceAmount);
         if (!boarding || isNaN(amt) || amt <= 0) { setAdvanceError('Please enter a valid amount.'); return; }
+        
+        // Validation: Student must pay exactly 50% of monthly rent as advance
+        const requiredAdvance = boarding.price / 2;
+        if (amt !== requiredAdvance) {
+            setAdvanceError(`Advance must be exactly 50% of monthly rent. Required: LKR ${requiredAdvance.toLocaleString()}`);
+            return;
+        }
+        
         const storedUser = localStorage.getItem('user');
         if (!storedUser) { navigate('/login'); return; }
         const user = JSON.parse(storedUser);
@@ -627,12 +635,16 @@ const BoardingDetailsPage = () => {
                                                 {/* Amount Input */}
                                                 <div style={{ marginBottom: '12px' }}>
                                                     <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Advance Amount (LKR)</div>
+                                                    <div style={{ marginBottom: '8px', padding: '10px 12px', borderRadius: '10px', background: 'rgba(108,99,255,0.08)', border: '1px solid rgba(108,99,255,0.25)', fontSize: '0.8rem', color: '#C4B5FD', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <span>💡</span>
+                                                        <span>Pay 50% of monthly rent: <strong>LKR {(boarding.price / 2).toLocaleString()}</strong></span>
+                                                    </div>
                                                     <input
                                                         type="number"
                                                         min="1"
                                                         value={advanceAmount}
                                                         onChange={e => { setAdvanceAmount(e.target.value); setAdvanceError(''); }}
-                                                        placeholder={`e.g. ${boarding.price}`}
+                                                        placeholder={`${(boarding.price / 2).toLocaleString()}`}
                                                         style={{
                                                             width: '100%', boxSizing: 'border-box', padding: '10px 13px',
                                                             background: 'rgba(0,0,0,0.3)',
@@ -648,19 +660,30 @@ const BoardingDetailsPage = () => {
 
                                                 {/* Fee Breakdown */}
                                                 {amt > 0 && (
-                                                    <div style={{ marginBottom: '14px', padding: '12px 14px', borderRadius: '10px', background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                                                    <div style={{ marginBottom: '14px', padding: '12px 14px', borderRadius: '10px', background: amt === (boarding.price / 2) ? 'rgba(67,233,123,0.1)' : 'rgba(255,107,107,0.08)', border: `1px solid ${amt === (boarding.price / 2) ? 'rgba(67,233,123,0.3)' : 'rgba(255,107,107,0.3)'}` }}>
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
                                                             <span>Your advance:</span>
                                                             <span style={{ color: '#fff', fontWeight: 700 }}>LKR {amt.toLocaleString()}</span>
                                                         </div>
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
+                                                            <span>Required amount (50%):</span>
+                                                            <span style={{ color: '#43E97B', fontWeight: 700 }}>LKR {(boarding.price / 2).toLocaleString()}</span>
+                                                        </div>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>
                                                             <span>Platform fee (12%):</span>
                                                             <span style={{ color: '#FCD34D', fontWeight: 700 }}>− LKR {platformFee.toLocaleString()}</span>
                                                         </div>
-                                                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.09)', paddingTop: '7px', display: 'flex', justifyContent: 'space-between', fontSize: '0.87rem' }}>
-                                                            <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 600 }}>Landlord receives:</span>
-                                                            <span style={{ color: '#43E97B', fontWeight: 800 }}>LKR {landlordAmt.toLocaleString()}</span>
-                                                        </div>
+                                                        {amt === (boarding.price / 2) ? (
+                                                            <div style={{ borderTop: '1px solid rgba(67,233,123,0.3)', paddingTop: '7px', display: 'flex', justifyContent: 'space-between', fontSize: '0.87rem', alignItems: 'center' }}>
+                                                                <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 600 }}>✅ Amount is correct</span>
+                                                                <span style={{ color: '#43E97B', fontWeight: 800 }}>LKR {landlordAmt.toLocaleString()}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div style={{ borderTop: '1px solid rgba(255,107,107,0.3)', paddingTop: '7px', display: 'flex', justifyContent: 'space-between', fontSize: '0.87rem', alignItems: 'center' }}>
+                                                                <span style={{ color: '#FF6B6B', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>⚠ Amount mismatch</span>
+                                                                <span style={{ color: '#FF6B6B', fontWeight: 800 }}>Difference: LKR {Math.abs(amt - (boarding.price / 2)).toLocaleString()}</span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
 
