@@ -364,6 +364,11 @@ const MaintenancePage = () => {
     fontFamily: "'Inter', sans-serif",
   };
 
+  const openNativeDatePicker = (e: React.MouseEvent<HTMLInputElement>) => {
+    const input = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+    input.showPicker?.();
+  };
+
   /* ─── Cleaning success ─── */
   if (cleaningSubmitted) {
     return (
@@ -637,7 +642,7 @@ const MaintenancePage = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                   <div>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Calendar size={14} /> Preferred Date *</label>
-                    <input name="date" type="date" value={cleaningForm.date} onChange={handleCleaningChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'light dark' }} />
+                    <input name="date" type="date" value={cleaningForm.date} onClick={openNativeDatePicker} onChange={handleCleaningChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'light dark' }} />
                   </div>
                   <div>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Clock size={14} /> Preferred Time *</label>
@@ -758,7 +763,7 @@ const MaintenancePage = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Calendar size={14} /> Preferred Date *</label>
-                  <input name="date" type="date" value={maintenanceForm.date} onChange={handleMaintenanceChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'light dark' }} />
+                  <input name="date" type="date" value={maintenanceForm.date} onClick={openNativeDatePicker} onChange={handleMaintenanceChange} min={new Date().toISOString().split('T')[0]} style={{ ...inputStyle, colorScheme: 'light dark' }} />
                 </div>
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px' }}><Clock size={14} /> Preferred Time</label>
