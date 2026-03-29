@@ -259,6 +259,10 @@ const MaintenancePage = () => {
   }, [currentUser?.userType]);
 
   const sanitizePhone10 = (value: string) => value.replace(/\D/g, '').slice(0, 10);
+  const sanitizeLettersSpaces = (value: string) => value.replace(/[^A-Za-z\s]/g, '');
+  const sanitizeLettersSpacesNewlines = (value: string) => value.replace(/[^A-Za-z\s\n\r]/g, '');
+
+  const isLettersSpaces = (value: string) => /^[A-Za-z]+(?:\s+[A-Za-z]+)*$/.test(value.trim());
 
   const loadMaintenanceRequests = async () => {
     try {
@@ -298,7 +302,10 @@ const MaintenancePage = () => {
 
   const handleCleaningChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    const nextValue = name === 'phone' ? sanitizePhone10(String(value)) : value;
+    const nextValue =
+      name === 'phone' ? sanitizePhone10(String(value)) :
+      name === 'name' ? sanitizeLettersSpaces(String(value)) :
+      value;
     setCleaningForm(prev => ({ ...prev, [name]: nextValue }));
     setCleaningError('');
   };
@@ -320,6 +327,7 @@ const MaintenancePage = () => {
     if (!cleaningForm.name || !cleaningForm.phone || !cleaningForm.email || !cleaningForm.address || !cleaningForm.date || !cleaningForm.time) {
       setCleaningError('Please fill in all required fields.'); return;
     }
+    if (!isLettersSpaces(cleaningForm.name)) { setCleaningError('Full name must contain letters only.'); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaningForm.email)) { setCleaningError('Please enter a valid email address.'); return; }
     if (!/^\d{10}$/.test(sanitizePhone10(cleaningForm.phone))) { setCleaningError('Phone number must be exactly 10 digits (numbers only).'); return; }
     setCleaningLoading(true);
@@ -337,7 +345,11 @@ const MaintenancePage = () => {
   /* ── Maintenance helpers ── */
   const handleMaintenanceChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    const nextValue = name === 'phone' ? sanitizePhone10(String(value)) : value;
+    const nextValue =
+      name === 'phone' ? sanitizePhone10(String(value)) :
+      name === 'name' ? sanitizeLettersSpaces(String(value)) :
+      name === 'description' ? sanitizeLettersSpacesNewlines(String(value)) :
+      value;
     setMaintenanceForm(prev => ({ ...prev, [name]: nextValue }));
     setMaintenanceError('');
   };
@@ -347,6 +359,8 @@ const MaintenancePage = () => {
     if (!maintenanceForm.name || !maintenanceForm.phone || !maintenanceForm.email || !maintenanceForm.address || !maintenanceForm.date || !maintenanceForm.description) {
       setMaintenanceError('Please fill in all required fields.'); return;
     }
+    if (!isLettersSpaces(maintenanceForm.name)) { setMaintenanceError('Full name must contain letters only.'); return; }
+    if (!/^[A-Za-z\s\n\r]+$/.test(maintenanceForm.description.trim())) { setMaintenanceError('Issue description must contain letters only.'); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(maintenanceForm.email)) { setMaintenanceError('Please enter a valid email address.'); return; }
     if (!/^\d{10}$/.test(sanitizePhone10(maintenanceForm.phone))) { setMaintenanceError('Phone number must be exactly 10 digits (numbers only).'); return; }
     if (!currentUser?._id) {
