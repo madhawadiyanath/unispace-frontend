@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
-  Home, ArrowLeft, Upload, X, CheckCircle,
+  Upload, X, CheckCircle,
   MapPin, Phone, Mail, User,
   FileText, Building2, Image, AlertCircle,
 } from 'lucide-react';
@@ -86,12 +86,16 @@ const BoardingFormPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title || !form.description || !form.price || !form.location || !form.contactName) {
+    if (!form.title || !form.description || !form.price || !form.location || !form.contactName || !form.contactPhone) {
       setError('Please fill in all required fields.');
       return;
     }
     if (Number(form.price) <= 0) {
       setError('Price must be a positive number.');
+      return;
+    }
+    if (!/^0\d{9}$/.test(form.contactPhone.trim())) {
+      setError('Please enter a valid 10-digit Sri Lankan phone number (e.g., 0712345678).');
       return;
     }
 
@@ -259,10 +263,10 @@ const BoardingFormPage = () => {
                 </div>
               </div>
               <div>
-                <Label>Phone Number</Label>
+                <Label>Phone Number <Req /></Label>
                 <div style={{ position: 'relative' }}>
                   <Phone size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                  <input name="contactPhone" value={form.contactPhone} onChange={handleChange} placeholder="07X XXX XXXX" style={{ ...inputStyle, paddingLeft: '38px' }} />
+                  <input name="contactPhone" value={form.contactPhone} onChange={handleChange} placeholder="07XXXXXXXX" style={{ ...inputStyle, paddingLeft: '38px' }} />
                 </div>
               </div>
               <div style={{ gridColumn: '1 / -1' }}>
