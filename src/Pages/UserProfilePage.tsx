@@ -25,7 +25,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 
-const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 interface Boarding {
   _id: string;
@@ -170,7 +170,9 @@ const UserProfilePage = () => {
     // Load cart items from localStorage
     const savedCart = localStorage.getItem('boardingCart');
     if (savedCart) {
-      try { setCartItems(JSON.parse(savedCart)); } catch {}
+      try { setCartItems(JSON.parse(savedCart)); } catch (e) {
+        // Failed to parse cart items
+      }
     }
 
     // Fetch landlord's own boarding submissions

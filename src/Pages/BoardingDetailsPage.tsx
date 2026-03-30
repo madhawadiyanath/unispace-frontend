@@ -116,7 +116,7 @@ const BoardingDetailsPage = () => {
         };
 
         const existingCart = localStorage.getItem('boardingCart') ? JSON.parse(localStorage.getItem('boardingCart') || '[]') : [];
-        const itemExists = existingCart.some((item: any) => item._id === boarding._id);
+        const itemExists = existingCart.some((item: { _id: string }) => item._id === boarding._id);
 
         if (!itemExists) {
             existingCart.push(cartItem);
@@ -669,7 +669,6 @@ const BoardingDetailsPage = () => {
                                                     const maxAdvance = boarding.price;
                                                     const isValid = amt >= minAdvance && amt <= maxAdvance;
                                                     const isTooLow = amt < minAdvance;
-                                                    const isTooHigh = amt > maxAdvance;
                                                     return (
                                                         <div style={{ marginBottom: '14px', padding: '12px 14px', borderRadius: '10px', background: isValid ? 'rgba(67,233,123,0.1)' : 'rgba(255,107,107,0.08)', border: `1px solid ${isValid ? 'rgba(67,233,123,0.3)' : 'rgba(255,107,107,0.3)'}` }}>
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'rgba(255,255,255,0.55)', marginBottom: '7px' }}>

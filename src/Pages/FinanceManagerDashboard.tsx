@@ -136,7 +136,6 @@ const FinanceManagerDashboard = () => {
         { id: 'listings',      label: 'Listings',        icon: <Home size={18} /> },
         { id: 'transactions',  label: 'Transactions',    icon: <CreditCard size={18} /> },
         { id: 'advances',      label: 'Advances',        icon: <Wallet size={18} /> },
-        { id: 'users',         label: 'Users',           icon: <Users size={18} /> },
         { id: 'reports',       label: 'Reports',         icon: <FileText size={18} /> },
     ];
 
@@ -660,67 +659,6 @@ const FinanceManagerDashboard = () => {
                                                 })}
                                             </tbody>
                                         </table>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* ══════ USERS ══════ */}
-                    {activeSection === 'users' && (
-                        <div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px', marginBottom: '22px' }}>
-                                {[
-                                    { label: 'Total Users', value: users.length, color: '#a855f7', bg: 'rgba(168,85,247,0.12)' },
-                                    { label: 'Students', value: students, color: '#43E97B', bg: 'rgba(67,233,123,0.12)' },
-                                    { label: 'Landlords', value: landlords, color: '#38F9D7', bg: 'rgba(56,249,215,0.12)' },
-                                    { label: 'Finance Managers', value: users.filter(u => u.userType === 'finance_manager').length, color: '#FCD34D', bg: 'rgba(252,211,77,0.12)' },
-                                ].map((c, i) => (
-                                    <div key={i} style={{ padding: '18px 20px', borderRadius: '16px', background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 800, fontFamily: "'Outfit', sans-serif", color: c.color }}>{c.value}</div>
-                                        <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)', marginTop: '3px' }}>{c.label}</div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(252,211,77,0.14)', borderRadius: '18px', padding: '24px' }}>
-                                <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.1rem', fontWeight: 700, margin: '0 0 20px' }}>All Users</h2>
-                                {loadingUsers ? (
-                                    <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.3)' }}>
-                                        <div style={{ width: '28px', height: '28px', border: '2px solid rgba(252,211,77,0.3)', borderTopColor: '#FCD34D', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
-                                        Loading users…
-                                    </div>
-                                ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        {users.map(u => {
-                                            const tc: Record<string, { color: string; bg: string }> = {
-                                                admin:           { color: '#a855f7', bg: 'rgba(168,85,247,0.15)' },
-                                                student:         { color: '#43E97B', bg: 'rgba(67,233,123,0.15)' },
-                                                landlord:        { color: '#38F9D7', bg: 'rgba(56,249,215,0.15)' },
-                                                finance_manager: { color: '#FCD34D', bg: 'rgba(252,211,77,0.15)' },
-                                            };
-                                            const c = tc[u.userType] || { color: '#fff', bg: 'rgba(255,255,255,0.1)' };
-                                            return (
-                                                <div key={u._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-                                                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(252,211,77,0.04)'; }}
-                                                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}
-                                                >
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                        <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.82rem', fontWeight: 700, color: c.color, flexShrink: 0 }}>
-                                                            {u.name?.slice(0, 2).toUpperCase() || '??'}
-                                                        </div>
-                                                        <div>
-                                                            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{u.name}</div>
-                                                            <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' }}>{u.email}</div>
-                                                        </div>
-                                                    </div>
-                                                    <span style={{ padding: '4px 12px', borderRadius: '100px', background: c.bg, color: c.color, fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize', border: `1px solid ${c.color}44` }}>
-                                                        {u.userType?.replace('_', ' ')}
-                                                    </span>
-                                                </div>
-                                            );
-                                        })}
-                                        {users.length === 0 && <p style={{ color: 'rgba(255,255,255,0.35)', textAlign: 'center', padding: '30px 0' }}>No users found.</p>}
                                     </div>
                                 )}
                             </div>
