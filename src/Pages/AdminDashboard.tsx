@@ -248,14 +248,14 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', background: '#0D0D1A', fontFamily: "'Inter', sans-serif", color: '#fff' }}>
+        <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--gradient-hero)', fontFamily: "'Inter', sans-serif", color: 'var(--text-primary)' }}>
 
             {/* ── Sidebar ── */}
             <aside
                 style={{
                     width: '240px',
-                    background: 'rgba(18,18,40,0.95)',
-                    borderRight: '1px solid rgba(108,99,255,0.15)',
+                    background: 'var(--card-bg)',
+                    borderRight: '1px solid var(--border-1)',
                     display: 'flex',
                     flexDirection: 'column',
                     position: 'fixed',
@@ -267,14 +267,14 @@ const AdminDashboard = () => {
                 className="sidebar"
             >
                 {/* Logo */}
-                <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(108,99,255,0.12)' }}>
+                <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid var(--border-1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px rgba(108,99,255,0.4)', flexShrink: 0 }}>
                             <ShieldCheck size={18} color="#fff" />
                         </div>
                         <div>
                             <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.3px' }}>Admin Panel</div>
-                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>BoardingFinder</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '1px' }}>BoardingFinder</div>
                         </div>
                     </div>
                 </div>
@@ -296,8 +296,8 @@ const AdminDashboard = () => {
                                     ? item.sub ? '1px solid rgba(252,211,77,0.3)' : '1px solid rgba(108,99,255,0.3)'
                                     : '1px solid transparent',
                                 color: activeSection === item.id
-                                    ? item.sub ? '#FCD34D' : '#fff'
-                                    : item.sub ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.55)',
+                                    ? item.sub ? '#FCD34D' : 'var(--text-primary)'
+                                    : item.sub ? 'var(--text-muted)' : 'var(--text-secondary)',
                                 fontSize: item.sub ? '0.82rem' : '0.9rem',
                                 fontWeight: activeSection === item.id ? 600 : 400,
                                 cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left',
@@ -315,14 +315,14 @@ const AdminDashboard = () => {
                 </nav>
 
                 {/* Admin User Info + Logout */}
-                <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(108,99,255,0.12)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', marginBottom: '10px' }}>
+                <div style={{ padding: '16px 12px', borderTop: '1px solid var(--border-1)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '12px', background: 'var(--surface-1)', marginBottom: '10px', border: '1px solid var(--border-1)' }}>
                         <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <ShieldCheck size={15} color="#fff" />
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                             <div style={{ fontWeight: 600, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser?.name || 'Admin'}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>Administrator</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Administrator</div>
                         </div>
                     </div>
                     <button
@@ -340,22 +340,22 @@ const AdminDashboard = () => {
             <div style={{ marginLeft: '240px', flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }} className="main-area">
 
                 {/* Top bar */}
-                <header style={{ padding: '16px 28px', borderBottom: '1px solid rgba(108,99,255,0.12)', background: 'rgba(13,13,26,0.8)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 40 }}>
+                <header style={{ padding: '16px 28px', borderBottom: '1px solid var(--border-1)', background: 'var(--nav-bg-scrolled)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 40 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)} style={{ display: 'none', background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '10px', padding: '8px', color: '#fff', cursor: 'pointer' }}>
+                        <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)} style={{ display: 'none', background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '10px', padding: '8px', color: 'var(--text-primary)', cursor: 'pointer' }}>
                             {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
                         </button>
                         <div>
                             <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.3rem', fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>
                                 {activeSection === 'add-finance-manager' ? 'Finance Manager' : navItems.find(n => n.id === activeSection)?.label || 'Dashboard'}
                             </h1>
-                            <p style={{ margin: 0, fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' }}>
+                            <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                             </p>
                         </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <button style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(108,99,255,0.1)', border: '1px solid rgba(108,99,255,0.2)', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <button style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Bell size={17} />
                         </button>
                         <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -373,7 +373,7 @@ const AdminDashboard = () => {
                             {/* Stats Grid */}
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '28px' }}>
                                 {stats.map((s, i) => (
-                                    <div key={i} style={{ background: 'rgba(18,18,40,0.8)', border: '1px solid rgba(108,99,255,0.15)', borderRadius: '18px', padding: '22px', display: 'flex', alignItems: 'flex-start', gap: '14px', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'default' }}
+                                    <div key={i} style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '22px', display: 'flex', alignItems: 'flex-start', gap: '14px', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'default' }}
                                         onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = `0 12px 30px rgba(0,0,0,0.3)`; }}
                                         onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}
                                     >
@@ -381,15 +381,15 @@ const AdminDashboard = () => {
                                             {s.icon}
                                         </div>
                                         <div>
-                                            <div style={{ fontSize: '2rem', fontWeight: 800, fontFamily: "'Outfit', sans-serif", lineHeight: 1, color: '#fff' }}>{s.value}</div>
-                                            <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)', marginTop: '4px' }}>{s.label}</div>
+                                            <div style={{ fontSize: '2rem', fontWeight: 800, fontFamily: "'Outfit', sans-serif", lineHeight: 1, color: 'var(--text-primary)' }}>{s.value}</div>
+                                            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '4px' }}>{s.label}</div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
                             {/* Recent Users Preview */}
-                            <div style={{ background: 'rgba(18,18,40,0.8)', border: '1px solid rgba(108,99,255,0.15)', borderRadius: '18px', padding: '24px' }}>
+                            <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                                     <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Recent Users</h2>
                                     <button onClick={() => setActiveSection('users')} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', color: '#6C63FF', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>
@@ -397,7 +397,7 @@ const AdminDashboard = () => {
                                     </button>
                                 </div>
                                 {loadingUsers ? (
-                                    <div style={{ textAlign: 'center', padding: '30px', color: 'rgba(255,255,255,0.3)' }}>
+                                    <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
                                         <div style={{ width: '28px', height: '28px', border: '2px solid rgba(108,99,255,0.3)', borderTopColor: '#6C63FF', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
                                         Loading users...
                                     </div>
@@ -406,7 +406,7 @@ const AdminDashboard = () => {
                                         {users.slice(0, 5).map(u => (
                                             <UserRow key={u._id} user={u} typeColor={typeColor} onDelete={() => setDeleteConfirm(u._id)} />
                                         ))}
-                                        {users.length === 0 && <p style={{ color: 'rgba(255,255,255,0.35)', textAlign: 'center', padding: '20px 0' }}>No users found.</p>}
+                                        {users.length === 0 && <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '20px 0' }}>No users found.</p>}
                                     </div>
                                 )}
                             </div>
@@ -418,28 +418,28 @@ const AdminDashboard = () => {
                         <div>
                             {/* Search */}
                             <div style={{ position: 'relative', maxWidth: '380px', marginBottom: '20px' }}>
-                                <Search size={16} color="rgba(255,255,255,0.35)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                                <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                                 <input
                                     type="text"
                                     placeholder="Search by name, email or type..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    style={{ width: '100%', padding: '11px 14px 11px 40px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(108,99,255,0.2)', borderRadius: '12px', color: '#fff', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }}
+                                    style={{ width: '100%', padding: '11px 14px 11px 40px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }}
                                 />
                             </div>
 
-                            <div style={{ background: 'rgba(18,18,40,0.8)', border: '1px solid rgba(108,99,255,0.15)', borderRadius: '18px', padding: '24px' }}>
+                            <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                                     <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
-                                        All Users <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400, marginLeft: '8px' }}>({filteredUsers.length})</span>
+                                        All Users <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: '8px' }}>({filteredUsers.length})</span>
                                     </h2>
-                                    <button onClick={fetchUsers} style={{ background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '10px', padding: '7px 14px', color: '#fff', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer' }}>
+                                    <button onClick={fetchUsers} style={{ background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '10px', padding: '7px 14px', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer' }}>
                                         Refresh
                                     </button>
                                 </div>
 
                                 {loadingUsers ? (
-                                    <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.3)' }}>
+                                    <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
                                         <div style={{ width: '28px', height: '28px', border: '2px solid rgba(108,99,255,0.3)', borderTopColor: '#6C63FF', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
                                         Loading users...
                                     </div>
@@ -448,7 +448,7 @@ const AdminDashboard = () => {
                                         {filteredUsers.map(u => (
                                             <UserRow key={u._id} user={u} typeColor={typeColor} onDelete={() => setDeleteConfirm(u._id)} />
                                         ))}
-                                        {filteredUsers.length === 0 && <p style={{ color: 'rgba(255,255,255,0.35)', textAlign: 'center', padding: '30px 0' }}>No users match your search.</p>}
+                                        {filteredUsers.length === 0 && <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '30px 0' }}>No users match your search.</p>}
                                     </div>
                                 )}
                             </div>
@@ -471,29 +471,29 @@ const AdminDashboard = () => {
                                 {/* Toolbar */}
                                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '20px' }}>
                                     <div style={{ position: 'relative', flex: '1', minWidth: '220px', maxWidth: '360px' }}>
-                                        <Search size={15} color="rgba(255,255,255,0.35)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                                        <input type="text" placeholder="Search listings…" value={boardingSearch} onChange={e => setBoardingSearch(e.target.value)} style={{ width: '100%', padding: '10px 14px 10px 38px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(108,99,255,0.2)', borderRadius: '12px', color: '#fff', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }} />
+                                        <Search size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                                        <input type="text" placeholder="Search listings…" value={boardingSearch} onChange={e => setBoardingSearch(e.target.value)} style={{ width: '100%', padding: '10px 14px 10px 38px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }} />
                                     </div>
                                     {(['all', 'pending', 'published', 'rejected'] as const).map(f => (
-                                        <button key={f} onClick={() => setBoardingFilter(f)} style={{ padding: '8px 18px', borderRadius: '100px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', background: boardingFilter === f ? 'linear-gradient(135deg, #6C63FF, #a855f7)' : 'rgba(255,255,255,0.05)', border: boardingFilter === f ? 'none' : '1px solid rgba(255,255,255,0.1)', color: boardingFilter === f ? '#fff' : 'rgba(255,255,255,0.6)', textTransform: 'capitalize' }}>
+                                        <button key={f} onClick={() => setBoardingFilter(f)} style={{ padding: '8px 18px', borderRadius: '100px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', background: boardingFilter === f ? 'linear-gradient(135deg, #6C63FF, #a855f7)' : 'var(--surface-1)', border: boardingFilter === f ? 'none' : '1px solid var(--border-1)', color: boardingFilter === f ? '#fff' : 'var(--text-secondary)', textTransform: 'capitalize' }}>
                                             {f} {f !== 'all' && <span style={{ marginLeft: '4px', opacity: 0.7 }}>({boardings.filter(b => b.status === f).length})</span>}
                                         </button>
                                     ))}
-                                    <button onClick={fetchBoardings} style={{ marginLeft: 'auto', background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '10px', padding: '8px 14px', color: '#fff', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer' }}>Refresh</button>
+                                    <button onClick={fetchBoardings} style={{ marginLeft: 'auto', background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '10px', padding: '8px 14px', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer' }}>Refresh</button>
                                 </div>
 
-                                <div style={{ background: 'rgba(18,18,40,0.8)', border: '1px solid rgba(108,99,255,0.15)', borderRadius: '18px', padding: '24px' }}>
+                                <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px' }}>
                                     <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.1rem', fontWeight: 700, margin: '0 0 20px' }}>
-                                        Boarding Submissions <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400, marginLeft: '8px' }}>({filtered.length})</span>
+                                        Boarding Submissions <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: '8px' }}>({filtered.length})</span>
                                     </h2>
 
                                     {loadingBoardings ? (
-                                        <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.3)' }}>
+                                        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
                                             <div style={{ width: '28px', height: '28px', border: '2px solid rgba(108,99,255,0.3)', borderTopColor: '#6C63FF', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
                                             Loading…
                                         </div>
                                     ) : filtered.length === 0 ? (
-                                        <p style={{ color: 'rgba(255,255,255,0.35)', textAlign: 'center', padding: '30px 0' }}>No listings found.</p>
+                                        <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '30px 0' }}>No listings found.</p>
                                     ) : (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                             {filtered.map(b => {
@@ -504,7 +504,7 @@ const AdminDashboard = () => {
                                                 };
                                                 const s = sc[b.status] || sc.pending;
                                                 return (
-                                                    <div key={b._id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', flexWrap: 'wrap' }}>
+                                                    <div key={b._id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px', borderRadius: '14px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', flexWrap: 'wrap' }}>
                                                         {/* Thumbnail */}
                                                         <div style={{ width: '60px', height: '60px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0, background: 'rgba(108,99,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                             {b.photos?.[0]
@@ -513,11 +513,11 @@ const AdminDashboard = () => {
                                                         </div>
                                                         {/* Info */}
                                                         <div style={{ flex: 1, minWidth: 0 }}>
-                                                            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', marginTop: '3px' }}>
+                                                            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '3px' }}>
                                                                 <MapPin size={11} color="#6C63FF" />{b.location}
                                                             </div>
-                                                            <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginTop: '2px' }}>
+                                                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
                                                                 {b.roomType} · LKR {b.price?.toLocaleString()}/mo · By {b.landlordName}
                                                             </div>
                                                         </div>
@@ -564,12 +564,12 @@ const AdminDashboard = () => {
                                 </div>
                                 <div>
                                     <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Add Finance Manager</h2>
-                                    <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.45)', fontSize: '0.85rem' }}>Create a new Finance Manager account</p>
+                                    <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Create a new Finance Manager account</p>
                                 </div>
                             </div>
 
                             {/* Form Card */}
-                            <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(252,211,77,0.18)', borderRadius: '22px', padding: '32px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+                            <div style={{ background: 'var(--card-bg)', border: '1px solid rgba(252,211,77,0.18)', borderRadius: '22px', padding: '32px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
 
                                 {/* Success banner */}
                                 {fmSuccess && (
@@ -588,7 +588,7 @@ const AdminDashboard = () => {
                                 <form onSubmit={handleAddFinanceManager}>
                                     {/* Full Name */}
                                     <div style={{ marginBottom: '20px' }}>
-                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Full Name</label>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Full Name</label>
                                         <div style={{ position: 'relative' }}>
                                             <UserPlus size={16} color="rgba(252,211,77,0.5)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                                             <input
@@ -596,7 +596,7 @@ const AdminDashboard = () => {
                                                 placeholder="e.g. Kasun Perera"
                                                 value={fmName}
                                                 onChange={e => setFmName(e.target.value)}
-                                                style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(252,211,77,0.2)', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
+                                                style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'var(--surface-1)', border: '1px solid rgba(252,211,77,0.2)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
                                                 onFocus={e => { (e.target as HTMLInputElement).style.borderColor = 'rgba(252,211,77,0.55)'; }}
                                                 onBlur={e => { (e.target as HTMLInputElement).style.borderColor = 'rgba(252,211,77,0.2)'; }}
                                             />
@@ -605,7 +605,7 @@ const AdminDashboard = () => {
 
                                     {/* Email */}
                                     <div style={{ marginBottom: '20px' }}>
-                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Email Address</label>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Email Address</label>
                                         <div style={{ position: 'relative' }}>
                                             <Search size={16} color="rgba(252,211,77,0.5)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                                             <input
@@ -613,7 +613,7 @@ const AdminDashboard = () => {
                                                 placeholder="e.g. kasun@company.com"
                                                 value={fmEmail}
                                                 onChange={e => setFmEmail(e.target.value)}
-                                                style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(252,211,77,0.2)', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
+                                                style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'var(--surface-1)', border: '1px solid rgba(252,211,77,0.2)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
                                                 onFocus={e => { (e.target as HTMLInputElement).style.borderColor = 'rgba(252,211,77,0.55)'; }}
                                                 onBlur={e => { (e.target as HTMLInputElement).style.borderColor = 'rgba(252,211,77,0.2)'; }}
                                             />
@@ -622,7 +622,7 @@ const AdminDashboard = () => {
 
                                     {/* Password */}
                                     <div style={{ marginBottom: '28px' }}>
-                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Password</label>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Password</label>
                                         <div style={{ position: 'relative' }}>
                                             <ShieldCheck size={16} color="rgba(252,211,77,0.5)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                                             <input
@@ -630,7 +630,7 @@ const AdminDashboard = () => {
                                                 placeholder="Min. 8 characters"
                                                 value={fmPassword}
                                                 onChange={e => setFmPassword(e.target.value)}
-                                                style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(252,211,77,0.2)', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
+                                                style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'var(--surface-1)', border: '1px solid rgba(252,211,77,0.2)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
                                                 onFocus={e => { (e.target as HTMLInputElement).style.borderColor = 'rgba(252,211,77,0.55)'; }}
                                                 onBlur={e => { (e.target as HTMLInputElement).style.borderColor = 'rgba(252,211,77,0.2)'; }}
                                             />
@@ -655,17 +655,17 @@ const AdminDashboard = () => {
                             </div>
 
                             {/* Finance Managers list */}
-                            <div style={{ marginTop: '28px', background: 'rgba(18,18,40,0.8)', border: '1px solid rgba(252,211,77,0.14)', borderRadius: '18px', padding: '24px' }}>
+                            <div style={{ marginTop: '28px', background: 'var(--card-bg)', border: '1px solid rgba(252,211,77,0.14)', borderRadius: '18px', padding: '24px' }}>
                                 <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1rem', fontWeight: 700, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Banknote size={16} color="#FCD34D" /> Existing Finance Managers
-                                    <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400, marginLeft: '4px' }}>({users.filter(u => u.userType === 'finance_manager').length})</span>
+                                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: '4px' }}>({users.filter(u => u.userType === 'finance_manager').length})</span>
                                 </h3>
                                 {loadingUsers ? (
-                                    <div style={{ textAlign: 'center', padding: '20px', color: 'rgba(255,255,255,0.3)' }}>
+                                    <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
                                         <div style={{ width: '22px', height: '22px', border: '2px solid rgba(252,211,77,0.3)', borderTopColor: '#FCD34D', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
                                     </div>
                                 ) : users.filter(u => u.userType === 'finance_manager').length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: '28px 0', color: 'rgba(255,255,255,0.3)', fontSize: '0.88rem' }}>
+                                    <div style={{ textAlign: 'center', padding: '28px 0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
                                         No Finance Managers added yet.
                                     </div>
                                 ) : (
@@ -689,12 +689,12 @@ const AdminDashboard = () => {
                                 </div>
                                 <div>
                                     <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Add Cleaning Staff</h2>
-                                    <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.45)', fontSize: '0.85rem' }}>Register a new cleaning team member for UniSpace services</p>
+                                    <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Register a new cleaning team member for UniSpace services</p>
                                 </div>
                             </div>
 
                             {/* Form Card */}
-                            <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(34,211,238,0.18)', borderRadius: '22px', padding: '32px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', marginBottom: '28px' }}>
+                            <div style={{ background: 'var(--card-bg)', border: '1px solid rgba(34,211,238,0.18)', borderRadius: '22px', padding: '32px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', marginBottom: '28px' }}>
                                 {csSuccess && (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px', borderRadius: '12px', background: 'rgba(67,233,123,0.1)', border: '1px solid rgba(67,233,123,0.3)', color: '#43E97B', fontSize: '0.9rem', fontWeight: 600, marginBottom: '24px' }}>
                                         <CheckCircle size={18} /> {csSuccess}
@@ -708,28 +708,28 @@ const AdminDashboard = () => {
                                 <form onSubmit={handleAddCleaningStaff}>
                                     {/* Full Name */}
                                     <div style={{ marginBottom: '20px' }}>
-                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: '8px' }}>Full Name</label>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: '8px' }}>Full Name</label>
                                         <div style={{ position: 'relative' }}>
                                             <UserPlus size={16} color="rgba(34,211,238,0.5)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                                            <input type="text" value={csName} onChange={e => { setCsName(e.target.value); setCsError(''); setCsSuccess(''); }} placeholder="e.g. Nimal Perera" style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(34,211,238,0.2)', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.2s' }} onFocus={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(34,211,238,0.55)'} onBlur={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(34,211,238,0.2)'} />
+                                            <input type="text" value={csName} onChange={e => { setCsName(e.target.value); setCsError(''); setCsSuccess(''); }} placeholder="e.g. Nimal Perera" style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'var(--surface-1)', border: '1px solid rgba(34,211,238,0.2)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.2s' }} onFocus={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(34,211,238,0.55)'} onBlur={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(34,211,238,0.2)'} />
                                         </div>
                                     </div>
                                     {/* Email + Role */}
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: '8px' }}>Email Address</label>
+                                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: '8px' }}>Email Address</label>
                                             <div style={{ position: 'relative' }}>
                                                 <Search size={16} color="rgba(34,211,238,0.5)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                                                <input type="email" value={csEmail} onChange={e => { setCsEmail(e.target.value); setCsError(''); }} placeholder="staff@example.com" style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(34,211,238,0.2)', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.2s' }} onFocus={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(34,211,238,0.55)'} onBlur={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(34,211,238,0.2)'} />
+                                                <input type="email" value={csEmail} onChange={e => { setCsEmail(e.target.value); setCsError(''); }} placeholder="staff@example.com" style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'var(--surface-1)', border: '1px solid rgba(34,211,238,0.2)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.2s' }} onFocus={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(34,211,238,0.55)'} onBlur={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(34,211,238,0.2)'} />
                                             </div>
                                         </div>
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: '8px' }}>Role</label>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(34,211,238,0.2)', borderRadius: '12px', padding: '12px 14px', height: '50px' }}>
+                                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: '8px' }}>Role</label>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--surface-1)', border: '1px solid rgba(34,211,238,0.2)', borderRadius: '12px', padding: '12px 14px', height: '50px' }}>
                                                 <Sparkles size={16} color="rgba(34,211,238,0.5)" style={{ flexShrink: 0 }} />
-                                                <select value={csRole} onChange={e => setCsRole(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#fff', fontSize: '0.9rem', appearance: 'none' as const }}>
+                                                <select value={csRole} onChange={e => setCsRole(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'var(--text-primary)', fontSize: '0.9rem', appearance: 'none' as const }}>
                                                     {['General Cleaner', 'Deep Cleaner', 'Move-Out Specialist', 'Supervisor', 'Part-Time Cleaner'].map(r => (
-                                                        <option key={r} value={r} style={{ background: '#1a1a2e' }}>{r}</option>
+                                                        <option key={r} value={r} style={{ background: 'var(--card-bg)', color: 'var(--text-primary)' }}>{r}</option>
                                                     ))}
                                                 </select>
                                             </div>
@@ -737,10 +737,10 @@ const AdminDashboard = () => {
                                     </div>
                                     {/* Password */}
                                     <div style={{ marginBottom: '28px' }}>
-                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: '8px' }}>Password</label>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: '8px' }}>Password</label>
                                         <div style={{ position: 'relative' }}>
                                             <ShieldCheck size={16} color="rgba(34,211,238,0.5)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                                            <input type="password" value={csPassword} onChange={e => { setCsPassword(e.target.value); setCsError(''); }} placeholder="Min. 8 characters" style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(34,211,238,0.2)', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.2s' }} onFocus={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(34,211,238,0.55)'} onBlur={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(34,211,238,0.2)'} />
+                                            <input type="password" value={csPassword} onChange={e => { setCsPassword(e.target.value); setCsError(''); }} placeholder="Min. 8 characters" style={{ width: '100%', padding: '13px 14px 13px 42px', background: 'var(--surface-1)', border: '1px solid rgba(34,211,238,0.2)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.2s' }} onFocus={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(34,211,238,0.55)'} onBlur={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(34,211,238,0.2)'} />
                                         </div>
                                     </div>
                                     {/* Submit */}
@@ -759,17 +759,17 @@ const AdminDashboard = () => {
                             </div>
 
                             {/* Staff List */}
-                            <div style={{ background: 'rgba(18,18,40,0.8)', border: '1px solid rgba(34,211,238,0.14)', borderRadius: '18px', padding: '24px' }}>
+                            <div style={{ background: 'var(--card-bg)', border: '1px solid rgba(34,211,238,0.14)', borderRadius: '18px', padding: '24px' }}>
                                 <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1rem', fontWeight: 700, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Sparkles size={16} color="#22d3ee" /> Cleaning Team
-                                    <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400, marginLeft: '4px' }}>({users.filter(u => u.userType === 'cleaning_staff').length})</span>
+                                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: '4px' }}>({users.filter(u => u.userType === 'cleaning_staff').length})</span>
                                 </h3>
                                 {loadingUsers ? (
-                                    <div style={{ textAlign: 'center', padding: '20px', color: 'rgba(255,255,255,0.3)' }}>
+                                    <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
                                         <div style={{ width: '22px', height: '22px', border: '2px solid rgba(34,211,238,0.3)', borderTopColor: '#22d3ee', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
                                     </div>
                                 ) : users.filter(u => u.userType === 'cleaning_staff').length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: '28px 0', color: 'rgba(255,255,255,0.3)', fontSize: '0.88rem' }}>
+                                    <div style={{ textAlign: 'center', padding: '28px 0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
                                         <div style={{ marginBottom: '10px', opacity: 0.3 }}><Sparkles size={32} /></div>
                                         No cleaning staff added yet.
                                     </div>
@@ -786,9 +786,9 @@ const AdminDashboard = () => {
 
                     {/* ── Reports placeholder ── */}
                     {activeSection === 'reports' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', color: 'rgba(255,255,255,0.25)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', color: 'var(--text-muted)' }}>
                             <Clock size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
-                            <h2 style={{ fontFamily: "'Outfit', sans-serif", margin: '0 0 8px', fontSize: '1.4rem', color: 'rgba(255,255,255,0.4)' }}>Coming Soon</h2>
+                            <h2 style={{ fontFamily: "'Outfit', sans-serif", margin: '0 0 8px', fontSize: '1.4rem', color: 'var(--text-secondary)' }}>Coming Soon</h2>
                             <p style={{ margin: 0, fontSize: '0.9rem' }}>Reports section is under development.</p>
                         </div>
                     )}
@@ -798,14 +798,14 @@ const AdminDashboard = () => {
             {/* ── Boarding Detail Modal ── */}
             {selectedBoarding && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }} onClick={() => setSelectedBoarding(null)}>
-                    <div style={{ background: '#1a1a30', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '24px', padding: '32px', maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+                    <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '24px', padding: '32px', maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
                         {/* Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
                             <div>
-                                <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px', color: '#fff' }}>{selectedBoarding.title}</h3>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)' }}><MapPin size={12} color="#6C63FF" />{selectedBoarding.location}</div>
+                                <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px', color: 'var(--text-primary)' }}>{selectedBoarding.title}</h3>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.82rem', color: 'var(--text-muted)' }}><MapPin size={12} color="#6C63FF" />{selectedBoarding.location}</div>
                             </div>
-                            <button onClick={() => setSelectedBoarding(null)} style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={15} /></button>
+                            <button onClick={() => setSelectedBoarding(null)} style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={15} /></button>
                         </div>
                         {/* Photo */}
                         {selectedBoarding.photos?.[0] && (
@@ -823,16 +823,16 @@ const AdminDashboard = () => {
                                 ['Email', selectedBoarding.contactEmail || '—'],
                                 ['Status', selectedBoarding.status],
                             ].map(([k, v]) => (
-                                <div key={k} style={{ padding: '10px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                                    <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.38)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>{k}</div>
-                                    <div style={{ fontSize: '0.88rem', color: '#fff', fontWeight: 500, textTransform: k === 'Status' ? 'capitalize' : 'none' }}>{v}</div>
+                                <div key={k} style={{ padding: '10px 14px', borderRadius: '10px', background: 'var(--surface-1)', border: '1px solid var(--border-1)' }}>
+                                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>{k}</div>
+                                    <div style={{ fontSize: '0.88rem', color: 'var(--text-primary)', fontWeight: 500, textTransform: k === 'Status' ? 'capitalize' : 'none' }}>{v}</div>
                                 </div>
                             ))}
                         </div>
                         {/* Description */}
-                        <div style={{ padding: '14px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', marginBottom: '16px' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.38)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Description</div>
-                            <p style={{ margin: 0, fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{selectedBoarding.description}</p>
+                        <div style={{ padding: '14px', borderRadius: '10px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', marginBottom: '16px' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Description</div>
+                            <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selectedBoarding.description}</p>
                         </div>
                         {/* Amenities */}
                         {selectedBoarding.amenities?.length > 0 && (
@@ -865,14 +865,14 @@ const AdminDashboard = () => {
             {/* ── Delete Confirmation Modal ── */}
             {deleteConfirm && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
-                    <div style={{ background: '#1a1a30', border: '1px solid rgba(255,101,132,0.4)', borderRadius: '20px', padding: '32px', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+                    <div style={{ background: 'var(--card-bg)', border: '1px solid rgba(255,101,132,0.4)', borderRadius: '20px', padding: '32px', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
                         <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(255,101,132,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
                             <AlertCircle size={26} color="#FF6584" />
                         </div>
                         <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.2rem', fontWeight: 700, margin: '0 0 10px' }}>Delete User?</h3>
-                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', margin: '0 0 24px' }}>This action cannot be undone. The user account will be permanently removed.</p>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '0 0 24px' }}>This action cannot be undone. The user account will be permanently removed.</p>
                         <div style={{ display: 'flex', gap: '12px' }}>
-                            <button onClick={() => setDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Cancel</button>
+                            <button onClick={() => setDeleteConfirm(null)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Cancel</button>
                             <button onClick={() => handleDelete(deleteConfirm)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,101,132,0.15)', border: '1px solid rgba(255,101,132,0.4)', color: '#FF6584', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}>Delete</button>
                         </div>
                     </div>
@@ -886,7 +886,7 @@ const AdminDashboard = () => {
 
             <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        input::placeholder { color: rgba(255,255,255,0.25); }
+                input::placeholder { color: var(--text-muted); opacity: 0.8; }
         @media (max-width: 768px) {
           .sidebar { left: -240px !important; }
           .sidebar.open { left: 0 !important; }
@@ -908,13 +908,13 @@ const UserRow = ({
     typeColor: Record<string, { color: string; bg: string }>;
     onDelete: () => void;
 }) => {
-    const tc = typeColor[user.userType] || { color: '#fff', bg: 'rgba(255,255,255,0.1)' };
+    const tc = typeColor[user.userType] || { color: '#6C63FF', bg: 'rgba(108,99,255,0.15)' };
     const initials = user.name?.slice(0, 2).toUpperCase() || '??';
 
     return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', transition: 'background 0.2s' }}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderRadius: '12px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', transition: 'background 0.2s' }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.08)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)'; }}
         >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
                 <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: `linear-gradient(135deg, ${tc.color}88, ${tc.color}44)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, color: '#fff', flexShrink: 0 }}>
@@ -922,7 +922,7 @@ const UserRow = ({
                 </div>
                 <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 600, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</div>
-                    <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
                 </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0, marginLeft: '12px' }}>
