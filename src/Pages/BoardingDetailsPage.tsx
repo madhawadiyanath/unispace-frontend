@@ -79,6 +79,10 @@ const BoardingDetailsPage = () => {
     const [showAdvanceForm, setShowAdvanceForm] = useState(false);
     const [advanceAmount, setAdvanceAmount] = useState('');
     const [advanceMethod, setAdvanceMethod] = useState<'card' | 'bank_transfer' | 'cash'>('card');
+    const [cardNumber, setCardNumber] = useState('');
+    const [cardholderName, setCardholderName] = useState('');
+    const [expiryDate, setExpiryDate] = useState('');
+    const [cvv, setCvv] = useState('');
     const [advanceSending, setAdvanceSending] = useState(false);
     const [advanceSent, setAdvanceSent] = useState(false);
     const [advanceError, setAdvanceError] = useState('');
@@ -216,6 +220,61 @@ const BoardingDetailsPage = () => {
             setAdvanceError(`Maximum advance is the full monthly rent: LKR ${maxAdvance.toLocaleString()}`);
             return;
         }
+
+        // Card validation if payment method is card
+        if (advanceMethod === 'card') {
+            // Validate cardholder name
+            if (!cardholderName.trim()) {
+                setAdvanceError('Cardholder name is required.');
+                return;
+            }
+            if (cardholderName.trim().length < 3) {
+                setAdvanceError('Cardholder name must be at least 3 characters.');
+                return;
+            }
+
+            // Validate card number (16 digits + Luhn algorithm)
+            const cardNum = cardNumber.replace(/\s/g, '');
+            if (!/^\d{16}$/.test(cardNum)) {
+                setAdvanceError('Card number must be 16 digits.');
+                return;
+            }
+            
+            // Luhn algorithm validation
+            let sum = 0;
+            for (let i = 0; i < cardNum.length; i++) {
+                let digit = parseInt(cardNum[i], 10);
+                if (i % 2 === cardNum.length % 2) {
+                    digit *= 2;
+                    if (digit > 9) digit -= 9;
+                }
+                sum += digit;
+            }
+            if (sum % 10 !== 0) {
+                setAdvanceError('Invalid card number. Please check and try again.');
+                return;
+            }
+
+            // Validate expiry date (MM/YY format)
+            const expiryPattern = /^(0[1-9]|1[0-2])\/\d{2}$/;
+            if (!expiryPattern.test(expiryDate)) {
+                setAdvanceError('Expiry date must be in MM/YY format.');
+                return;
+            }
+            
+            const [month, year] = expiryDate.split('/');
+            const expireDate = new Date(2000 + parseInt(year, 10), parseInt(month, 10), 0);
+            if (expireDate < new Date()) {
+                setAdvanceError('Card has expired.');
+                return;
+            }
+
+            // Validate CVV (3-4 digits)
+            if (!/^\d{3,4}$/.test(cvv)) {
+                setAdvanceError('CVV must be 3-4 digits.');
+                return;
+            }
+        }
         
         const storedUser = localStorage.getItem('user');
         if (!storedUser) { navigate('/login'); return; }
@@ -242,6 +301,10 @@ const BoardingDetailsPage = () => {
             if (data.success) {
                 setAdvanceSent(true);
                 setAdvanceAmount('');
+                setCardNumber('');
+                setCardholderName('');
+                setExpiryDate('');
+                setCvv('');
                 setTimeout(() => { setAdvanceSent(false); setShowAdvanceForm(false); }, 4000);
             } else {
                 setAdvanceError(data.message || 'Payment submission failed.');
@@ -719,7 +782,7 @@ const BoardingDetailsPage = () => {
                                                             <button
                                                                 key={m.id}
                                                                 type="button"
-                                                                onClick={() => setAdvanceMethod(m.id)}
+                                                                onClick={() => { setAdvanceMethod(m.id); setAdvanceError(''); }}
                                                                 style={{
                                                                     flex: 1, padding: '8px 4px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
                                                                     background: advanceMethod === m.id ? 'rgba(67,233,123,0.18)' : 'rgba(255,255,255,0.04)',
@@ -731,24 +794,120 @@ const BoardingDetailsPage = () => {
                                                     </div>
                                                 </div>
 
+                                                {/* Card Details Form (only for card payment) */}
+                                                {advanceMethod === 'card' && (
+                                                    <div style={{ marginBottom: '14px', padding: '12px', borderRadius: '10px', background: 'rgba(67,233,123,0.04)', border: '1px solid rgba(67,233,123,0.2)' }}>
+                                                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#43E97B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Card Details</div>
+                                                        
+                                                        {/* Cardholder Name */}
+                                                        <div style={{ marginBottom: '10px' }}>
+                                                            <label style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Cardholder Name</label>
+                                                            <input
+                                                                type="text"
+                                                                value={cardholderName}
+                                                                onChange={e => { setCardholderName(e.target.value); setAdvanceError(''); }}
+                                                                placeholder="John Doe"
+                                                                style={{
+                                                                    width: '100%', boxSizing: 'border-box', padding: '9px 11px', marginTop: '4px',
+                                                                    background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(67,233,123,0.2)', borderRadius: '8px',
+                                                                    color: '#fff', fontSize: '0.85rem', fontFamily: "'Inter', sans-serif", outline: 'none',
+                                                                }}
+                                                                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(67,233,123,0.5)'; }}
+                                                                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(67,233,123,0.2)'; }}
+                                                            />
+                                                        </div>
+
+                                                        {/* Card Number */}
+                                                        <div style={{ marginBottom: '10px' }}>
+                                                            <label style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Card Number</label>
+                                                            <input
+                                                                type="text"
+                                                                value={cardNumber}
+                                                                onChange={e => {
+                                                                    const val = e.target.value.replace(/\D/g, '').slice(0, 16);
+                                                                    setCardNumber(val.replace(/(\d{4})/g, '$1 ').trim());
+                                                                    setAdvanceError('');
+                                                                }}
+                                                                placeholder="4532 1234 5678 9010"
+                                                                maxLength={19}
+                                                                style={{
+                                                                    width: '100%', boxSizing: 'border-box', padding: '9px 11px', marginTop: '4px',
+                                                                    background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(67,233,123,0.2)', borderRadius: '8px',
+                                                                    color: '#fff', fontSize: '0.85rem', fontFamily: "'Space Mono', monospace", outline: 'none', letterSpacing: '0.05em',
+                                                                }}
+                                                                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(67,233,123,0.5)'; }}
+                                                                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(67,233,123,0.2)'; }}
+                                                            />
+                                                        </div>
+
+                                                        {/* Expiry and CVV Row */}
+                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                                            <div>
+                                                                <label style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Expiry (MM/YY)</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={expiryDate}
+                                                                    onChange={e => {
+                                                                        let val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                                                        if (val.length >= 2) val = val.slice(0, 2) + '/' + val.slice(2);
+                                                                        setExpiryDate(val);
+                                                                        setAdvanceError('');
+                                                                    }}
+                                                                    placeholder="12/25"
+                                                                    maxLength={5}
+                                                                    style={{
+                                                                        width: '100%', boxSizing: 'border-box', padding: '9px 11px', marginTop: '4px',
+                                                                        background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(67,233,123,0.2)', borderRadius: '8px',
+                                                                        color: '#fff', fontSize: '0.85rem', fontFamily: "'Space Mono', monospace", outline: 'none',
+                                                                    }}
+                                                                    onFocus={e => { e.currentTarget.style.borderColor = 'rgba(67,233,123,0.5)'; }}
+                                                                    onBlur={e => { e.currentTarget.style.borderColor = 'rgba(67,233,123,0.2)'; }}
+                                                                />
+                                                            </div>
+
+                                                            <div>
+                                                                <label style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>CVV</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={cvv}
+                                                                    onChange={e => {
+                                                                        const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                                                        setCvv(val);
+                                                                        setAdvanceError('');
+                                                                    }}
+                                                                    placeholder="123"
+                                                                    maxLength={4}
+                                                                    style={{
+                                                                        width: '100%', boxSizing: 'border-box', padding: '9px 11px', marginTop: '4px',
+                                                                        background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(67,233,123,0.2)', borderRadius: '8px',
+                                                                        color: '#fff', fontSize: '0.85rem', fontFamily: "'Space Mono', monospace", outline: 'none',
+                                                                    }}
+                                                                    onFocus={e => { e.currentTarget.style.borderColor = 'rgba(67,233,123,0.5)'; }}
+                                                                    onBlur={e => { e.currentTarget.style.borderColor = 'rgba(67,233,123,0.2)'; }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 {advanceError && (
                                                     <p style={{ color: '#FF6584', fontSize: '0.78rem', margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: '5px' }}>⚠ {advanceError}</p>
                                                 )}
                                                 <button
                                                     onClick={handlePayAdvance}
-                                                    disabled={advanceSending || !advanceAmount || Number(advanceAmount) <= 0}
+                                                    disabled={advanceSending || !advanceAmount || Number(advanceAmount) <= 0 || (advanceMethod === 'card' && (!cardNumber.replace(/\s/g, '') || !cardholderName.trim() || !expiryDate || !cvv))}
                                                     style={{
                                                         width: '100%', padding: '12px', borderRadius: '12px',
-                                                        background: advanceSending || !advanceAmount || Number(advanceAmount) <= 0
+                                                        background: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 || (advanceMethod === 'card' && (!cardNumber.replace(/\s/g, '') || !cardholderName.trim() || !expiryDate || !cvv))
                                                             ? 'rgba(67,233,123,0.08)'
                                                             : 'linear-gradient(135deg, #43E97B, #38F9D7)',
                                                         border: 'none',
-                                                        color: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 ? 'rgba(255,255,255,0.3)' : '#0D0D1A',
+                                                        color: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 || (advanceMethod === 'card' && (!cardNumber.replace(/\s/g, '') || !cardholderName.trim() || !expiryDate || !cvv)) ? 'rgba(255,255,255,0.3)' : '#0D0D1A',
                                                         fontWeight: 700, fontSize: '0.9rem',
-                                                        cursor: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 ? 'not-allowed' : 'pointer',
+                                                        cursor: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 || (advanceMethod === 'card' && (!cardNumber.replace(/\s/g, '') || !cardholderName.trim() || !expiryDate || !cvv)) ? 'not-allowed' : 'pointer',
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
                                                         transition: 'all 0.2s',
-                                                        boxShadow: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 ? 'none' : '0 6px 20px rgba(67,233,123,0.35)',
+                                                        boxShadow: advanceSending || !advanceAmount || Number(advanceAmount) <= 0 || (advanceMethod === 'card' && (!cardNumber.replace(/\s/g, '') || !cardholderName.trim() || !expiryDate || !cvv)) ? 'none' : '0 6px 20px rgba(67,233,123,0.35)',
                                                     }}
                                                 >
                                                     {advanceSending
