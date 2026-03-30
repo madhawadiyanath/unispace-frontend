@@ -59,7 +59,7 @@ const LoginPage = () => {
         <div
             style={{
                 minHeight: '100vh',
-                background: 'linear-gradient(135deg, #0D0D1A 0%, #1a0533 50%, #0D0D1A 100%)',
+                background: 'var(--gradient-hero)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -67,6 +67,7 @@ const LoginPage = () => {
                 position: 'relative',
                 overflow: 'hidden',
                 fontFamily: "'Inter', sans-serif",
+                color: 'var(--text-primary)',
             }}
         >
             {/* Background blobs */}
@@ -77,10 +78,10 @@ const LoginPage = () => {
 
             {/* Logo top-left */}
             <Link to="/" style={{ position: 'absolute', top: '24px', left: '28px', display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px rgba(108,99,255,0.5)' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--btn-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--btn-primary-shadow-sm)' }}>
                     <Home size={18} color="#fff" />
                 </div>
-                <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.1rem', background: 'linear-gradient(135deg, #fff, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.1rem', background: 'var(--gradient-purple)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     BoardingFinder
                 </span>
             </Link>
@@ -90,12 +91,12 @@ const LoginPage = () => {
                 style={{
                     width: '100%',
                     maxWidth: '440px',
-                    background: 'rgba(18, 18, 40, 0.85)',
+                    background: 'var(--surface-2)',
                     backdropFilter: 'blur(24px)',
-                    border: '1px solid rgba(108,99,255,0.2)',
+                    border: '1px solid var(--border-1)',
                     borderRadius: '28px',
                     padding: '44px 40px',
-                    boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
+                    boxShadow: 'var(--shadow-card)',
                     position: 'relative',
                     zIndex: 1,
                     animation: 'fadeInUp 0.6s ease forwards',
@@ -106,27 +107,27 @@ const LoginPage = () => {
                     <div
                         style={{
                             width: '64px', height: '64px', borderRadius: '20px',
-                            background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                            background: 'var(--btn-primary-bg)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             margin: '0 auto 18px',
-                            boxShadow: '0 8px 25px rgba(108,99,255,0.5)',
+                            boxShadow: 'var(--btn-primary-shadow)',
                         }}
                     >
                         <LogIn size={28} color="#fff" />
                     </div>
-                    <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.9rem', fontWeight: 800, margin: '0 0 8px', letterSpacing: '-0.5px', color: '#fff' }}>
+                    <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.9rem', fontWeight: 800, margin: '0 0 8px', letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
                         Welcome Back
                     </h1>
-                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                         Sign in to your BoardingFinder account
                     </p>
                 </div>
 
                 {/* Error / Success Alerts */}
                 {error && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,101,132,0.12)', border: '1px solid rgba(255,101,132,0.35)', borderRadius: '12px', padding: '12px 16px', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--danger-soft-bg)', border: '1px solid var(--danger-soft-border)', borderRadius: '12px', padding: '12px 16px', marginBottom: '20px' }}>
                         <AlertCircle size={17} color="#FF6584" style={{ flexShrink: 0 }} />
-                        <span style={{ color: '#FF6584', fontSize: '0.875rem' }}>{error}</span>
+                        <span style={{ color: 'var(--danger-soft-text)', fontSize: '0.875rem' }}>{error}</span>
                     </div>
                 )}
                 {success && (
@@ -140,7 +141,7 @@ const LoginPage = () => {
                 <form onSubmit={handleSubmit}>
                     {/* Username */}
                     <div style={{ marginBottom: '16px' }}>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginBottom: '8px', letterSpacing: '0.3px' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', letterSpacing: '0.3px' }}>
                             USERNAME
                         </label>
                         <div style={{ position: 'relative' }}>
@@ -156,21 +157,21 @@ const LoginPage = () => {
                                 style={{
                                     width: '100%',
                                     padding: '13px 14px 13px 42px',
-                                    background: 'rgba(255,255,255,0.05)',
-                                    border: '1px solid rgba(108,99,255,0.2)',
+                                    background: 'var(--input-bg)',
+                                    border: '1px solid var(--input-border)',
                                     borderRadius: '12px',
-                                    color: '#fff',
+                                    color: 'var(--input-text)',
                                     fontSize: '0.95rem',
                                     transition: 'border-color 0.2s, box-shadow 0.2s',
                                     outline: 'none',
                                     boxSizing: 'border-box',
                                 }}
                                 onFocus={(e) => {
-                                    e.target.style.borderColor = '#6C63FF';
-                                    e.target.style.boxShadow = '0 0 0 3px rgba(108,99,255,0.15)';
+                                    e.target.style.borderColor = 'var(--input-focus-border)';
+                                    e.target.style.boxShadow = 'var(--input-focus-ring)';
                                 }}
                                 onBlur={(e) => {
-                                    e.target.style.borderColor = 'rgba(108,99,255,0.2)';
+                                    e.target.style.borderColor = 'var(--input-border)';
                                     e.target.style.boxShadow = 'none';
                                 }}
                             />
@@ -180,10 +181,10 @@ const LoginPage = () => {
                     {/* Password */}
                     <div style={{ marginBottom: '24px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.3px' }}>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.3px' }}>
                                 PASSWORD
                             </label>
-                            <a href="#" style={{ fontSize: '0.8rem', color: '#a855f7', fontWeight: 500 }}>Forgot password?</a>
+                            <a href="#" style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 500 }}>Forgot password?</a>
                         </div>
                         <div style={{ position: 'relative' }}>
                             <Lock size={17} color="#6C63FF" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
@@ -197,28 +198,28 @@ const LoginPage = () => {
                                 style={{
                                     width: '100%',
                                     padding: '13px 44px 13px 42px',
-                                    background: 'rgba(255,255,255,0.05)',
-                                    border: '1px solid rgba(108,99,255,0.2)',
+                                    background: 'var(--input-bg)',
+                                    border: '1px solid var(--input-border)',
                                     borderRadius: '12px',
-                                    color: '#fff',
+                                    color: 'var(--input-text)',
                                     fontSize: '0.95rem',
                                     transition: 'border-color 0.2s, box-shadow 0.2s',
                                     outline: 'none',
                                     boxSizing: 'border-box',
                                 }}
                                 onFocus={(e) => {
-                                    e.target.style.borderColor = '#6C63FF';
-                                    e.target.style.boxShadow = '0 0 0 3px rgba(108,99,255,0.15)';
+                                    e.target.style.borderColor = 'var(--input-focus-border)';
+                                    e.target.style.boxShadow = 'var(--input-focus-ring)';
                                 }}
                                 onBlur={(e) => {
-                                    e.target.style.borderColor = 'rgba(108,99,255,0.2)';
+                                    e.target.style.borderColor = 'var(--input-border)';
                                     e.target.style.boxShadow = 'none';
                                 }}
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', padding: 0 }}
+                                style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0 }}
                             >
                                 {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                             </button>
@@ -233,13 +234,14 @@ const LoginPage = () => {
                             width: '100%',
                             padding: '14px',
                             borderRadius: '14px',
-                            background: loading ? 'rgba(108,99,255,0.5)' : 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                            background: 'var(--btn-primary-bg)',
                             color: '#fff',
                             fontSize: '1rem',
                             fontWeight: 700,
                             cursor: loading ? 'not-allowed' : 'pointer',
                             border: 'none',
-                            boxShadow: loading ? 'none' : '0 8px 25px rgba(108,99,255,0.45)',
+                            boxShadow: loading ? 'none' : 'var(--btn-primary-shadow)',
+                            opacity: loading ? 0.75 : 1,
                             transition: 'all 0.25s',
                             display: 'flex',
                             alignItems: 'center',
@@ -251,12 +253,12 @@ const LoginPage = () => {
                         onMouseEnter={(e) => {
                             if (!loading) {
                                 (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
-                                (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 30px rgba(108,99,255,0.6)';
+                                (e.currentTarget as HTMLElement).style.boxShadow = 'var(--btn-primary-shadow-hover)';
                             }
                         }}
                         onMouseLeave={(e) => {
                             (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                            (e.currentTarget as HTMLElement).style.boxShadow = loading ? 'none' : '0 8px 25px rgba(108,99,255,0.45)';
+                            (e.currentTarget as HTMLElement).style.boxShadow = loading ? 'none' : 'var(--btn-primary-shadow)';
                         }}
                     >
                         {loading ? (
@@ -275,17 +277,17 @@ const LoginPage = () => {
 
                 {/* Divider */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', margin: '28px 0' }}>
-                    <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
-                    <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>or</span>
-                    <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+                    <div style={{ flex: 1, height: '1px', background: 'var(--border-1)' }} />
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>or</span>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--border-1)' }} />
                 </div>
 
                 {/* Sign up link */}
-                <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                     Don't have an account?{' '}
                     <Link
                         to="/register"
-                        style={{ color: '#a855f7', fontWeight: 600, textDecoration: 'none' }}
+                        style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}
                         onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.textDecoration = 'underline')}
                         onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.textDecoration = 'none')}
                     >
@@ -297,8 +299,8 @@ const LoginPage = () => {
             <style>{`
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin-slow { to { transform: rotate(360deg); } }
-        input::placeholder { color: rgba(255,255,255,0.25); }
-        select option { background: #1a1a35; }
+                input::placeholder { color: var(--text-muted); }
+                select option { background: var(--select-option-bg); color: var(--text-primary); }
       `}</style>
         </div>
     );

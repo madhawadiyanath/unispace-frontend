@@ -4,7 +4,7 @@ import {
     Users, Home, TrendingUp, ShieldCheck, LogOut,
     Bell, Search, Menu, X, Trash2, BarChart2,
     CheckCircle, Clock, AlertCircle, ChevronRight,
-    Eye, MapPin, Building2, UserPlus, DollarSign,
+    Eye, MapPin, Building2, UserPlus, Banknote,
     Sparkles,
 } from 'lucide-react';
 
@@ -233,7 +233,7 @@ const AdminDashboard = () => {
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: <BarChart2 size={18} />, sub: false },
         { id: 'users', label: 'Users', icon: <Users size={18} />, sub: false },
-        { id: 'add-finance-manager', label: 'Add Finance Manager', icon: <DollarSign size={15} />, sub: true },
+        { id: 'add-finance-manager', label: 'Add Finance Manager', icon: <Banknote size={15} />, sub: true },
         { id: 'add-cleaning-staff', label: 'Cleaning Staff', icon: <Sparkles size={18} />, sub: false },
         { id: 'listings', label: 'Listings', icon: <Home size={18} />, sub: false },
         { id: 'reports', label: 'Reports', icon: <TrendingUp size={18} />, sub: false },
@@ -560,7 +560,7 @@ const AdminDashboard = () => {
                             {/* Header */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
                                 <div style={{ width: '52px', height: '52px', borderRadius: '16px', background: 'rgba(252,211,77,0.12)', border: '1px solid rgba(252,211,77,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                    <DollarSign size={24} color="#FCD34D" />
+                                    <Banknote size={24} color="#FCD34D" />
                                 </div>
                                 <div>
                                     <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Add Finance Manager</h2>
@@ -657,7 +657,7 @@ const AdminDashboard = () => {
                             {/* Finance Managers list */}
                             <div style={{ marginTop: '28px', background: 'rgba(18,18,40,0.8)', border: '1px solid rgba(252,211,77,0.14)', borderRadius: '18px', padding: '24px' }}>
                                 <h3 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1rem', fontWeight: 700, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <DollarSign size={16} color="#FCD34D" /> Existing Finance Managers
+                                    <Banknote size={16} color="#FCD34D" /> Existing Finance Managers
                                     <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400, marginLeft: '4px' }}>({users.filter(u => u.userType === 'finance_manager').length})</span>
                                 </h3>
                                 {loadingUsers ? (

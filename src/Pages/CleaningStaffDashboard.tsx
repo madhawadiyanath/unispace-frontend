@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Sparkles, LogOut, Bell, Calendar, Clock,
   CheckCircle, User, Mail, MapPin, Phone,
-  ClipboardList, ChevronRight,
+  ClipboardList, ChevronRight, Wrench, Droplets, Zap, Hammer, AlertCircle,
 } from 'lucide-react';
+
+const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:5000';
 
 /* ─── Types ──────────────────────────────────────────────── */
 interface BookingRequest {
@@ -21,6 +23,75 @@ interface BookingRequest {
   status: 'pending' | 'accepted' | 'completed';
   submittedAt: string;
 }
+
+type MaintenanceRequestStatus = 'pending' | 'accepted' | 'completed' | 'rejected';
+
+interface MaintenanceRequest {
+  id: string;
+  type: string;
+  status: MaintenanceRequestStatus;
+  submittedAt: string;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  date: string;
+  time: string;
+  priority: string;
+  description: string;
+  requestedById?: string;
+  requestedByEmail?: string;
+  acceptedById?: string;
+  acceptedByName?: string;
+  acceptedAt?: string;
+  completedAt?: string;
+  rejectedAt?: string;
+}
+
+type ApiMaintenanceRequest = {
+  _id: string;
+  requesterId: string;
+  requesterName?: string;
+  requesterEmail?: string;
+  requesterPhone?: string;
+  address: string;
+  category: string;
+  priority: string;
+  preferredDate: string;
+  preferredTime?: string;
+  description: string;
+  status: MaintenanceRequestStatus;
+  acceptedById?: string;
+  acceptedByName?: string;
+  acceptedAt?: string;
+  completedAt?: string;
+  rejectedAt?: string;
+  createdAt?: string;
+};
+
+const mapApiMaintenanceRequest = (r: ApiMaintenanceRequest): MaintenanceRequest => {
+  return {
+    id: r._id,
+    type: r.category,
+    status: r.status,
+    submittedAt: r.createdAt || '',
+    name: r.requesterName || '',
+    phone: r.requesterPhone || '',
+    email: r.requesterEmail || '',
+    address: r.address,
+    date: r.preferredDate,
+    time: r.preferredTime || '',
+    priority: r.priority,
+    description: r.description,
+    requestedById: r.requesterId,
+    requestedByEmail: r.requesterEmail || '',
+    acceptedById: r.acceptedById,
+    acceptedByName: r.acceptedByName,
+    acceptedAt: r.acceptedAt,
+    completedAt: r.completedAt,
+    rejectedAt: r.rejectedAt,
+  };
+};
 
 const PACKAGE_NAMES: Record<string, string> = {
   basic: 'Basic Clean',
@@ -44,8 +115,24 @@ const CleaningStaffDashboard = () => {
   const [bookings, setBookings] = useState<BookingRequest[]>([]);
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'accepted' | 'completed'>('all');
 
+  const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
+
+  const loadMaintenanceRequests = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/maintenance`);
+      const data = await res.json();
+      const list = (data?.requests || []) as ApiMaintenanceRequest[];
+      const mapped = Array.isArray(list) ? list.map(mapApiMaintenanceRequest) : [];
+      setMaintenanceRequests(mapped);
+    } catch {
+      setMaintenanceRequests([]);
+    }
+  };
+
   useEffect(() => {
-    if (!currentUser || currentUser.userType !== 'cleaning_staff') {
+    const userType = String(currentUser?.userType || '').toLowerCase();
+    const isStaff = userType === 'admin' || userType.includes('staff');
+    if (!currentUser || !isStaff) {
       navigate('/login');
       return;
     }
@@ -53,6 +140,21 @@ const CleaningStaffDashboard = () => {
     if (saved) {
       try { setBookings(JSON.parse(saved)); } catch {}
     }
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'cleaningBookings') {
+        try {
+          const raw = localStorage.getItem('cleaningBookings');
+          const parsed = raw ? JSON.parse(raw) : [];
+          setBookings(Array.isArray(parsed) ? parsed : []);
+        } catch {
+          setBookings([]);
+        }
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    void loadMaintenanceRequests();
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   /* ── Helpers ── */
@@ -67,6 +169,28 @@ const CleaningStaffDashboard = () => {
     navigate('/login');
   };
 
+  const updateMaintenanceStatus = (id: string, status: MaintenanceRequestStatus) => {
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/maintenance/${encodeURIComponent(id)}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            status,
+            acceptedById: currentUser?._id,
+            acceptedByName: currentUser?.name,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) return;
+        const updated = mapApiMaintenanceRequest(data.request as ApiMaintenanceRequest);
+        setMaintenanceRequests(prev => prev.map(r => r.id === id ? updated : r));
+      } catch {
+        // keep UI as-is on failure
+      }
+    })();
+  };
+
   const pending   = bookings.filter(b => b.status === 'pending');
   const accepted  = bookings.filter(b => b.status === 'accepted');
   const completed = bookings.filter(b => b.status === 'completed');
@@ -76,6 +200,13 @@ const CleaningStaffDashboard = () => {
     activeTab === 'accepted'  ? accepted  :
     activeTab === 'completed' ? completed :
     bookings;
+
+  const maintenanceForStaff = maintenanceRequests
+    .filter(r => r.type !== 'cleaning')
+    .slice()
+    .sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''));
+
+  const pendingMaintenanceCount = maintenanceForStaff.filter(r => r.status === 'pending').length;
 
   /* ─────────────────────────── JSX ─────────────────────────── */
   return (
@@ -324,6 +455,146 @@ const CleaningStaffDashboard = () => {
             })}
           </div>
         )}
+
+        {/* ── Maintenance Requests (Plumbing/Electrical/Repairs) ── */}
+        <div style={{ marginTop: '26px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(108,99,255,0.10)', border: '1px solid rgba(108,99,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Wrench size={18} color="#a78bfa" />
+              </div>
+              <div>
+                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.05rem' }}>Maintenance Requests</div>
+                <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)' }}>
+                  {maintenanceForStaff.length} total
+                  {pendingMaintenanceCount > 0 && (
+                    <span style={{ color: '#FCD34D', fontWeight: 800 }}> · {pendingMaintenanceCount} pending</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => navigate('/maintenance?tab=plumbing')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '12px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.25)', color: '#a78bfa', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}
+              >
+                Open Maintenance Page <ChevronRight size={14} />
+              </button>
+              <button
+                onClick={() => {
+                  void loadMaintenanceRequests();
+                }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.65)', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          {maintenanceForStaff.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '34px 18px', borderRadius: '18px', background: 'rgba(18,18,40,0.75)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.35)' }}>
+              <AlertCircle size={38} color="rgba(255,255,255,0.2)" style={{ marginBottom: '12px' }} />
+              <div style={{ fontWeight: 800, color: 'rgba(255,255,255,0.55)' }}>No maintenance requests yet</div>
+              <div style={{ fontSize: '0.85rem', marginTop: '6px' }}>When owners submit requests, they will appear here.</div>
+            </div>
+          ) : (
+            <div className="booking-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '18px' }}>
+              {maintenanceForStaff.map(req => {
+                const typeCfg: Record<string, { label: string; icon: ReactNode; color: string }> = {
+                  plumbing: { label: 'Plumbing', icon: <Droplets size={16} />, color: '#06b6d4' },
+                  electrical: { label: 'Electrical', icon: <Zap size={16} />, color: '#f59e0b' },
+                  repairs: { label: 'Repairs', icon: <Hammer size={16} />, color: '#22c55e' },
+                };
+                const tc = typeCfg[req.type] || { label: req.type, icon: <Wrench size={16} />, color: '#a78bfa' };
+                const statusMap: Record<MaintenanceRequestStatus, { color: string; bg: string; border: string; label: string }> = {
+                  pending: { color: '#FCD34D', bg: 'rgba(252,211,77,0.12)', border: 'rgba(252,211,77,0.3)', label: '● Pending' },
+                  accepted: { color: '#22d3ee', bg: 'rgba(34,211,238,0.12)', border: 'rgba(34,211,238,0.3)', label: '◉ Accepted' },
+                  completed: { color: '#43E97B', bg: 'rgba(67,233,123,0.12)', border: 'rgba(67,233,123,0.3)', label: '✓ Completed' },
+                  rejected: { color: '#fb7185', bg: 'rgba(251,113,133,0.12)', border: 'rgba(251,113,133,0.3)', label: '✕ Rejected' },
+                };
+                const s = statusMap[req.status];
+
+                return (
+                  <div key={req.id} style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ height: '4px', background: `linear-gradient(90deg, ${tc.color}, ${tc.color}88)` }} />
+
+                    <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'flex-start' }}>
+                        <div>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontWeight: 800, color: '#fff' }}>
+                            <span style={{ color: tc.color, opacity: 0.95 }}>{tc.icon}</span> {tc.label}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
+                            {new Date(req.submittedAt).toLocaleString()}
+                          </div>
+                        </div>
+                        <span style={{ padding: '4px 12px', borderRadius: '100px', background: s.bg, color: s.color, fontSize: '0.72rem', fontWeight: 800, border: `1px solid ${s.border}` }}>
+                          {s.label}
+                        </span>
+                      </div>
+
+                      <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {[
+                          { icon: <User size={13} color={tc.color} />, text: req.name },
+                          { icon: <Phone size={13} color={tc.color} />, text: req.phone },
+                          { icon: <Mail size={13} color={tc.color} />, text: req.email },
+                          { icon: <MapPin size={13} color={tc.color} />, text: req.address },
+                        ].map((item, i) => (
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.83rem', color: 'rgba(255,255,255,0.7)' }}>
+                            {item.icon}
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.text}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)' }}>
+                          <Calendar size={13} color={tc.color} /> {req.date}
+                        </div>
+                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)' }}>
+                          <Clock size={13} color={tc.color} /> {req.time || '—'}
+                        </div>
+                      </div>
+
+                      <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.55, borderLeft: `3px solid ${tc.color}55` }}>
+                        {req.description}
+                      </div>
+
+                      <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
+                        {req.status === 'pending' && (
+                          <button
+                            onClick={() => updateMaintenanceStatus(req.id, 'accepted')}
+                            style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.35)', color: '#22d3ee', fontWeight: 700, cursor: 'pointer', fontSize: '0.87rem', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(34,211,238,0.22)'}
+                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(34,211,238,0.12)'}
+                          >
+                            <CheckCircle size={15} /> Accept
+                          </button>
+                        )}
+                        {req.status === 'accepted' && (
+                          <button
+                            onClick={() => updateMaintenanceStatus(req.id, 'completed')}
+                            style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(67,233,123,0.12)', border: '1px solid rgba(67,233,123,0.35)', color: '#43E97B', fontWeight: 700, cursor: 'pointer', fontSize: '0.87rem', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(67,233,123,0.22)'}
+                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(67,233,123,0.12)'}
+                          >
+                            <CheckCircle size={15} /> Complete
+                          </button>
+                        )}
+                        {req.status === 'completed' && (
+                          <div style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(67,233,123,0.08)', border: '1px solid rgba(67,233,123,0.2)', color: '#43E97B', fontSize: '0.87rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                            <CheckCircle size={15} /> Done
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       <style>{`

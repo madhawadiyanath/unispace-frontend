@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, MapPin, DollarSign, Star, Users, Home, ArrowRight, Sparkles } from 'lucide-react';
+import { Search, MapPin, Star, Users, Home, ArrowRight, Sparkles } from 'lucide-react';
 
 const Hero = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -55,7 +55,7 @@ const Hero = () => {
                 display: 'flex',
                 alignItems: 'center',
                 overflow: 'hidden',
-                background: 'linear-gradient(135deg, #0D0D1A 0%, #1a0533 50%, #0D0D1A 100%)',
+                background: 'var(--gradient-hero)',
                 paddingTop: '72px',
             }}
         >
@@ -65,7 +65,7 @@ const Hero = () => {
                     position: 'absolute',
                     width: '600px',
                     height: '600px',
-                    background: 'radial-gradient(circle, rgba(108,99,255,0.2) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(79,70,229,0.16) 0%, transparent 70%)',
                     top: '-100px',
                     right: '-100px',
                     filter: 'blur(40px)',
@@ -78,7 +78,7 @@ const Hero = () => {
                     position: 'absolute',
                     width: '500px',
                     height: '500px',
-                    background: 'radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%)',
                     bottom: '-50px',
                     left: '-100px',
                     filter: 'blur(40px)',
@@ -91,7 +91,7 @@ const Hero = () => {
                     position: 'absolute',
                     width: '300px',
                     height: '300px',
-                    background: 'radial-gradient(circle, rgba(67,233,123,0.1) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(67,233,123,0.12) 0%, transparent 70%)',
                     top: '60%',
                     left: '40%',
                     filter: 'blur(30px)',
@@ -140,15 +140,15 @@ const Hero = () => {
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '8px',
-                                background: 'rgba(108,99,255,0.15)',
-                                border: '1px solid rgba(108,99,255,0.4)',
+                                background: 'var(--nav-link-hover-bg)',
+                                border: '1px solid var(--nav-border)',
                                 borderRadius: '100px',
                                 padding: '6px 16px',
                                 marginBottom: '24px',
                             }}
                         >
-                            <Sparkles size={14} color="#a855f7" />
-                            <span style={{ fontSize: '0.8rem', color: '#a855f7', fontWeight: 600 }}>
+                            <Sparkles size={14} color="var(--primary)" />
+                            <span style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600 }}>
                                 #1 Campus Boarding Platform in Sri Lanka
                             </span>
                         </div>
@@ -167,7 +167,7 @@ const Hero = () => {
                             Find Your{' '}
                             <span
                                 style={{
-                                    background: 'linear-gradient(135deg, #6C63FF, #a855f7, #FF6584)',
+                                    background: 'linear-gradient(135deg, var(--primary), var(--secondary), var(--accent))',
                                     WebkitBackgroundClip: 'text',
                                     WebkitTextFillColor: 'transparent',
                                     display: 'inline-block',
@@ -182,7 +182,7 @@ const Hero = () => {
                         <p
                             style={{
                                 fontSize: '1.1rem',
-                                color: 'rgba(255,255,255,0.65)',
+                                color: 'var(--text-secondary)',
                                 lineHeight: 1.8,
                                 marginBottom: '36px',
                                 maxWidth: '480px',
@@ -195,12 +195,12 @@ const Hero = () => {
                         {/* Search Box */}
                         <div
                             style={{
-                                background: 'rgba(20, 20, 45, 0.8)',
-                                backdropFilter: 'blur(20px)',
-                                border: '1px solid rgba(108,99,255,0.25)',
+                                background: 'var(--search-panel-bg)',
+                                backdropFilter: 'blur(22px)',
+                                border: '1px solid var(--search-panel-border)',
                                 borderRadius: '20px',
                                 padding: '20px',
-                                boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+                                boxShadow: 'var(--search-panel-shadow)',
                                 marginBottom: '36px',
                             }}
                         >
@@ -210,14 +210,14 @@ const Hero = () => {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '12px',
-                                    background: 'rgba(255,255,255,0.05)',
-                                    border: '1px solid rgba(108,99,255,0.2)',
+                                    background: 'var(--search-field-bg)',
+                                    border: '1px solid var(--search-field-border)',
                                     borderRadius: '12px',
                                     padding: '12px 16px',
                                     marginBottom: '12px',
                                 }}
                             >
-                                <MapPin size={18} color="#6C63FF" style={{ flexShrink: 0 }} />
+                                <MapPin size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
                                 <input
                                     type="text"
                                     placeholder="Search by location, university or area..."
@@ -226,7 +226,7 @@ const Hero = () => {
                                     style={{
                                         background: 'transparent',
                                         border: 'none',
-                                        color: '#fff',
+                                        color: 'var(--input-text)',
                                         fontSize: '0.95rem',
                                         flex: 1,
                                         outline: 'none',
@@ -242,29 +242,29 @@ const Hero = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '8px',
-                                        background: 'rgba(255,255,255,0.05)',
-                                        border: '1px solid rgba(108,99,255,0.2)',
+                                        background: 'var(--search-filter-bg)',
+                                        border: '1px solid var(--search-filter-border)',
                                         borderRadius: '10px',
                                         padding: '10px 14px',
                                     }}
                                 >
-                                    <DollarSign size={16} color="#43E97B" />
+                                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--accent)', flexShrink: 0, letterSpacing: '0.3px' }}>Rs.</span>
                                     <select
                                         value={priceRange}
                                         onChange={(e) => setPriceRange(e.target.value)}
                                         style={{
                                             background: 'transparent',
                                             border: 'none',
-                                            color: 'rgba(255,255,255,0.8)',
+                                            color: 'var(--text-secondary)',
                                             fontSize: '0.875rem',
                                             flex: 1,
                                         }}
                                     >
-                                        <option value="any" style={{ background: '#1a1a35' }}>Any Price</option>
-                                        <option value="5000" style={{ background: '#1a1a35' }}>Under LKR 5,000</option>
-                                        <option value="10000" style={{ background: '#1a1a35' }}>LKR 5,000 – 10,000</option>
-                                        <option value="20000" style={{ background: '#1a1a35' }}>LKR 10,000 – 20,000</option>
-                                        <option value="20000+" style={{ background: '#1a1a35' }}>LKR 20,000+</option>
+                                        <option value="any" style={{ background: 'var(--select-option-bg)' }}>Any Price</option>
+                                        <option value="5000" style={{ background: 'var(--select-option-bg)' }}>Under LKR 5,000</option>
+                                        <option value="10000" style={{ background: 'var(--select-option-bg)' }}>LKR 5,000 – 10,000</option>
+                                        <option value="20000" style={{ background: 'var(--select-option-bg)' }}>LKR 10,000 – 20,000</option>
+                                        <option value="20000+" style={{ background: 'var(--select-option-bg)' }}>LKR 20,000+</option>
                                     </select>
                                 </div>
 
@@ -274,29 +274,29 @@ const Hero = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '8px',
-                                        background: 'rgba(255,255,255,0.05)',
-                                        border: '1px solid rgba(108,99,255,0.2)',
+                                        background: 'var(--search-filter-bg)',
+                                        border: '1px solid var(--search-filter-border)',
                                         borderRadius: '10px',
                                         padding: '10px 14px',
                                     }}
                                 >
-                                    <Home size={16} color="#FF6584" />
+                                    <Home size={16} color="var(--primary)" />
                                     <select
                                         value={roomType}
                                         onChange={(e) => setRoomType(e.target.value)}
                                         style={{
                                             background: 'transparent',
                                             border: 'none',
-                                            color: 'rgba(255,255,255,0.8)',
+                                            color: 'var(--text-secondary)',
                                             fontSize: '0.875rem',
                                             flex: 1,
                                         }}
                                     >
-                                        <option value="any" style={{ background: '#1a1a35' }}>Any Type</option>
-                                        <option value="single" style={{ background: '#1a1a35' }}>Single Room</option>
-                                        <option value="shared" style={{ background: '#1a1a35' }}>Shared Room</option>
-                                        <option value="studio" style={{ background: '#1a1a35' }}>Studio</option>
-                                        <option value="apartment" style={{ background: '#1a1a35' }}>Apartment</option>
+                                        <option value="any" style={{ background: 'var(--select-option-bg)' }}>Any Type</option>
+                                        <option value="single" style={{ background: 'var(--select-option-bg)' }}>Single Room</option>
+                                        <option value="shared" style={{ background: 'var(--select-option-bg)' }}>Shared Room</option>
+                                        <option value="studio" style={{ background: 'var(--select-option-bg)' }}>Studio</option>
+                                        <option value="apartment" style={{ background: 'var(--select-option-bg)' }}>Apartment</option>
                                     </select>
                                 </div>
                             </div>
@@ -307,7 +307,7 @@ const Hero = () => {
                                     width: '100%',
                                     padding: '14px',
                                     borderRadius: '12px',
-                                    background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                                    background: 'var(--btn-primary-bg)',
                                     color: '#fff',
                                     fontSize: '1rem',
                                     fontWeight: 700,
@@ -315,17 +315,17 @@ const Hero = () => {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     gap: '10px',
-                                    boxShadow: '0 8px 25px rgba(108,99,255,0.5)',
+                                    boxShadow: 'var(--btn-primary-shadow)',
                                     transition: 'all 0.3s ease',
                                     letterSpacing: '0.5px',
                                 }}
                                 onMouseEnter={(e) => {
                                     (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
-                                    (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 35px rgba(108,99,255,0.7)';
+                                    (e.currentTarget as HTMLElement).style.boxShadow = 'var(--btn-primary-shadow-hover)';
                                 }}
                                 onMouseLeave={(e) => {
                                     (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                                    (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 25px rgba(108,99,255,0.5)';
+                                    (e.currentTarget as HTMLElement).style.boxShadow = 'var(--btn-primary-shadow)';
                                 }}
                             >
                                 <Search size={18} />
@@ -335,27 +335,27 @@ const Hero = () => {
 
                         {/* Popular Tags */}
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginRight: '4px' }}>Popular:</span>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginRight: '4px' }}>Popular:</span>
                             {['NSBM', 'UOC', 'USJP', 'SLIIT', 'MoratuwaUni'].map((tag) => (
                                 <button
                                     key={tag}
                                     style={{
                                         padding: '5px 14px',
                                         borderRadius: '100px',
-                                        background: 'rgba(108,99,255,0.12)',
-                                        border: '1px solid rgba(108,99,255,0.25)',
-                                        color: 'rgba(255,255,255,0.7)',
+                                        background: 'var(--surface-2)',
+                                        border: '1px solid var(--btn-ghost-border)',
+                                        color: 'var(--text-secondary)',
                                         fontSize: '0.8rem',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s',
                                     }}
                                     onMouseEnter={(e) => {
-                                        (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.25)';
-                                        (e.currentTarget as HTMLElement).style.color = '#fff';
+                                        (e.currentTarget as HTMLElement).style.background = 'var(--nav-link-hover-bg)';
+                                        (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)';
                                     }}
                                     onMouseLeave={(e) => {
-                                        (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.12)';
-                                        (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)';
+                                        (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)';
+                                        (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
                                     }}
                                 >
                                     {tag}
@@ -380,9 +380,9 @@ const Hero = () => {
                         <div
                             style={{
                                 width: '280px',
-                                background: 'rgba(20,20,50,0.8)',
+                                background: 'var(--card-bg)',
                                 backdropFilter: 'blur(20px)',
-                                border: '1px solid rgba(108,99,255,0.3)',
+                                border: '1px solid var(--glass-border)',
                                 borderRadius: '24px',
                                 padding: '24px',
                                 boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(108,99,255,0.15)',
@@ -412,12 +412,12 @@ const Hero = () => {
                                         position: 'absolute',
                                         bottom: '10px',
                                         left: '10px',
-                                        background: '#43E97B',
+                                        background: 'var(--badge-success-bg)',
                                         borderRadius: '8px',
                                         padding: '4px 10px',
                                         fontSize: '0.7rem',
                                         fontWeight: 700,
-                                        color: '#0D0D1A',
+                                        color: 'var(--badge-success-text)',
                                     }}
                                 >
                                     AVAILABLE
@@ -426,13 +426,13 @@ const Hero = () => {
                             <h3 style={{ fontWeight: 700, marginBottom: '6px', fontSize: '1rem' }}>
                                 Modern Studio Room
                             </h3>
-                            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginBottom: '12px' }}>
-                                📍 2 min walk from NSBM
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '12px' }}>
+                                📍 2 min walk from SLIIT
                             </p>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div>
-                                    <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#6C63FF' }}>LKR 18K</span>
-                                    <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>/month</span>
+                                    <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--primary)' }}>LKR 18K</span>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>/month</span>
                                 </div>
                                 <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                                     <Star size={14} color="#FFD700" fill="#FFD700" />
@@ -445,7 +445,7 @@ const Hero = () => {
                                     marginTop: '14px',
                                     padding: '10px',
                                     borderRadius: '10px',
-                                    background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                                    background: 'var(--btn-primary-bg)',
                                     color: '#fff',
                                     fontSize: '0.85rem',
                                     fontWeight: 600,
@@ -469,9 +469,9 @@ const Hero = () => {
                                     ...(card.top ? { top: card.top } : {}),
                                     ...(card.left !== undefined ? { left: card.left } : {}),
                                     ...(card.right !== undefined ? { right: card.right } : {}),
-                                    background: 'rgba(20,20,50,0.9)',
+                                    background: 'var(--card-bg)',
                                     backdropFilter: 'blur(15px)',
-                                    border: '1px solid rgba(108,99,255,0.25)',
+                                    border: '1px solid var(--glass-border)',
                                     borderRadius: '16px',
                                     padding: '14px 18px',
                                     display: 'flex',
@@ -486,7 +486,7 @@ const Hero = () => {
                                 <span style={{ fontSize: '1.5rem' }}>{card.icon}</span>
                                 <div>
                                     <div style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '2px' }}>{card.title}</div>
-                                    <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.55)' }}>{card.price}</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{card.price}</div>
                                 </div>
                                 <div
                                     style={{
@@ -498,7 +498,7 @@ const Hero = () => {
                                         padding: '2px 8px',
                                         fontSize: '0.65rem',
                                         fontWeight: 700,
-                                        color: '#0D0D1A',
+                                        color: 'var(--badge-success-text)',
                                     }}
                                 >
                                     {card.badge}
@@ -524,8 +524,8 @@ const Hero = () => {
                         <div
                             key={i}
                             style={{
-                                background: 'rgba(255,255,255,0.04)',
-                                border: '1px solid rgba(255,255,255,0.08)',
+                                background: 'var(--surface-1)',
+                                border: '1px solid var(--border-1)',
                                 borderRadius: '16px',
                                 padding: '20px',
                                 display: 'flex',
@@ -534,13 +534,13 @@ const Hero = () => {
                                 transition: 'all 0.3s',
                             }}
                             onMouseEnter={(e) => {
-                                (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.1)';
-                                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.3)';
+                                (e.currentTarget as HTMLElement).style.background = 'var(--nav-link-hover-bg)';
+                                (e.currentTarget as HTMLElement).style.borderColor = 'var(--nav-border)';
                                 (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)';
                             }}
                             onMouseLeave={(e) => {
-                                (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)';
-                                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.08)';
+                                (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)';
+                                (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-1)';
                                 (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
                             }}
                         >
@@ -549,18 +549,18 @@ const Hero = () => {
                                     width: '44px',
                                     height: '44px',
                                     borderRadius: '12px',
-                                    background: 'linear-gradient(135deg, rgba(108,99,255,0.3), rgba(168,85,247,0.2))',
+                                    background: 'var(--btn-primary-bg)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    color: '#a855f7',
+                                    color: '#fff',
                                 }}
                             >
                                 {stat.icon}
                             </div>
                             <div>
                                 <div style={{ fontSize: '1.4rem', fontWeight: 800, lineHeight: 1 }}>{stat.value}</div>
-                                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>{stat.label}</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{stat.label}</div>
                             </div>
                         </div>
                     ))}

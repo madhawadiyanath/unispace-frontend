@@ -7,9 +7,9 @@
 }
 
 :root {
-  --primary: #6C63FF;
-  --primary-dark: #5A52D5;
-  --primary-light: #8B85FF;
+  --primary: #a855f7; /* Previous purple color */
+  --primary-dark: #6C63FF;
+  --primary-light: #d8b4fe;
   --secondary: #FF6584;
   --accent: #43E97B;
   --accent2: #38F9D7;
@@ -31,6 +31,163 @@
   --border-radius: 16px;
   --border-radius-lg: 24px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Shared semantic tokens (defaults = dark theme) */
+  --app-bg: var(--dark);
+  --app-bg-2: var(--dark2);
+  --surface-1: rgba(255,255,255,0.04);
+  --surface-2: rgba(255,255,255,0.06);
+  --surface-3: rgba(255,255,255,0.08);
+  --border-1: rgba(255,255,255,0.1);
+
+  /* Navbar */
+  --nav-bg-scrolled: rgba(13, 13, 26, 0.92);
+  --nav-border: rgba(108, 99, 255, 0.2);
+  --nav-shadow: 0 4px 30px rgba(0,0,0,0.3);
+  --nav-link: rgba(255,255,255,0.85);
+  --nav-link-hover: #fff;
+  --nav-link-hover-bg: rgba(108,99,255,0.15);
+  --nav-dropdown-bg: rgba(20, 20, 40, 0.95);
+  --nav-dropdown-border: rgba(108,99,255,0.2);
+  --nav-dropdown-item: rgba(255,255,255,0.8);
+  --nav-dropdown-item-hover: #fff;
+  --nav-dropdown-item-hover-bg: rgba(108,99,255,0.2);
+
+  /* Inputs / search */
+  --input-bg: rgba(255,255,255,0.06);
+  --input-border: rgba(108,99,255,0.25);
+  --input-text: var(--text-primary);
+  --input-icon: var(--text-muted);
+  --input-focus-border: rgba(108,99,255,0.6);
+  --input-focus-ring: 0 0 0 3px rgba(108,99,255,0.12);
+
+  --search-panel-bg: rgba(20, 20, 50, 0.55);
+  --search-panel-border: rgba(255,255,255,0.10);
+  --search-panel-shadow: 0 32px 80px rgba(0,0,0,0.35);
+  --search-field-bg: rgba(255,255,255,0.06);
+  --search-field-border: rgba(255,255,255,0.12);
+  --search-filter-bg: rgba(255,255,255,0.06);
+  --search-filter-border: rgba(108,99,255,0.2);
+  --select-option-bg: #1a1a35;
+
+  /* Buttons */
+  --btn-primary-bg: var(--gradient-purple);
+  --btn-primary-shadow: 0 8px 25px rgba(108,99,255,0.5);
+  --btn-primary-shadow-hover: 0 12px 35px rgba(108,99,255,0.7);
+  --btn-primary-shadow-sm: 0 4px 15px rgba(108,99,255,0.4);
+  --btn-primary-shadow-sm-hover: 0 8px 22px rgba(108,99,255,0.6);
+  --btn-ghost-bg: transparent;
+  --btn-ghost-border: rgba(108,99,255,0.35);
+
+  /* Danger */
+  --danger-soft-bg: rgba(255,101,132,0.10);
+  --danger-soft-bg-hover: rgba(255,101,132,0.16);
+  --danger-soft-border: rgba(255,101,132,0.30);
+  --danger-soft-text: #FF6584;
+
+  /* Badges */
+  --badge-success-bg: var(--accent);
+  --badge-success-text: #0D0D1A;
+  --badge-danger-bg: var(--secondary);
+  --badge-danger-text: #0D0D1A;
+
+  /* Footer */
+  --footer-bg: linear-gradient(180deg, #0D0D1A 0%, #070714 100%);
+  --footer-border: rgba(108,99,255,0.15);
+  --footer-cta-bg: linear-gradient(135deg, rgba(108,99,255,0.12), rgba(168,85,247,0.08));
+  --footer-cta-border: rgba(108,99,255,0.1);
+  --footer-text: #fff;
+  --footer-muted: rgba(255,255,255,0.5);
+  --footer-link: rgba(255,255,255,0.45);
+}
+
+/* Light theme overrides */
+:root[data-theme="light"] {
+  /* Palette: cream background, coral/peach accents, mint secondary */
+  --primary: #FF7A59;
+  --primary-dark: #F16242;
+  --primary-light: #FFD4C8;
+  --secondary: #2DD4BF;
+  --accent: #34D399;
+  --accent2: #2DD4BF;
+
+  --dark: #FFFBF5;
+  --dark2: #FFF3EA;
+  --dark3: #FFE9DC;
+  --card-bg: rgba(255, 255, 255, 0.78);
+  --glass: rgba(45, 42, 36, 0.03);
+  --glass-border: rgba(45, 42, 36, 0.12);
+
+  --text-primary: #2D2A24;
+  --text-secondary: rgba(45, 42, 36, 0.74);
+  --text-muted: rgba(45, 42, 36, 0.50);
+
+  --gradient-hero: linear-gradient(135deg, #FFFBF5 0%, #FFE8D9 50%, #FFFBF5 100%);
+  --gradient-purple: linear-gradient(135deg, #FF7A59, #FFB199);
+  --gradient-green: linear-gradient(135deg, #34D399, #2DD4BF);
+  --gradient-pink: linear-gradient(135deg, #FFB199, #FF7A59);
+  --shadow-glow: 0 0 40px rgba(255, 122, 89, 0.22);
+  --shadow-card: 0 20px 60px rgba(45, 42, 36, 0.10);
+
+  --app-bg: var(--dark);
+  --app-bg-2: var(--dark2);
+  --surface-1: rgba(255,255,255,0.72);
+  --surface-2: rgba(255,255,255,0.85);
+  --surface-3: rgba(255,255,255,0.92);
+  --border-1: rgba(45,42,36,0.12);
+
+  --nav-bg-scrolled: rgba(255, 251, 245, 0.92);
+  --nav-border: rgba(255, 122, 89, 0.22);
+  --nav-shadow: 0 6px 30px rgba(45,42,36,0.12);
+  --nav-link: rgba(45,42,36,0.82);
+  --nav-link-hover: rgba(45,42,36,0.95);
+  --nav-link-hover-bg: rgba(255,122,89,0.12);
+  --nav-dropdown-bg: rgba(255,255,255,0.92);
+  --nav-dropdown-border: rgba(45,42,36,0.12);
+  --nav-dropdown-item: rgba(45,42,36,0.78);
+  --nav-dropdown-item-hover: rgba(45,42,36,0.95);
+  --nav-dropdown-item-hover-bg: rgba(255,122,89,0.12);
+
+  --input-bg: rgba(255,255,255,0.85);
+  --input-border: rgba(45,42,36,0.14);
+  --input-text: var(--text-primary);
+  --input-icon: rgba(45,42,36,0.45);
+  --input-focus-border: rgba(255,122,89,0.55);
+  --input-focus-ring: 0 0 0 3px rgba(255,122,89,0.18);
+
+  --search-panel-bg: rgba(255, 255, 255, 0.78);
+  --search-panel-border: rgba(45,42,36,0.10);
+  --search-panel-shadow: 0 32px 80px rgba(45,42,36,0.12);
+  --search-field-bg: rgba(255,255,255,0.92);
+  --search-field-border: rgba(45,42,36,0.12);
+  --search-filter-bg: rgba(255,255,255,0.92);
+  --search-filter-border: rgba(45,42,36,0.12);
+  --select-option-bg: #FFFFFF;
+
+  --btn-primary-bg: var(--gradient-purple);
+  --btn-primary-shadow: 0 8px 25px rgba(255,122,89,0.28);
+  --btn-primary-shadow-hover: 0 12px 35px rgba(255,122,89,0.36);
+  --btn-primary-shadow-sm: 0 4px 15px rgba(255,122,89,0.26);
+  --btn-primary-shadow-sm-hover: 0 8px 22px rgba(255,122,89,0.34);
+  --btn-ghost-border: rgba(45,42,36,0.18);
+
+  --danger-soft-bg: rgba(255,122,89,0.10);
+  --danger-soft-bg-hover: rgba(255,122,89,0.16);
+  --danger-soft-border: rgba(255,122,89,0.26);
+  --danger-soft-text: var(--primary);
+
+  --badge-success-text: #1F1A14;
+  --badge-danger-bg: #FF7A59;
+  --badge-danger-text: #1F1A14;
+
+  --footer-bg: linear-gradient(180deg, #FFFBF5 0%, #FFF3EA 100%);
+  --footer-border: rgba(45,42,36,0.12);
+  --footer-cta-bg: linear-gradient(135deg, rgba(255,122,89,0.10), rgba(45,212,191,0.08));
+  --footer-cta-border: rgba(45,42,36,0.10);
+  --footer-text: var(--text-primary);
+  --footer-muted: rgba(45,42,36,0.62);
+  --footer-link: rgba(45,42,36,0.62);
+
 }
 
 html {
@@ -39,7 +196,7 @@ html {
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: var(--dark);
+  background-color: var(--app-bg);
   color: var(--text-primary);
   line-height: 1.6;
   overflow-x: hidden;

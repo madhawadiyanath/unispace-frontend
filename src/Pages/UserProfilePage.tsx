@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   User,
@@ -20,9 +20,12 @@ import {
   ExternalLink,
   MessageSquare,
   MailOpen,
+  Wrench,
+  MapPin,
+  AlertTriangle,
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:5000';
 
 interface Boarding {
   _id: string;
@@ -54,6 +57,88 @@ interface ChatMessage {
   createdAt: string;
 }
 
+interface IssueReport {
+  _id: string;
+  boardingId: string;
+  boardingTitle: string;
+  tenantName: string;
+  tenantEmail: string;
+  issueType: 'cleaning' | 'plumbing' | 'electrical' | 'repairs';
+  priority: 'low' | 'medium' | 'high';
+  description: string;
+  status: 'open' | 'in-progress' | 'resolved';
+  createdAt: string;
+}
+
+type MaintenanceRequestStatus = 'pending' | 'accepted' | 'completed' | 'rejected';
+
+interface MaintenanceRequest {
+  id: string;
+  type: string;
+  status: MaintenanceRequestStatus;
+  submittedAt: string;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  date: string;
+  time: string;
+  priority: string;
+  description: string;
+  requestedById?: string;
+  requestedByEmail?: string;
+  acceptedById?: string;
+  acceptedByName?: string;
+  acceptedAt?: string;
+  completedAt?: string;
+  rejectedAt?: string;
+}
+
+type ApiMaintenanceRequest = {
+  _id: string;
+  requesterId: string;
+  requesterName?: string;
+  requesterEmail?: string;
+  requesterPhone?: string;
+  address: string;
+  category: string;
+  priority: string;
+  preferredDate: string;
+  preferredTime?: string;
+  description: string;
+  status: MaintenanceRequestStatus;
+  acceptedById?: string;
+  acceptedByName?: string;
+  acceptedAt?: string;
+  completedAt?: string;
+  rejectedAt?: string;
+  createdAt?: string;
+};
+
+const mapApiMaintenanceRequest = (r: ApiMaintenanceRequest): MaintenanceRequest => {
+  return {
+    id: r._id,
+    type: r.category,
+    status: r.status,
+    submittedAt: r.createdAt || '',
+    name: r.requesterName || '',
+    phone: r.requesterPhone || '',
+    email: r.requesterEmail || '',
+    address: r.address,
+    date: r.preferredDate,
+    time: r.preferredTime || '',
+    priority: r.priority,
+    description: r.description,
+    requestedById: r.requesterId,
+    requestedByEmail: r.requesterEmail || '',
+    acceptedById: r.acceptedById,
+    acceptedByName: r.acceptedByName,
+    acceptedAt: r.acceptedAt,
+    completedAt: r.completedAt,
+    rejectedAt: r.rejectedAt,
+  };
+};
+
 interface UserData {
   _id: string;
   name: string;
@@ -69,6 +154,9 @@ const UserProfilePage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [issueReports, setIssueReports] = useState<IssueReport[]>([]);
+  const [loadingIssues, setLoadingIssues] = useState(false);
+  const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -101,8 +189,36 @@ const UserProfilePage = () => {
         .then(data => setChatMessages(data.messages || []))
         .catch(() => {})
         .finally(() => setLoadingMessages(false));
+
+      // Fetch issue reports for this landlord
+      setLoadingIssues(true);
+      fetch(`${API_BASE}/issues/landlord/${user._id}`)
+        .then(r => r.json())
+        .then(data => setIssueReports(data.issues || []))
+        .catch(() => {})
+        .finally(() => setLoadingIssues(false));
+
+      // Fetch maintenance requests for this owner
+      fetch(`${API_BASE}/maintenance/requester/${encodeURIComponent(user._id)}`)
+        .then(r => r.json())
+        .then(data => {
+          const list = (data?.requests || []) as ApiMaintenanceRequest[];
+          const mapped = Array.isArray(list) ? list.map(mapApiMaintenanceRequest) : [];
+          setMaintenanceRequests(mapped);
+        })
+        .catch(() => setMaintenanceRequests([]));
     }
   }, [navigate]);
+
+  const acceptedMaintenanceForOwner = useMemo(() => {
+    if (!currentUser) return [];
+    const id = currentUser._id;
+    const email = currentUser.email;
+    return maintenanceRequests
+      .filter(r => (r.status === 'accepted' || r.status === 'completed'))
+      .filter(r => (id && r.requestedById === id) || (email && (r.requestedByEmail === email || r.email === email)))
+      .sort((a, b) => (b.acceptedAt || b.submittedAt || '').localeCompare(a.acceptedAt || a.submittedAt || ''));
+  }, [maintenanceRequests, currentUser]);
 
   const handleRemoveFromCart = (id: string) => {
     const updated = cartItems.filter(item => item._id !== id);
@@ -113,6 +229,15 @@ const UserProfilePage = () => {
   const handleMarkAsRead = (id: string) => {
     fetch(`${API_BASE}/chat/${id}/read`, { method: 'PUT' }).catch(() => {});
     setChatMessages(prev => prev.map(m => m._id === id ? { ...m, isRead: true } : m));
+  };
+
+  const handleUpdateIssueStatus = (id: string, status: string) => {
+    fetch(`${API_BASE}/issues/${id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    }).catch(() => {});
+    setIssueReports(prev => prev.map(i => i._id === id ? { ...i, status: status as IssueReport['status'] } : i));
   };
 
   const handleLogout = () => {
@@ -267,6 +392,7 @@ const UserProfilePage = () => {
             {/* Edit button top-right */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '16px' }}>
               <button
+                onClick={() => navigate('/profile/edit')}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '7px',
                   padding: '8px 18px', borderRadius: '10px',
@@ -578,6 +704,296 @@ const UserProfilePage = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Landlord: Issue Reports section ── */}
+        {currentUser.userType === 'landlord' && (
+          <div
+            style={{
+              marginTop: '24px',
+              background: 'rgba(18, 18, 40, 0.80)',
+              backdropFilter: 'blur(24px)',
+              border: '1px solid rgba(252,211,77,0.2)',
+              borderRadius: '24px',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Header */}
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid rgba(252,211,77,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(252,211,77,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                  <AlertTriangle size={18} color="#FCD34D" />
+                  {issueReports.filter(i => i.status === 'open').length > 0 && (
+                    <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ef4444', color: '#fff', fontSize: '0.65rem', fontWeight: 800, borderRadius: '100px', padding: '1px 6px', minWidth: '18px', textAlign: 'center' }}>
+                      {issueReports.filter(i => i.status === 'open').length}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, color: '#fff', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Issue Reports</h3>
+                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>
+                    {issueReports.length} report{issueReports.length !== 1 ? 's' : ''}
+                    {issueReports.filter(i => i.status === 'open').length > 0 && (
+                      <span style={{ color: '#FCD34D', fontWeight: 700 }}> · {issueReports.filter(i => i.status === 'open').length} open</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Issue list */}
+            <div style={{ padding: '16px 28px 24px' }}>
+              {loadingIssues ? (
+                <div style={{ textAlign: 'center', padding: '28px', color: 'rgba(255,255,255,0.35)' }}>
+                  <div style={{ width: '24px', height: '24px', border: '2px solid rgba(252,211,77,0.3)', borderTopColor: '#FCD34D', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
+                  Loading issue reports…
+                </div>
+              ) : issueReports.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '36px 0' }}>
+                  <AlertTriangle size={38} color="rgba(252,211,77,0.2)" style={{ marginBottom: '12px' }} />
+                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>No issue reports yet.</p>
+                  <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.22)', fontSize: '0.8rem' }}>Tenants can report issues from the boarding details page.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {issueReports.map(issue => {
+                    const typeConfig: Record<string, { color: string; bg: string; label: string; tab: string }> = {
+                      cleaning:   { color: '#6C63FF', bg: 'rgba(108,99,255,0.12)', label: '🧹 Cleaning',   tab: 'cleaning' },
+                      plumbing:   { color: '#06b6d4', bg: 'rgba(6,182,212,0.12)',  label: '💧 Plumbing',   tab: 'plumbing' },
+                      electrical: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', label: '⚡ Electrical', tab: 'electrical' },
+                      repairs:    { color: '#22c55e', bg: 'rgba(34,197,94,0.12)',  label: '🔨 Repairs',    tab: 'repairs' },
+                    };
+                    const priorityConfig: Record<string, { color: string; bg: string }> = {
+                      low:    { color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
+                      medium: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+                      high:   { color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
+                    };
+                    const statusConfig: Record<string, { color: string; bg: string }> = {
+                      open:        { color: '#FCD34D', bg: 'rgba(252,211,77,0.12)' },
+                      'in-progress': { color: '#06b6d4', bg: 'rgba(6,182,212,0.12)' },
+                      resolved:    { color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
+                    };
+                    const tc = typeConfig[issue.issueType] || typeConfig.repairs;
+                    const pc = priorityConfig[issue.priority] || priorityConfig.medium;
+                    const sc = statusConfig[issue.status] || statusConfig.open;
+                    return (
+                      <div
+                        key={issue._id}
+                        style={{
+                          padding: '18px 20px',
+                          borderRadius: '16px',
+                          background: issue.status === 'resolved' ? 'rgba(255,255,255,0.02)' : 'rgba(252,211,77,0.04)',
+                          border: `1px solid ${issue.status === 'resolved' ? 'rgba(255,255,255,0.07)' : 'rgba(252,211,77,0.2)'}`,
+                          opacity: issue.status === 'resolved' ? 0.65 : 1,
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        {/* Top row */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            {/* Boarding tag */}
+                            {issue.boardingTitle && (
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '8px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.22)', color: '#a78bfa', fontSize: '0.75rem', fontWeight: 600, marginBottom: '8px' }}>
+                                🏠 {issue.boardingTitle}
+                              </div>
+                            )}
+                            {/* Sender */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'linear-gradient(135deg, #FCD34D, #f59e0b)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.8rem', fontWeight: 800, color: '#0D0D1A' }}>
+                                {issue.tenantName?.[0]?.toUpperCase() || '?'}
+                              </div>
+                              <div>
+                                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#fff' }}>{issue.tenantName || 'Tenant'}</div>
+                                <div style={{ fontSize: '0.73rem', color: 'rgba(255,255,255,0.4)' }}>{issue.tenantEmail}</div>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Right: date + status */}
+                          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                            <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', marginBottom: '6px' }}>
+                              {new Date(issue.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </div>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', borderRadius: '100px', background: sc.bg, color: sc.color, fontSize: '0.72rem', fontWeight: 700, border: `1px solid ${sc.color}44`, textTransform: 'capitalize' }}>
+                              {issue.status}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Badges row */}
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 12px', borderRadius: '100px', background: tc.bg, color: tc.color, fontSize: '0.75rem', fontWeight: 700, border: `1px solid ${tc.color}44` }}>
+                            {tc.label}
+                          </span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 12px', borderRadius: '100px', background: pc.bg, color: pc.color, fontSize: '0.75rem', fontWeight: 700, border: `1px solid ${pc.color}44`, textTransform: 'capitalize' }}>
+                            {issue.priority} Priority
+                          </span>
+                        </div>
+
+                        {/* Description */}
+                        <p style={{ margin: '0 0 14px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', lineHeight: 1.65, background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '10px 14px', borderLeft: `3px solid ${tc.color}66` }}>
+                          {issue.description}
+                        </p>
+
+                        {/* Action buttons */}
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          {/* View Boarding */}
+                          <button
+                            onClick={() => navigate(`/boarding/${issue.boardingId}`)}
+                            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 14px', borderRadius: '8px', background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.25)', color: '#a78bfa', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.25)'; }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.12)'; }}
+                          >
+                            <ExternalLink size={12} /> View Boarding
+                          </button>
+
+                          {/* Request Maintenance — links to /maintenance?tab=issueType */}
+                          {issue.status !== 'resolved' && (
+                            <button
+                              onClick={() => navigate(`/maintenance?tab=${tc.tab}`)}
+                              style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 14px', borderRadius: '8px', background: `${tc.color}22`, border: `1px solid ${tc.color}55`, color: tc.color, fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
+                              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `${tc.color}38`; }}
+                              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = `${tc.color}22`; }}
+                            >
+                              <Wrench size={12} /> Request Maintenance
+                            </button>
+                          )}
+
+                          {/* Mark as in-progress */}
+                          {issue.status === 'open' && (
+                            <button
+                              onClick={() => handleUpdateIssueStatus(issue._id, 'in-progress')}
+                              style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 14px', borderRadius: '8px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)', color: '#06b6d4', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(6,182,212,0.2)'; }}
+                              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(6,182,212,0.08)'; }}
+                            >
+                              ⚙ Mark In-Progress
+                            </button>
+                          )}
+
+                          {/* Mark as resolved */}
+                          {issue.status !== 'resolved' && (
+                            <button
+                              onClick={() => handleUpdateIssueStatus(issue._id, 'resolved')}
+                              style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 14px', borderRadius: '8px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', color: '#22c55e', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(34,197,94,0.2)'; }}
+                              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(34,197,94,0.08)'; }}
+                            >
+                              ✓ Mark Resolved
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Landlord: Accepted Maintenance Requests ── */}
+        {currentUser.userType === 'landlord' && (
+          <div
+            style={{
+              marginTop: '24px',
+              background: 'rgba(18, 18, 40, 0.80)',
+              backdropFilter: 'blur(24px)',
+              border: '1px solid rgba(34,211,238,0.18)',
+              borderRadius: '24px',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Header */}
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid rgba(34,211,238,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(34,211,238,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Wrench size={18} color="#22d3ee" />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, color: '#fff', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Maintenance Requests</h3>
+                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>
+                    {acceptedMaintenanceForOwner.length} accepted / completed
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (!currentUser?._id) return;
+                  fetch(`${API_BASE}/maintenance/requester/${encodeURIComponent(currentUser._id)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                      const list = (data?.requests || []) as ApiMaintenanceRequest[];
+                      const mapped = Array.isArray(list) ? list.map(mapApiMaintenanceRequest) : [];
+                      setMaintenanceRequests(mapped);
+                    })
+                    .catch(() => setMaintenanceRequests([]));
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '8px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.65)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Refresh
+              </button>
+            </div>
+
+            <div style={{ padding: '16px 28px 24px' }}>
+              {acceptedMaintenanceForOwner.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '36px 0' }}>
+                  <Wrench size={38} color="rgba(34,211,238,0.18)" style={{ marginBottom: '12px' }} />
+                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>No accepted maintenance requests yet.</p>
+                  <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.22)', fontSize: '0.8rem' }}>After staff accepts your request, it will appear here.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {acceptedMaintenanceForOwner.map(r => {
+                    const typeConfig: Record<string, { label: string; color: string; bg: string }> = {
+                      plumbing: { label: '💧 Plumbing', color: '#06b6d4', bg: 'rgba(6,182,212,0.12)' },
+                      electrical: { label: '⚡ Electrical', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+                      repairs: { label: '🔨 General Repairs', color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
+                      cleaning: { label: '🧹 Cleaning', color: '#6C63FF', bg: 'rgba(108,99,255,0.12)' },
+                    };
+                    const tc = typeConfig[r.type] || { label: r.type, color: '#22d3ee', bg: 'rgba(34,211,238,0.12)' };
+                    const statusCfg = r.status === 'completed'
+                      ? { color: '#22c55e', bg: 'rgba(34,197,94,0.12)' }
+                      : { color: '#22d3ee', bg: 'rgba(34,211,238,0.12)' };
+
+                    return (
+                      <div key={r.id} style={{ padding: '16px 18px', borderRadius: '18px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '100px', background: tc.bg, color: tc.color, fontSize: '0.75rem', fontWeight: 800, border: `1px solid ${tc.color}44` }}>
+                              {tc.label}
+                            </span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '100px', background: statusCfg.bg, color: statusCfg.color, fontSize: '0.75rem', fontWeight: 800, border: `1px solid ${statusCfg.color}44`, textTransform: 'capitalize' }}>
+                              {r.status}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', textAlign: 'right' }}>
+                            {new Date(r.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </div>
+                        </div>
+
+                        <p style={{ margin: '0 0 10px', color: 'rgba(255,255,255,0.78)', fontSize: '0.875rem', lineHeight: 1.6, background: 'rgba(0,0,0,0.18)', borderRadius: '12px', padding: '10px 12px', borderLeft: `3px solid ${tc.color}66` }}>
+                          {r.description}
+                        </p>
+
+                        <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MapPin size={14} color={tc.color} /> {r.address}</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Calendar size={14} color={tc.color} /> {r.date}{r.time ? ` · ${r.time}` : ''}</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><User size={14} color={tc.color} /> {r.acceptedByName || 'Staff'}</span>
+                        </div>
+
+                        {r.acceptedAt && (
+                          <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)' }}>
+                            Accepted · {new Date(r.acceptedAt).toLocaleString()}
+                            {r.completedAt ? ` · Completed · ${new Date(r.completedAt).toLocaleString()}` : ''}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

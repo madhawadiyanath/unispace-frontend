@@ -7,7 +7,7 @@ const Testimonials = () => {
     const testimonials = [
         {
             name: 'Kavindi Perera',
-            university: 'NSBM Green University',
+            university: 'SLIIT',
             year: '2nd Year – IT',
             rating: 5,
             text: 'BoardingFinder made finding a room near NSBM so easy! I found a verified listing within 10 minutes and moved in within a week. The reviews from other students were super helpful.',
@@ -16,7 +16,7 @@ const Testimonials = () => {
         },
         {
             name: 'Tharaka Jayawardena',
-            university: 'University of Colombo',
+            university: 'SLIIT',
             year: '3rd Year – CS',
             rating: 5,
             text: 'The distance filter was a game-changer. I could see exactly how far each boarding house was from my faculty. Saved so much time compared to Facebook groups!',
@@ -52,9 +52,10 @@ const Testimonials = () => {
         <section
             style={{
                 padding: '100px 24px',
-                background: 'linear-gradient(180deg, #13132A 0%, #0D0D1A 100%)',
+                background: 'linear-gradient(180deg, var(--app-bg-2) 0%, var(--app-bg) 100%)',
                 position: 'relative',
                 overflow: 'hidden',
+                color: 'var(--text-primary)',
             }}
         >
             {/* Background decoration */}
@@ -115,13 +116,13 @@ const Testimonials = () => {
                 {/* Testimonial Card */}
                 <div
                     style={{
-                        background: 'rgba(20, 20, 50, 0.7)',
+                        background: 'var(--surface-2)',
                         backdropFilter: 'blur(20px)',
                         border: `1px solid ${current.color}30`,
                         borderRadius: '28px',
                         padding: '48px',
                         position: 'relative',
-                        boxShadow: `0 30px 80px rgba(0,0,0,0.3), 0 0 0 1px ${current.color}15`,
+                        boxShadow: `var(--shadow-card), 0 0 0 1px ${current.color}15`,
                         transition: 'all 0.4s ease',
                     }}
                 >
@@ -160,7 +161,7 @@ const Testimonials = () => {
                         style={{
                             fontSize: '1.2rem',
                             lineHeight: 1.8,
-                            color: 'rgba(255,255,255,0.85)',
+                            color: 'var(--text-secondary)',
                             fontStyle: 'italic',
                             marginBottom: '36px',
                             maxWidth: '760px',
@@ -187,8 +188,8 @@ const Testimonials = () => {
                             {current.avatar}
                         </div>
                         <div>
-                            <div style={{ fontWeight: 700, fontSize: '1rem' }}>{current.name}</div>
-                            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
+                            <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>{current.name}</div>
+                            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                                 {current.university}
                             </div>
                             <div
@@ -221,9 +222,9 @@ const Testimonials = () => {
                             width: '44px',
                             height: '44px',
                             borderRadius: '12px',
-                            background: 'rgba(255,255,255,0.06)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            color: 'rgba(255,255,255,0.7)',
+                            background: 'var(--surface-1)',
+                            border: '1px solid var(--border-1)',
+                            color: 'var(--text-secondary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -231,14 +232,14 @@ const Testimonials = () => {
                             transition: 'all 0.2s',
                         }}
                         onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.2)';
-                            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.4)';
-                            (e.currentTarget as HTMLElement).style.color = '#fff';
+                            (e.currentTarget as HTMLElement).style.background = 'var(--nav-link-hover-bg)';
+                            (e.currentTarget as HTMLElement).style.borderColor = 'var(--btn-ghost-border)';
+                            (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)';
                         }}
                         onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)';
-                            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)';
-                            (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)';
+                            (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)';
+                            (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-1)';
+                            (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
                         }}
                     >
                         <ChevronLeft size={20} />
@@ -246,7 +247,7 @@ const Testimonials = () => {
 
                     {/* Dots */}
                     <div style={{ display: 'flex', gap: '8px' }}>
-                        {testimonials.map((t, i) => (
+                        {testimonials.map((_, i) => (
                             <button
                                 key={i}
                                 onClick={() => setActive(i)}
@@ -254,7 +255,7 @@ const Testimonials = () => {
                                     width: active === i ? '28px' : '10px',
                                     height: '10px',
                                     borderRadius: '100px',
-                                    background: active === i ? current.color : 'rgba(255,255,255,0.2)',
+                                    background: active === i ? current.color : 'var(--border-1)',
                                     border: 'none',
                                     cursor: 'pointer',
                                     transition: 'all 0.3s ease',
@@ -270,9 +271,9 @@ const Testimonials = () => {
                             width: '44px',
                             height: '44px',
                             borderRadius: '12px',
-                            background: 'rgba(255,255,255,0.06)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            color: 'rgba(255,255,255,0.7)',
+                            background: 'var(--surface-1)',
+                            border: '1px solid var(--border-1)',
+                            color: 'var(--text-secondary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -280,14 +281,14 @@ const Testimonials = () => {
                             transition: 'all 0.2s',
                         }}
                         onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.2)';
-                            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(108,99,255,0.4)';
-                            (e.currentTarget as HTMLElement).style.color = '#fff';
+                            (e.currentTarget as HTMLElement).style.background = 'var(--nav-link-hover-bg)';
+                            (e.currentTarget as HTMLElement).style.borderColor = 'var(--btn-ghost-border)';
+                            (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)';
                         }}
                         onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)';
-                            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)';
-                            (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)';
+                            (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)';
+                            (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-1)';
+                            (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
                         }}
                     >
                         <ChevronRight size={20} />
