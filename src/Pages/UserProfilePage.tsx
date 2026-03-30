@@ -254,7 +254,8 @@ const UserProfilePage = () => {
     <div
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0D0D1A 0%, #1a0533 50%, #0D0D1A 100%)',
+        background: 'var(--gradient-hero)',
+        color: 'var(--text-primary)',
         fontFamily: "'Inter', sans-serif",
         padding: '0',
         position: 'relative',
@@ -272,9 +273,9 @@ const UserProfilePage = () => {
           position: 'sticky',
           top: 0,
           zIndex: 100,
-          background: 'rgba(13,13,26,0.85)',
+          background: 'var(--nav-bg-scrolled)',
           backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(108,99,255,0.18)',
+          borderBottom: '1px solid var(--nav-border)',
           padding: '0 32px',
           height: '68px',
           display: 'flex',
@@ -284,10 +285,10 @@ const UserProfilePage = () => {
       >
         {/* Logo */}
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px rgba(108,99,255,0.5)' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--gradient-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-glow)' }}>
             <Home size={18} color="#fff" />
           </div>
-          <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.1rem', background: 'linear-gradient(135deg, #fff, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.1rem', background: 'linear-gradient(135deg, var(--text-primary), var(--primary))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             BoardingFinder
           </span>
         </Link>
@@ -298,18 +299,18 @@ const UserProfilePage = () => {
           style={{
             display: 'flex', alignItems: 'center', gap: '7px',
             padding: '8px 16px', borderRadius: '10px',
-            background: 'rgba(108,99,255,0.1)',
-            border: '1px solid rgba(108,99,255,0.25)',
-            color: 'rgba(255,255,255,0.8)', fontSize: '0.875rem',
+            background: 'var(--nav-link-hover-bg)',
+            border: '1px solid var(--nav-border)',
+            color: 'var(--nav-link)', fontSize: '0.875rem',
             fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s',
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.2)';
-            (e.currentTarget as HTMLElement).style.color = '#fff';
+            (e.currentTarget as HTMLElement).style.background = 'var(--nav-link-hover-bg)';
+            (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)';
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = 'rgba(108,99,255,0.1)';
-            (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.8)';
+            (e.currentTarget as HTMLElement).style.background = 'var(--nav-link-hover-bg)';
+            (e.currentTarget as HTMLElement).style.color = 'var(--nav-link)';
           }}
         >
           <ArrowLeft size={15} />
@@ -335,7 +336,7 @@ const UserProfilePage = () => {
               fontFamily: "'Outfit', sans-serif",
               fontWeight: 800,
               fontSize: '2rem',
-              background: 'linear-gradient(135deg, #fff 30%, #a855f7)',
+              background: 'linear-gradient(135deg, var(--text-primary) 30%, var(--primary))',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               letterSpacing: '-0.5px',
@@ -343,7 +344,7 @@ const UserProfilePage = () => {
           >
             My Profile
           </h1>
-          <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.45)', fontSize: '0.9rem' }}>
+          <p style={{ margin: '6px 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
             Manage your account details
           </p>
         </div>
@@ -351,23 +352,23 @@ const UserProfilePage = () => {
         {/* Profile card */}
         <div
           style={{
-            background: 'rgba(18, 18, 40, 0.80)',
+            background: 'var(--card-bg)',
             backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(108,99,255,0.2)',
+            border: '1px solid var(--border-1)',
             borderRadius: '24px',
             overflow: 'hidden',
-            boxShadow: '0 30px 80px rgba(0,0,0,0.4)',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
           {/* Banner */}
           <div
             style={{
               height: '120px',
-              background: 'linear-gradient(135deg, #6C63FF 0%, #a855f7 60%, #ec4899 100%)',
+              background: 'var(--btn-primary-bg)',
               position: 'relative',
             }}
           >
-            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(var(--glass-border) 1px, transparent 1px), linear-gradient(90deg, var(--glass-border) 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
           </div>
 
           {/* Avatar + name row */}
@@ -377,11 +378,11 @@ const UserProfilePage = () => {
               style={{
                 width: '88px', height: '88px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
-                border: '4px solid rgba(13,13,26,1)',
+                background: 'var(--gradient-purple)',
+                border: '4px solid var(--app-bg)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '2rem', fontWeight: 800, color: '#fff',
-                boxShadow: '0 0 30px rgba(108,99,255,0.5)',
+                boxShadow: 'var(--shadow-glow)',
                 position: 'absolute',
                 top: '-44px',
               }}
@@ -422,7 +423,7 @@ const UserProfilePage = () => {
                   style={{
                     margin: 0,
                     fontFamily: "'Outfit', sans-serif",
-                    fontWeight: 800, fontSize: '1.6rem', color: '#fff',
+                    fontWeight: 800, fontSize: '1.6rem', color: 'var(--text-primary)',
                   }}
                 >
                   {currentUser.name}
@@ -444,13 +445,13 @@ const UserProfilePage = () => {
                   {currentUser.userType || 'student'}
                 </span>
               </div>
-              <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>
+              <p style={{ margin: '6px 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                 {currentUser.email}
               </p>
             </div>
 
             {/* Divider */}
-            <div style={{ height: '1px', background: 'rgba(108,99,255,0.15)', marginBottom: '28px' }} />
+            <div style={{ height: '1px', background: 'var(--border-1)', marginBottom: '28px' }} />
 
             {/* Info rows */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
@@ -488,22 +489,22 @@ const UserProfilePage = () => {
           <div
             style={{
               marginTop: '24px',
-              background: 'rgba(18, 18, 40, 0.80)',
+              background: 'var(--card-bg)',
               backdropFilter: 'blur(24px)',
-              border: '1px solid rgba(108,99,255,0.2)',
+              border: '1px solid var(--border-1)',
               borderRadius: '24px',
               overflow: 'hidden',
             }}
           >
             {/* Header row */}
-            <div style={{ padding: '24px 28px', borderBottom: '1px solid rgba(108,99,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border-1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(108,99,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Building2 size={18} color="#a855f7" />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, color: '#fff', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>My Boarding Listings</h3>
-                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>{myBoardings.length} submission{myBoardings.length !== 1 ? 's' : ''}</p>
+                  <h3 style={{ margin: 0, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>My Boarding Listings</h3>
+                  <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem' }}>{myBoardings.length} submission{myBoardings.length !== 1 ? 's' : ''}</p>
                 </div>
               </div>
               <button
@@ -511,14 +512,14 @@ const UserProfilePage = () => {
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
                   padding: '10px 20px', borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                  background: 'var(--btn-primary-bg)',
                   color: '#fff', fontSize: '0.875rem', fontWeight: 600,
                   border: 'none', cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(108,99,255,0.4)',
+                  boxShadow: 'var(--btn-primary-shadow-sm)',
                   transition: 'all 0.2s',
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 22px rgba(108,99,255,0.6)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 16px rgba(108,99,255,0.4)'; }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLElement).style.boxShadow = 'var(--btn-primary-shadow-sm-hover)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLElement).style.boxShadow = 'var(--btn-primary-shadow-sm)'; }}
               >
                 <PlusCircle size={16} />
                 Add New Boarding
@@ -528,15 +529,15 @@ const UserProfilePage = () => {
             {/* Listing rows */}
             <div style={{ padding: '16px 28px 24px' }}>
               {loadingBoardings ? (
-                <div style={{ textAlign: 'center', padding: '28px', color: 'rgba(255,255,255,0.35)' }}>
+                <div style={{ textAlign: 'center', padding: '28px', color: 'var(--text-muted)' }}>
                   <div style={{ width: '24px', height: '24px', border: '2px solid rgba(108,99,255,0.3)', borderTopColor: '#6C63FF', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
                   Loading your listings…
                 </div>
               ) : myBoardings.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '36px 0' }}>
                   <Building2 size={38} color="rgba(108,99,255,0.3)" style={{ marginBottom: '12px' }} />
-                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>No submissions yet.</p>
-                  <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.22)', fontSize: '0.8rem' }}>Click "Add New Boarding" to get started.</p>
+                  <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>No submissions yet.</p>
+                  <p style={{ margin: '6px 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Click "Add New Boarding" to get started.</p>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -548,10 +549,10 @@ const UserProfilePage = () => {
                     };
                     const sc = statusConfig[b.status] || statusConfig.pending;
                     return (
-                      <div key={b._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', flexWrap: 'wrap', gap: '10px' }}>
+                      <div key={b._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderRadius: '14px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', flexWrap: 'wrap', gap: '10px' }}>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
-                          <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{b.location} · LKR {b.price.toLocaleString()}/mo · {b.roomType}</div>
+                          <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>{b.location} · LKR {b.price.toLocaleString()}/mo · {b.roomType}</div>
                         </div>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 12px', borderRadius: '100px', background: sc.bg, color: sc.color, fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize', border: `1px solid ${sc.color}44`, flexShrink: 0 }}>
                           {sc.icon}{b.status}
@@ -570,15 +571,15 @@ const UserProfilePage = () => {
           <div
             style={{
               marginTop: '24px',
-              background: 'rgba(18, 18, 40, 0.80)',
+              background: 'var(--card-bg)',
               backdropFilter: 'blur(24px)',
-              border: '1px solid rgba(56,249,215,0.2)',
+              border: '1px solid var(--border-1)',
               borderRadius: '24px',
               overflow: 'hidden',
             }}
           >
             {/* Header */}
-            <div style={{ padding: '24px 28px', borderBottom: '1px solid rgba(56,249,215,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border-1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(56,249,215,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                   <MessageSquare size={18} color="#38F9D7" />
@@ -589,8 +590,8 @@ const UserProfilePage = () => {
                   )}
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, color: '#fff', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Messages Inbox</h3>
-                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>
+                  <h3 style={{ margin: 0, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Messages Inbox</h3>
+                  <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem' }}>
                     {chatMessages.length} message{chatMessages.length !== 1 ? 's' : ''}
                     {chatMessages.filter(m => !m.isRead).length > 0 && (
                       <span style={{ color: '#FF6584', fontWeight: 700 }}> · {chatMessages.filter(m => !m.isRead).length} unread</span>
@@ -615,15 +616,15 @@ const UserProfilePage = () => {
             {/* Message list */}
             <div style={{ padding: '16px 28px 24px' }}>
               {loadingMessages ? (
-                <div style={{ textAlign: 'center', padding: '28px', color: 'rgba(255,255,255,0.35)' }}>
+                <div style={{ textAlign: 'center', padding: '28px', color: 'var(--text-muted)' }}>
                   <div style={{ width: '24px', height: '24px', border: '2px solid rgba(56,249,215,0.3)', borderTopColor: '#38F9D7', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
                   Loading messages…
                 </div>
               ) : chatMessages.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '36px 0' }}>
                   <MessageSquare size={38} color="rgba(56,249,215,0.2)" style={{ marginBottom: '12px' }} />
-                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>No messages yet.</p>
-                  <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.22)', fontSize: '0.8rem' }}>Students will appear here once they chat about your listings.</p>
+                  <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>No messages yet.</p>
+                  <p style={{ margin: '6px 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Students will appear here once they chat about your listings.</p>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -633,8 +634,8 @@ const UserProfilePage = () => {
                       style={{
                         padding: '16px 18px',
                         borderRadius: '16px',
-                        background: msg.isRead ? 'rgba(255,255,255,0.03)' : 'rgba(56,249,215,0.06)',
-                        border: `1px solid ${msg.isRead ? 'rgba(255,255,255,0.07)' : 'rgba(56,249,215,0.25)'}`,
+                        background: msg.isRead ? 'var(--surface-1)' : 'rgba(56,249,215,0.06)',
+                        border: `1px solid ${msg.isRead ? 'var(--border-1)' : 'rgba(56,249,215,0.25)'}`,
                         transition: 'all 0.2s',
                         position: 'relative',
                       }}
@@ -650,10 +651,10 @@ const UserProfilePage = () => {
                           {msg.senderName?.[0]?.toUpperCase() || '?'}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#fff' }}>{msg.senderName || 'Unknown Student'}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{msg.senderEmail}</div>
+                          <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{msg.senderName || 'Unknown Student'}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{msg.senderEmail}</div>
                         </div>
-                        <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', flexShrink: 0, textAlign: 'right' }}>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', flexShrink: 0, textAlign: 'right' }}>
                           {new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}<br />
                           {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                         </div>
@@ -667,7 +668,7 @@ const UserProfilePage = () => {
                       )}
 
                       {/* Message body */}
-                      <p style={{ margin: '0 0 12px', color: 'rgba(255,255,255,0.78)', fontSize: '0.875rem', lineHeight: 1.65, background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '10px 14px', borderLeft: '3px solid rgba(56,249,215,0.35)' }}>
+                      <p style={{ margin: '0 0 12px', color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.65, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 14px', borderLeft: '3px solid rgba(56,249,215,0.35)' }}>
                         {msg.message}
                       </p>
 
@@ -694,9 +695,9 @@ const UserProfilePage = () => {
                         {!msg.isRead && (
                           <button
                             onClick={() => handleMarkAsRead(msg._id)}
-                            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.45)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)'; }}
-                            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: '8px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)'; }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)'; }}
                           >
                             ✓ Mark as read
                           </button>
@@ -715,15 +716,15 @@ const UserProfilePage = () => {
           <div
             style={{
               marginTop: '24px',
-              background: 'rgba(18, 18, 40, 0.80)',
+              background: 'var(--card-bg)',
               backdropFilter: 'blur(24px)',
-              border: '1px solid rgba(252,211,77,0.2)',
+              border: '1px solid var(--border-1)',
               borderRadius: '24px',
               overflow: 'hidden',
             }}
           >
             {/* Header */}
-            <div style={{ padding: '24px 28px', borderBottom: '1px solid rgba(252,211,77,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border-1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(252,211,77,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                   <AlertTriangle size={18} color="#FCD34D" />
@@ -734,8 +735,8 @@ const UserProfilePage = () => {
                   )}
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, color: '#fff', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Issue Reports</h3>
-                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>
+                  <h3 style={{ margin: 0, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Issue Reports</h3>
+                  <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem' }}>
                     {issueReports.length} report{issueReports.length !== 1 ? 's' : ''}
                     {issueReports.filter(i => i.status === 'open').length > 0 && (
                       <span style={{ color: '#FCD34D', fontWeight: 700 }}> · {issueReports.filter(i => i.status === 'open').length} open</span>
@@ -748,15 +749,15 @@ const UserProfilePage = () => {
             {/* Issue list */}
             <div style={{ padding: '16px 28px 24px' }}>
               {loadingIssues ? (
-                <div style={{ textAlign: 'center', padding: '28px', color: 'rgba(255,255,255,0.35)' }}>
+                <div style={{ textAlign: 'center', padding: '28px', color: 'var(--text-muted)' }}>
                   <div style={{ width: '24px', height: '24px', border: '2px solid rgba(252,211,77,0.3)', borderTopColor: '#FCD34D', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
                   Loading issue reports…
                 </div>
               ) : issueReports.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '36px 0' }}>
                   <AlertTriangle size={38} color="rgba(252,211,77,0.2)" style={{ marginBottom: '12px' }} />
-                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>No issue reports yet.</p>
-                  <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.22)', fontSize: '0.8rem' }}>Tenants can report issues from the boarding details page.</p>
+                  <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>No issue reports yet.</p>
+                  <p style={{ margin: '6px 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Tenants can report issues from the boarding details page.</p>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -786,8 +787,8 @@ const UserProfilePage = () => {
                         style={{
                           padding: '18px 20px',
                           borderRadius: '16px',
-                          background: issue.status === 'resolved' ? 'rgba(255,255,255,0.02)' : 'rgba(252,211,77,0.04)',
-                          border: `1px solid ${issue.status === 'resolved' ? 'rgba(255,255,255,0.07)' : 'rgba(252,211,77,0.2)'}`,
+                          background: issue.status === 'resolved' ? 'var(--surface-1)' : 'rgba(252,211,77,0.04)',
+                          border: `1px solid ${issue.status === 'resolved' ? 'var(--border-1)' : 'rgba(252,211,77,0.2)'}`,
                           opacity: issue.status === 'resolved' ? 0.65 : 1,
                           transition: 'all 0.2s',
                         }}
@@ -807,14 +808,14 @@ const UserProfilePage = () => {
                                 {issue.tenantName?.[0]?.toUpperCase() || '?'}
                               </div>
                               <div>
-                                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#fff' }}>{issue.tenantName || 'Tenant'}</div>
-                                <div style={{ fontSize: '0.73rem', color: 'rgba(255,255,255,0.4)' }}>{issue.tenantEmail}</div>
+                                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-primary)' }}>{issue.tenantName || 'Tenant'}</div>
+                                <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)' }}>{issue.tenantEmail}</div>
                               </div>
                             </div>
                           </div>
                           {/* Right: date + status */}
                           <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                            <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', marginBottom: '6px' }}>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '6px' }}>
                               {new Date(issue.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </div>
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', borderRadius: '100px', background: sc.bg, color: sc.color, fontSize: '0.72rem', fontWeight: 700, border: `1px solid ${sc.color}44`, textTransform: 'capitalize' }}>
@@ -834,7 +835,7 @@ const UserProfilePage = () => {
                         </div>
 
                         {/* Description */}
-                        <p style={{ margin: '0 0 14px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', lineHeight: 1.65, background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '10px 14px', borderLeft: `3px solid ${tc.color}66` }}>
+                        <p style={{ margin: '0 0 14px', color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.65, background: 'var(--surface-1)', borderRadius: '10px', padding: '10px 14px', borderLeft: `3px solid ${tc.color}66` }}>
                           {issue.description}
                         </p>
 
@@ -900,22 +901,22 @@ const UserProfilePage = () => {
           <div
             style={{
               marginTop: '24px',
-              background: 'rgba(18, 18, 40, 0.80)',
+              background: 'var(--card-bg)',
               backdropFilter: 'blur(24px)',
-              border: '1px solid rgba(34,211,238,0.18)',
+              border: '1px solid var(--border-1)',
               borderRadius: '24px',
               overflow: 'hidden',
             }}
           >
             {/* Header */}
-            <div style={{ padding: '24px 28px', borderBottom: '1px solid rgba(34,211,238,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border-1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(34,211,238,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Wrench size={18} color="#22d3ee" />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, color: '#fff', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Maintenance Requests</h3>
-                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>
+                  <h3 style={{ margin: 0, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Maintenance Requests</h3>
+                  <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem' }}>
                     {acceptedMaintenanceForOwner.length} accepted / completed
                   </p>
                 </div>
@@ -932,7 +933,7 @@ const UserProfilePage = () => {
                     })
                     .catch(() => setMaintenanceRequests([]));
                 }}
-                style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '8px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.65)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '8px 14px', borderRadius: '10px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
               >
                 Refresh
               </button>
@@ -942,8 +943,8 @@ const UserProfilePage = () => {
               {acceptedMaintenanceForOwner.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '36px 0' }}>
                   <Wrench size={38} color="rgba(34,211,238,0.18)" style={{ marginBottom: '12px' }} />
-                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>No accepted maintenance requests yet.</p>
-                  <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.22)', fontSize: '0.8rem' }}>After staff accepts your request, it will appear here.</p>
+                  <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>No accepted maintenance requests yet.</p>
+                  <p style={{ margin: '6px 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>After staff accepts your request, it will appear here.</p>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -960,7 +961,7 @@ const UserProfilePage = () => {
                       : { color: '#22d3ee', bg: 'rgba(34,211,238,0.12)' };
 
                     return (
-                      <div key={r.id} style={{ padding: '16px 18px', borderRadius: '18px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div key={r.id} style={{ padding: '16px 18px', borderRadius: '18px', background: 'var(--surface-1)', border: '1px solid var(--border-1)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
                           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                             <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '100px', background: tc.bg, color: tc.color, fontSize: '0.75rem', fontWeight: 800, border: `1px solid ${tc.color}44` }}>
@@ -970,23 +971,23 @@ const UserProfilePage = () => {
                               {r.status}
                             </span>
                           </div>
-                          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', textAlign: 'right' }}>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'right' }}>
                             {new Date(r.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </div>
                         </div>
 
-                        <p style={{ margin: '0 0 10px', color: 'rgba(255,255,255,0.78)', fontSize: '0.875rem', lineHeight: 1.6, background: 'rgba(0,0,0,0.18)', borderRadius: '12px', padding: '10px 12px', borderLeft: `3px solid ${tc.color}66` }}>
+                        <p style={{ margin: '0 0 10px', color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.6, background: 'var(--surface-1)', borderRadius: '12px', padding: '10px 12px', borderLeft: `3px solid ${tc.color}66` }}>
                           {r.description}
                         </p>
 
-                        <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MapPin size={14} color={tc.color} /> {r.address}</span>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Calendar size={14} color={tc.color} /> {r.date}{r.time ? ` · ${r.time}` : ''}</span>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><User size={14} color={tc.color} /> {r.acceptedByName || 'Staff'}</span>
                         </div>
 
                         {r.acceptedAt && (
-                          <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)' }}>
+                          <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                             Accepted · {new Date(r.acceptedAt).toLocaleString()}
                             {r.completedAt ? ` · Completed · ${new Date(r.completedAt).toLocaleString()}` : ''}
                           </div>
@@ -1004,30 +1005,30 @@ const UserProfilePage = () => {
         <div
           style={{
             marginTop: '24px',
-            background: 'rgba(18, 18, 40, 0.80)',
+            background: 'var(--card-bg)',
             backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(108,99,255,0.2)',
+            border: '1px solid var(--border-1)',
             borderRadius: '24px',
             overflow: 'hidden',
           }}
         >
           {/* Section header */}
-          <div style={{ padding: '24px 28px', borderBottom: '1px solid rgba(108,99,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border-1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(108,99,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ShoppingCart size={18} color="#a855f7" />
               </div>
               <div>
-                <h3 style={{ margin: 0, color: '#fff', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Saved Boardings</h3>
-                <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} saved</p>
+                <h3 style={{ margin: 0, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Saved Boardings</h3>
+                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem' }}>{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} saved</p>
               </div>
             </div>
             {cartItems.length > 0 && (
               <button
                 onClick={() => { setCartItems([]); localStorage.setItem('boardingCart', '[]'); }}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '10px', background: 'rgba(255,101,132,0.08)', border: '1px solid rgba(255,101,132,0.25)', color: '#FF6584', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,101,132,0.18)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,101,132,0.08)'; }}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '10px', background: 'var(--danger-soft-bg)', border: '1px solid var(--danger-soft-border)', color: 'var(--danger-soft-text)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--danger-soft-bg-hover)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--danger-soft-bg)'; }}
               >
                 <Trash2 size={13} /> Clear All
               </button>
@@ -1039,11 +1040,11 @@ const UserProfilePage = () => {
             {cartItems.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
                 <ShoppingCart size={40} color="rgba(108,99,255,0.25)" style={{ marginBottom: '12px' }} />
-                <p style={{ margin: 0, color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>No saved boardings yet.</p>
-                <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.22)', fontSize: '0.8rem' }}>Browse listings and click "Add to Cart" to save them here.</p>
+                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>No saved boardings yet.</p>
+                <p style={{ margin: '6px 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Browse listings and click "Add to Cart" to save them here.</p>
                 <button
                   onClick={() => navigate('/')}
-                  style={{ marginTop: '18px', padding: '10px 24px', borderRadius: '12px', background: 'linear-gradient(135deg, #6C63FF, #a855f7)', border: 'none', color: '#fff', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', boxShadow: '0 4px 16px rgba(108,99,255,0.4)' }}
+                  style={{ marginTop: '18px', padding: '10px 24px', borderRadius: '12px', background: 'var(--btn-primary-bg)', border: 'none', color: '#fff', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', boxShadow: 'var(--btn-primary-shadow-sm)' }}
                 >
                   Browse Boardings
                 </button>
@@ -1068,8 +1069,8 @@ const UserProfilePage = () => {
 
                     {/* Info */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</div>
-                      <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', marginTop: '3px' }}>{item.location}</div>
+                      <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '3px' }}>{item.location}</div>
                       <div style={{ fontSize: '0.82rem', color: '#a78bfa', fontWeight: 700, marginTop: '3px' }}>LKR {item.price?.toLocaleString()} / mo</div>
                     </div>
 
@@ -1105,9 +1106,9 @@ const UserProfilePage = () => {
         <div
           style={{
             marginTop: '24px',
-            background: 'rgba(18, 18, 40, 0.75)',
+            background: 'var(--card-bg)',
             backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,101,132,0.15)',
+            border: '1px solid var(--danger-soft-border)',
             borderRadius: '18px',
             padding: '24px 28px',
             display: 'flex',
@@ -1118,8 +1119,8 @@ const UserProfilePage = () => {
           }}
         >
           <div>
-            <h3 style={{ margin: 0, color: '#fff', fontWeight: 700, fontSize: '1rem' }}>Sign Out</h3>
-            <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>
+            <h3 style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 700, fontSize: '1rem' }}>Sign Out</h3>
+            <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
               You will be returned to the home page.
             </p>
           </div>
@@ -1128,19 +1129,19 @@ const UserProfilePage = () => {
             style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               padding: '10px 22px', borderRadius: '12px',
-              background: 'rgba(255,101,132,0.1)',
-              border: '1px solid rgba(255,101,132,0.3)',
-              color: '#FF6584', fontSize: '0.9rem', fontWeight: 600,
+              background: 'var(--danger-soft-bg)',
+              border: '1px solid var(--danger-soft-border)',
+              color: 'var(--danger-soft-text)', fontSize: '0.9rem', fontWeight: 600,
               cursor: 'pointer', transition: 'all 0.2s',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = 'rgba(255,101,132,0.2)';
-              (e.currentTarget as HTMLElement).style.borderColor = '#FF6584';
+              (e.currentTarget as HTMLElement).style.background = 'var(--danger-soft-bg-hover)';
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--danger-soft-text)';
               (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = 'rgba(255,101,132,0.1)';
-              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,101,132,0.3)';
+              (e.currentTarget as HTMLElement).style.background = 'var(--danger-soft-bg)';
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--danger-soft-border)';
               (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
             }}
           >
@@ -1172,8 +1173,8 @@ const InfoRow = ({
       gap: '14px',
       padding: '16px 18px',
       borderRadius: '14px',
-      background: 'rgba(108,99,255,0.06)',
-      border: '1px solid rgba(108,99,255,0.12)',
+      background: 'var(--surface-1)',
+      border: '1px solid var(--border-1)',
     }}
   >
     <div
@@ -1187,10 +1188,10 @@ const InfoRow = ({
       {icon}
     </div>
     <div>
-      <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>
+      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>
         {label}
       </div>
-      <div style={{ fontSize: '0.95rem', color: '#fff', fontWeight: 500, textTransform: capitalize ? 'capitalize' : 'none' }}>
+      <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 500, textTransform: capitalize ? 'capitalize' : 'none' }}>
         {value}
       </div>
     </div>
