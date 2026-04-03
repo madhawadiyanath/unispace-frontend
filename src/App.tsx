@@ -8,6 +8,7 @@ import AdminDashboard from './Pages/AdminDashboard';
 import UserProfilePage from './Pages/UserProfilePage';
 import BoardingFormPage from './Pages/BoardingFormPage';
 import BoardingDetailsPage from './Pages/BoardingDetailsPage';
+import BookingPaymentPage from './Pages/BookingPaymentPage';
 import FinanceManagerDashboard from './Pages/FinanceManagerDashboard';
 import CleaningServicePage from './Pages/CleaningServicePage';
 import CleaningStaffDashboard from './Pages/CleaningStaffDashboard';
@@ -39,6 +40,7 @@ function App() {
         <Route path="/profile/edit" element={<EditProfilePage />} />
         <Route path="/boarding/add" element={<BoardingFormPage />} />
         <Route path="/boarding/:id" element={<BoardingDetailsPage />} />
+        <Route path="/book/:id" element={<BookingPaymentPage />} />
         <Route path="/cleaning-service" element={<CleaningServicePage />} />
         <Route path="/cleaning-staff/dashboard" element={<CleaningStaffDashboard />} />
         <Route path="/maintenance" element={<MaintenancePage />} />

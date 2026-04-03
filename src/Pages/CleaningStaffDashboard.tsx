@@ -210,12 +210,12 @@ const CleaningStaffDashboard = () => {
 
   /* ─────────────────────────── JSX ─────────────────────────── */
   return (
-    <div style={{ minHeight: '100vh', background: '#0D0D1A', fontFamily: "'Inter', sans-serif", color: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--gradient-hero)', fontFamily: "'Inter', sans-serif", color: 'var(--text-primary)' }}>
 
       {/* ── Top Header ── */}
       <header style={{
-        background: 'rgba(18,18,40,0.97)',
-        borderBottom: '1px solid rgba(34,211,238,0.15)',
+        background: 'var(--card-bg)',
+        borderBottom: '1px solid var(--border-1)',
         padding: '0 28px',
         height: '68px',
         display: 'flex',
@@ -233,28 +233,28 @@ const CleaningStaffDashboard = () => {
           </div>
           <div>
             <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.3px' }}>Staff Dashboard</div>
-            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>UniSpace Cleaning</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '1px' }}>UniSpace Cleaning</div>
           </div>
         </div>
 
         {/* Right */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.2)', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.2)', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Bell size={16} />
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 12px 5px 6px', borderRadius: '100px', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.2)' }}>
             <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, #22d3ee, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, color: '#0D0D1A' }}>
               {currentUser?.name?.slice(0, 2).toUpperCase() || 'CS'}
             </div>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {currentUser?.name || 'Staff'}
             </span>
           </div>
           <button
             onClick={handleLogout}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', background: 'rgba(255,101,132,0.1)', border: '1px solid rgba(255,101,132,0.25)', color: '#FF6584', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,101,132,0.2)'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,101,132,0.1)'}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', background: 'var(--danger-soft-bg)', border: '1px solid var(--danger-soft-border)', color: 'var(--danger-soft-text)', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--danger-soft-bg-hover)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--danger-soft-bg)'}
           >
             <LogOut size={14} /> Logout
           </button>
@@ -289,7 +289,7 @@ const CleaningStaffDashboard = () => {
             <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 900, margin: '0 0 6px' }}>
               Welcome, {currentUser?.name || 'Staff'}! 👋
             </h1>
-            <p style={{ margin: 0, color: 'rgba(255,255,255,0.45)', fontSize: '0.87rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.87rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Mail size={13} /> {currentUser?.email}
             </p>
           </div>
@@ -303,7 +303,7 @@ const CleaningStaffDashboard = () => {
             ].map(s => (
               <div key={s.label} style={{ background: s.bg, border: `1px solid ${s.border}`, borderRadius: '16px', padding: '14px 22px', textAlign: 'center', minWidth: '90px' }}>
                 <div style={{ fontSize: '2rem', fontWeight: 900, color: s.color, fontFamily: "'Outfit', sans-serif", lineHeight: 1 }}>{s.count}</div>
-                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', marginTop: '4px', fontWeight: 600 }}>{s.label}</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 600 }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -324,9 +324,9 @@ const CleaningStaffDashboard = () => {
                 display: 'flex', alignItems: 'center', gap: '7px',
                 padding: '9px 18px', borderRadius: '10px',
                 fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
-                background: activeTab === tab.id ? 'linear-gradient(135deg, #22d3ee, #06b6d4)' : 'rgba(255,255,255,0.05)',
-                border: activeTab === tab.id ? 'none' : '1px solid rgba(255,255,255,0.1)',
-                color: activeTab === tab.id ? '#0D0D1A' : 'rgba(255,255,255,0.6)',
+                background: activeTab === tab.id ? 'linear-gradient(135deg, #22d3ee, #06b6d4)' : 'var(--surface-2)',
+                border: activeTab === tab.id ? 'none' : '1px solid var(--border-1)',
+                color: activeTab === tab.id ? '#0D0D1A' : 'var(--text-secondary)',
               }}
             >
               {tab.icon} {tab.label}
@@ -336,7 +336,7 @@ const CleaningStaffDashboard = () => {
 
         {/* ── Booking Cards ── */}
         {displayed.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 24px', color: 'rgba(255,255,255,0.25)' }}>
+          <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--text-muted)' }}>
             <div style={{ marginBottom: '14px', opacity: 0.4 }}><Sparkles size={40} /></div>
             <p style={{ margin: 0, fontSize: '0.95rem' }}>
               {activeTab === 'all' ? 'No booking requests yet. Share the cleaning page with students!' : `No ${activeTab} bookings.`}
@@ -364,9 +364,9 @@ const CleaningStaffDashboard = () => {
               return (
                 <div
                   key={booking.id}
-                  style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'all 0.25s' }}
+                  style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'all 0.25s' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = `${pkgColor}44`; (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 30px rgba(0,0,0,0.3)`; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.07)'; (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-1)'; (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}
                 >
                   {/* Card Top Accent */}
                   <div style={{ height: '4px', background: `linear-gradient(90deg, ${pkgColor}, ${pkgColor}88)` }} />
@@ -375,11 +375,11 @@ const CleaningStaffDashboard = () => {
                     {/* Header */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#fff' }}>
+                        <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-primary)' }}>
                           {PACKAGE_NAMES[booking.packageId] || booking.packageId}
                         </div>
                         {booking.addOns?.length > 0 && (
-                          <div style={{ fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', marginTop: '3px' }}>
+                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '3px' }}>
                             + {booking.addOns.join(', ')}
                           </div>
                         )}
@@ -390,14 +390,14 @@ const CleaningStaffDashboard = () => {
                     </div>
 
                     {/* Customer Details */}
-                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {[
                         { icon: <User    size={13} color={pkgColor} />, text: booking.name    },
                         { icon: <Phone   size={13} color={pkgColor} />, text: booking.phone   },
                         { icon: <Mail    size={13} color={pkgColor} />, text: booking.email   },
                         { icon: <MapPin  size={13} color={pkgColor} />, text: booking.address },
                       ].map((item, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.83rem', color: 'rgba(255,255,255,0.7)' }}>
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.83rem', color: 'var(--text-secondary)' }}>
                           {item.icon}
                           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.text}</span>
                         </div>
@@ -406,17 +406,17 @@ const CleaningStaffDashboard = () => {
 
                     {/* Schedule */}
                     <div style={{ display: 'flex', gap: '10px' }}>
-                      <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)' }}>
+                      <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                         <Calendar size={13} color={pkgColor} /> {booking.date}
                       </div>
-                      <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)' }}>
+                      <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                         <Clock size={13} color={pkgColor} /> {booking.time}
                       </div>
                     </div>
 
                     {/* Notes */}
                     {booking.notes && (
-                      <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.55, borderLeft: `3px solid ${pkgColor}55` }}>
+                      <div style={{ background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.55, borderLeft: `3px solid ${pkgColor}55` }}>
                         📝 {booking.notes}
                       </div>
                     )}
@@ -465,7 +465,7 @@ const CleaningStaffDashboard = () => {
               </div>
               <div>
                 <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.05rem' }}>Maintenance Requests</div>
-                <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)' }}>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                   {maintenanceForStaff.length} total
                   {pendingMaintenanceCount > 0 && (
                     <span style={{ color: '#FCD34D', fontWeight: 800 }}> · {pendingMaintenanceCount} pending</span>
@@ -485,7 +485,7 @@ const CleaningStaffDashboard = () => {
                 onClick={() => {
                   void loadMaintenanceRequests();
                 }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.65)', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '12px', background: 'var(--surface-2)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}
               >
                 Refresh
               </button>
@@ -493,9 +493,9 @@ const CleaningStaffDashboard = () => {
           </div>
 
           {maintenanceForStaff.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '34px 18px', borderRadius: '18px', background: 'rgba(18,18,40,0.75)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.35)' }}>
-              <AlertCircle size={38} color="rgba(255,255,255,0.2)" style={{ marginBottom: '12px' }} />
-              <div style={{ fontWeight: 800, color: 'rgba(255,255,255,0.55)' }}>No maintenance requests yet</div>
+            <div style={{ textAlign: 'center', padding: '34px 18px', borderRadius: '18px', background: 'var(--card-bg)', border: '1px solid var(--border-1)', color: 'var(--text-muted)' }}>
+              <AlertCircle size={38} color="var(--text-muted)" style={{ marginBottom: '12px', opacity: 0.7 }} />
+              <div style={{ fontWeight: 800, color: 'var(--text-secondary)' }}>No maintenance requests yet</div>
               <div style={{ fontSize: '0.85rem', marginTop: '6px' }}>When owners submit requests, they will appear here.</div>
             </div>
           ) : (
@@ -516,16 +516,16 @@ const CleaningStaffDashboard = () => {
                 const s = statusMap[req.status];
 
                 return (
-                  <div key={req.id} style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <div key={req.id} style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ height: '4px', background: `linear-gradient(90deg, ${tc.color}, ${tc.color}88)` }} />
 
                     <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'flex-start' }}>
                         <div>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontWeight: 800, color: '#fff' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontWeight: 800, color: 'var(--text-primary)' }}>
                             <span style={{ color: tc.color, opacity: 0.95 }}>{tc.icon}</span> {tc.label}
                           </div>
-                          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                             {new Date(req.submittedAt).toLocaleString()}
                           </div>
                         </div>
@@ -534,14 +534,14 @@ const CleaningStaffDashboard = () => {
                         </span>
                       </div>
 
-                      <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {[
                           { icon: <User size={13} color={tc.color} />, text: req.name },
                           { icon: <Phone size={13} color={tc.color} />, text: req.phone },
                           { icon: <Mail size={13} color={tc.color} />, text: req.email },
                           { icon: <MapPin size={13} color={tc.color} />, text: req.address },
                         ].map((item, i) => (
-                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.83rem', color: 'rgba(255,255,255,0.7)' }}>
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.83rem', color: 'var(--text-secondary)' }}>
                             {item.icon}
                             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.text}</span>
                           </div>
@@ -549,15 +549,15 @@ const CleaningStaffDashboard = () => {
                       </div>
 
                       <div style={{ display: 'flex', gap: '10px' }}>
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)' }}>
+                        <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                           <Calendar size={13} color={tc.color} /> {req.date}
                         </div>
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)' }}>
+                        <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                           <Clock size={13} color={tc.color} /> {req.time || '—'}
                         </div>
                       </div>
 
-                      <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.55, borderLeft: `3px solid ${tc.color}55` }}>
+                      <div style={{ background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.55, borderLeft: `3px solid ${tc.color}55` }}>
                         {req.description}
                       </div>
 
