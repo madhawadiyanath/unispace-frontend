@@ -313,7 +313,7 @@ const BoardingDetailsPage = () => {
 
                 {/* Multi-layer overlay */}
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--app-bg) 0%, transparent 100%)' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(var(--primary-rgb, 108,99,255), 0.18) 0%, transparent 55%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(108, 99, 255, 0.15) 0%, rgba(255, 154, 68, 0.05) 50%, transparent 100%)' }} />
 
                 {/* ── Top navbar ── */}
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20, padding: '22px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -357,20 +357,20 @@ const BoardingDetailsPage = () => {
                             </span>
                         </div>
 
-                        <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 'clamp(1.9rem, 4.5vw, 3rem)', fontWeight: 900, margin: '0 0 14px', lineHeight: 1.08, letterSpacing: '-0.5px', textShadow: '0 2px 24px rgba(0,0,0,0.6)' }}>
+                        <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 'clamp(1.9rem, 4.5vw, 3rem)', fontWeight: 900, margin: '0 0 14px', lineHeight: 1.08, letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
                             {boarding.title}
                         </h1>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '22px', flexWrap: 'wrap' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.82)', fontSize: '0.92rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '0.92rem', fontWeight: 600 }}>
                                 <MapPin size={15} color="#6C63FF" /> {boarding.location}
                             </div>
                             {boarding.nearUniversity && (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.65)', fontSize: '0.88rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '0.88rem', fontWeight: 600 }}>
                                     <GraduationCap size={15} color="#a855f7" /> Near {boarding.nearUniversity}
                                 </div>
                             )}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600 }}>
                                 <Home size={13} color="#38F9D7" /> By {boarding.landlordName || 'Landlord'}
                             </div>
                         </div>
