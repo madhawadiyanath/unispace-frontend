@@ -35,6 +35,21 @@ interface Boarding {
     createdAt: string;
 }
 
+interface Booking {
+    _id: string;
+    boardingId: string;
+    boardingTitle: string;
+    landlordId: string;
+    landlordName: string;
+    clientName: string;
+    clientEmail: string;
+    clientPhone: string;
+    paymentCardLast4: string;
+    paymentStatus: string;
+    bookingStatus: string;
+    createdAt: string;
+}
+
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -68,6 +83,12 @@ const AdminDashboard = () => {
     const [boardingFilter, setBoardingFilter] = useState<'all' | 'pending' | 'published' | 'rejected'>('all');
     const [selectedBoarding, setSelectedBoarding] = useState<Boarding | null>(null);
 
+    // Bookings state
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [loadingBookings, setLoadingBookings] = useState(false);
+    const [bookingSearch, setBookingSearch] = useState('');
+    const [bookingFilter, setBookingFilter] = useState<'all' | 'active' | 'cancelled' | 'completed'>('all');
+
     // Guard: admins only
     const storedUser = localStorage.getItem('user');
     const currentUser = storedUser ? JSON.parse(storedUser) : null;
@@ -79,6 +100,7 @@ const AdminDashboard = () => {
         }
         fetchUsers();
         fetchBoardings();
+        fetchBookings();
     }, []);
 
     const fetchUsers = async () => {
@@ -104,6 +126,19 @@ const AdminDashboard = () => {
             console.error('Failed to fetch boardings');
         } finally {
             setLoadingBoardings(false);
+        }
+    };
+
+    const fetchBookings = async () => {
+        setLoadingBookings(true);
+        try {
+            const res = await fetch(`${API_BASE}/bookings`);
+            const data = await res.json();
+            setBookings(data.bookings || []);
+        } catch {
+            console.error('Failed to fetch bookings');
+        } finally {
+            setLoadingBookings(false);
         }
     };
 
@@ -227,6 +262,7 @@ const AdminDashboard = () => {
         { label: 'Students', value: users.filter(u => u.userType === 'student').length, icon: <CheckCircle size={22} />, color: '#43E97B', bg: 'rgba(67,233,123,0.15)' },
         { label: 'Landlords', value: users.filter(u => u.userType === 'landlord').length, icon: <Home size={22} />, color: '#38F9D7', bg: 'rgba(56,249,215,0.15)' },
         { label: 'Pending Listings', value: boardings.filter(b => b.status === 'pending').length, icon: <Clock size={22} />, color: '#FCD34D', bg: 'rgba(252,211,77,0.15)' },
+        { label: 'Total Bookings', value: bookings.length, icon: <Building2 size={22} />, color: '#FF6B9D', bg: 'rgba(255,107,157,0.15)' },
         { label: 'Cleaning Staff', value: users.filter(u => u.userType === 'cleaning_staff').length, icon: <Sparkles size={22} />, color: '#22d3ee', bg: 'rgba(34,211,238,0.15)' },
     ];
 
@@ -236,6 +272,7 @@ const AdminDashboard = () => {
         { id: 'add-finance-manager', label: 'Add Finance Manager', icon: <Banknote size={15} />, sub: true },
         { id: 'add-cleaning-staff', label: 'Cleaning Staff', icon: <Sparkles size={18} />, sub: false },
         { id: 'listings', label: 'Listings', icon: <Home size={18} />, sub: false },
+        { id: 'bookings', label: 'Bookings', icon: <Building2 size={18} />, sub: false },
         { id: 'reports', label: 'Reports', icon: <TrendingUp size={18} />, sub: false },
     ];
 
@@ -783,6 +820,84 @@ const AdminDashboard = () => {
                             </div>
                         </div>
                     )}
+
+                    {/* ── Reports placeholder ── */}
+                    {activeSection === 'bookings' && (() => {
+                        const filtered = bookings.filter(b => {
+                            const matchSearch =
+                                b.boardingTitle?.toLowerCase().includes(bookingSearch.toLowerCase()) ||
+                                b.clientName?.toLowerCase().includes(bookingSearch.toLowerCase()) ||
+                                b.clientEmail?.toLowerCase().includes(bookingSearch.toLowerCase());
+                            const matchFilter = bookingFilter === 'all' || b.bookingStatus === bookingFilter;
+                            return matchSearch && matchFilter;
+                        });
+
+                        return (
+                            <div>
+                                {/* Toolbar */}
+                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '20px' }}>
+                                    <div style={{ position: 'relative', flex: '1', minWidth: '220px', maxWidth: '360px' }}>
+                                        <Search size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                                        <input type="text" placeholder="Search bookings…" value={bookingSearch} onChange={e => setBookingSearch(e.target.value)} style={{ width: '100%', padding: '10px 14px 10px 38px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }} />
+                                    </div>
+                                    {(['all', 'active', 'cancelled', 'completed'] as const).map(f => (
+                                        <button key={f} onClick={() => setBookingFilter(f)} style={{ padding: '8px 18px', borderRadius: '100px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', background: bookingFilter === f ? 'linear-gradient(135deg, #6C63FF, #a855f7)' : 'var(--surface-1)', border: bookingFilter === f ? 'none' : '1px solid var(--border-1)', color: bookingFilter === f ? '#fff' : 'var(--text-secondary)', textTransform: 'capitalize' }}>
+                                            {f} {f !== 'all' && <span style={{ marginLeft: '4px', opacity: 0.7 }}>({bookings.filter(b => b.bookingStatus === f).length})</span>}
+                                        </button>
+                                    ))}
+                                    <button onClick={fetchBookings} style={{ marginLeft: 'auto', background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '10px', padding: '8px 14px', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer' }}>Refresh</button>
+                                </div>
+
+                                <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px' }}>
+                                    <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.1rem', fontWeight: 700, margin: '0 0 20px' }}>
+                                        Bookings <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: '8px' }}>({filtered.length})</span>
+                                    </h2>
+
+                                    {loadingBookings ? (
+                                        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                                            <div style={{ width: '28px', height: '28px', border: '2px solid rgba(108,99,255,0.3)', borderTopColor: '#6C63FF', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
+                                            Loading…
+                                        </div>
+                                    ) : filtered.length === 0 ? (
+                                        <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '30px 0' }}>No bookings found.</p>
+                                    ) : (
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                                <thead>
+                                                    <tr style={{ borderBottom: '2px solid var(--border-1)', color: 'var(--text-muted)' }}>
+                                                        <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.5px' }}>Client Name</th>
+                                                        <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.5px' }}>Boarding</th>
+                                                        <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.5px' }}>Email</th>
+                                                        <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.5px' }}>Card</th>
+                                                        <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.5px' }}>Status</th>
+                                                        <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.5px' }}>Date</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {filtered.map(b => (
+                                                        <tr key={b._id} style={{ borderBottom: '1px solid var(--border-1)', transition: 'background 0.2s' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+                                                            <td style={{ padding: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>{b.clientName}</td>
+                                                            <td style={{ padding: '12px', color: 'var(--text-secondary)' }}>{b.boardingTitle}</td>
+                                                            <td style={{ padding: '12px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{b.clientEmail}</td>
+                                                            <td style={{ padding: '12px', fontFamily: "'Courier New', monospace", color: 'var(--text-secondary)', fontSize: '0.85rem' }}>••••{b.paymentCardLast4}</td>
+                                                            <td style={{ padding: '12px' }}>
+                                                                <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, background: b.bookingStatus === 'active' ? 'rgba(67,233,123,0.15)' : b.bookingStatus === 'cancelled' ? 'rgba(255,107,157,0.15)' : 'rgba(108,99,255,0.15)', color: b.bookingStatus === 'active' ? '#43E97B' : b.bookingStatus === 'cancelled' ? '#FF6B9D' : '#6C63FF', textTransform: 'capitalize' }}>
+                                                                    {b.bookingStatus}
+                                                                </span>
+                                                            </td>
+                                                            <td style={{ padding: '12px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                                                {new Date(b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })()}
 
                     {/* ── Reports placeholder ── */}
                     {activeSection === 'reports' && (

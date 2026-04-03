@@ -590,6 +590,32 @@ const BoardingDetailsPage = () => {
                                 {cartAdded ? '✓ Added to Cart' : 'Add to Cart'}
                             </button>
 
+                            {/* ── Book Now Button ── */}
+                            {isAvailable && (
+                                <button
+                                    onClick={() => navigate(`/book/${boarding._id}`)}
+                                    style={{
+                                        width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
+                                        background: 'color-mix(in srgb, var(--primary) 7%, transparent)',
+                                        border: '1px solid color-mix(in srgb, var(--primary) 28%, transparent)',
+                                        color: 'var(--primary)',
+                                        fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                        transition: 'all 0.25s',
+                                    }}
+                                    onMouseEnter={e => {
+                                        (e.currentTarget as HTMLElement).style.background = 'color-mix(in srgb, var(--primary) 15%, transparent)';
+                                        (e.currentTarget as HTMLElement).style.borderColor = 'color-mix(in srgb, var(--primary) 40%, transparent)';
+                                    }}
+                                    onMouseLeave={e => {
+                                        (e.currentTarget as HTMLElement).style.background = 'color-mix(in srgb, var(--primary) 7%, transparent)';
+                                        (e.currentTarget as HTMLElement).style.borderColor = 'color-mix(in srgb, var(--primary) 28%, transparent)';
+                                    }}
+                                >
+                                    📅 Book Now
+                                </button>
+                            )}
+
                             {/* ── Pay Advance Button ── */}
                             {isAvailable && (
                                 <button
