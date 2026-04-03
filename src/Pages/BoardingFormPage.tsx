@@ -1,10 +1,16 @@
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Upload, X, CheckCircle,
   MapPin, Phone, Mail, User,
   FileText, Building2, Image, AlertCircle,
 } from 'lucide-react';
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
+import type { LeafletMouseEvent } from 'leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import Navbar from '../Components/Navbar';
 
 const API_BASE = 'http://localhost:5000';
@@ -12,6 +18,57 @@ const API_BASE = 'http://localhost:5000';
 const ROOM_TYPES = ['Single Room', 'Double Room', 'Studio', 'Annex', 'Hostel Room', 'Shared Room'];
 const UNIVERSITIES = ['SLIIT', 'NSBM', 'UOC (University of Colombo)', 'IIT', 'NIBM', 'Informatics', 'Other'];
 const ALL_AMENITIES = ['WiFi', 'AC', 'Meals', 'Parking', 'Study Room', 'Kitchen', 'Laundry', 'Security', 'Hot Water', 'Garden', 'CCTV', 'Balcony'];
+
+// Fix Leaflet default marker icon path (Vite bundling)
+L.Marker.prototype.options.icon = L.icon({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+
+type LatLngTuple = [number, number];
+
+const RecenterMap = ({ center }: { center: LatLngTuple }) => {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center);
+  }, [center, map]);
+  return null;
+};
+
+const LocationPicker = ({
+  position,
+  onChange,
+  onPicked,
+}: {
+  position: LatLngTuple;
+  onChange: (pos: LatLngTuple) => void;
+  onPicked: () => void;
+}) => {
+  useMapEvents({
+    click(e: LeafletMouseEvent) {
+      onChange([e.latlng.lat, e.latlng.lng]);
+      onPicked();
+    },
+  });
+
+  return (
+    <Marker
+      position={position}
+      draggable
+      eventHandlers={{
+        dragend: (e: L.LeafletEvent) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const marker = e.target as any;
+          const latlng = marker.getLatLng();
+          onChange([latlng.lat, latlng.lng]);
+          onPicked();
+        },
+      }}
+    />
+  );
+};
 
 interface StoredUser {
   _id: string;
@@ -33,11 +90,14 @@ const BoardingFormPage = () => {
     roomType: 'Single Room',
     price: '',
     location: '',
+    latitude: 6.9271,
+    longitude: 79.8612,
     nearUniversity: 'SLIIT',
     contactName: currentUser?.name || '',
     contactPhone: '',
     contactEmail: currentUser?.email || '',
   });
+  const [locationPicked, setLocationPicked] = useState(false);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -86,8 +146,12 @@ const BoardingFormPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title || !form.description || !form.price || !form.location || !form.contactName || !form.contactPhone) {
+    if (!form.title || !form.description || !form.price || !form.contactName || !form.contactPhone) {
       setError('Please fill in all required fields.');
+      return;
+    }
+    if (!form.location && !locationPicked) {
+      setError('Please pin the exact location on the map (or enter the full address).');
       return;
     }
     if (Number(form.price) <= 0) {
@@ -109,6 +173,8 @@ const BoardingFormPage = () => {
       fd.append('roomType', form.roomType);
       fd.append('price', form.price);
       fd.append('location', form.location);
+      fd.append('latitude', String(form.latitude));
+      fd.append('longitude', String(form.longitude));
       fd.append('nearUniversity', form.nearUniversity);
       fd.append('contactName', form.contactName);
       fd.append('contactPhone', form.contactPhone);
@@ -151,7 +217,7 @@ const BoardingFormPage = () => {
             <button onClick={() => navigate('/profile')} style={{ padding: '12px 28px', borderRadius: '12px', background: 'var(--btn-primary-bg)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem' }}>
               Back to Profile
             </button>
-            <button onClick={() => { setSuccess(false); setForm({ title: '', description: '', roomType: 'Single Room', price: '', location: '', nearUniversity: 'SLIIT', contactName: currentUser.name, contactPhone: '', contactEmail: currentUser.email }); setSelectedAmenities([]); setPhotos([]); setPreviews([]); }} style={{ padding: '12px 28px', borderRadius: '12px', background: 'var(--surface-2)', border: '1px solid var(--border-1)', color: 'var(--primary-light)', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem' }}>
+            <button onClick={() => { setSuccess(false); setLocationPicked(false); setForm({ title: '', description: '', roomType: 'Single Room', price: '', location: '', latitude: 6.9271, longitude: 79.8612, nearUniversity: 'SLIIT', contactName: currentUser.name, contactPhone: '', contactEmail: currentUser.email }); setSelectedAmenities([]); setPhotos([]); setPreviews([]); }} style={{ padding: '12px 28px', borderRadius: '12px', background: 'var(--surface-2)', border: '1px solid var(--border-1)', color: 'var(--primary-light)', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem' }}>
               Add Another
             </button>
           </div>
@@ -213,8 +279,47 @@ const BoardingFormPage = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div style={{ gridColumn: '1 / -1' }}>
                 <Label>Full Address / Location <Req /></Label>
-                <input name="location" value={form.location} onChange={handleChange} placeholder="e.g. 45/B Malabe Road, Pittugala" style={inputStyle} />
+                <input name="location" value={form.location} onChange={handleChange} placeholder="Optional if you pin the exact location below" style={inputStyle} />
               </div>
+
+              <div style={{ gridColumn: '1 / -1' }}>
+                <Label>Pin Exact Location <Req /></Label>
+                <div style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-1)', background: 'var(--surface-1)' }}>
+                  <div style={{ height: '260px' }}>
+                    {(() => {
+                      const pos: LatLngTuple = [Number(form.latitude) || 6.9271, Number(form.longitude) || 79.8612];
+                      return (
+                        <MapContainer
+                          center={pos}
+                          zoom={13}
+                          scrollWheelZoom
+                          style={{ height: '100%', width: '100%' }}
+                        >
+                          <TileLayer
+                            attribution='&copy; OpenStreetMap contributors'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          />
+                          <RecenterMap center={pos} />
+                          <LocationPicker
+                            position={pos}
+                            onChange={(next) => setForm(prev => ({ ...prev, latitude: next[0], longitude: next[1] }))}
+                            onPicked={() => { setLocationPicked(true); setError(''); }}
+                          />
+                        </MapContainer>
+                      );
+                    })()}
+                  </div>
+                  <div style={{ padding: '12px 14px', display: 'flex', gap: '10px', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                      Click the map (or drag the pin) to set the exact location.
+                    </div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                      Lat: {Number(form.latitude).toFixed(5)} · Lng: {Number(form.longitude).toFixed(5)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <Label>Monthly Rent (LKR) <Req /></Label>
                 <div style={{ position: 'relative' }}>
