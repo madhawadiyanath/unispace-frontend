@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Star, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 
 const Testimonials = () => {
     const [active, setActive] = useState(0);
 
-    const testimonials = [
+    const defaultTestimonials = [
         {
             name: 'Kavindi Perera',
             university: 'SLIIT',
@@ -42,6 +42,22 @@ const Testimonials = () => {
             color: '#38F9D7',
         },
     ];
+
+    const [testimonials, setTestimonials] = useState(defaultTestimonials);
+
+    useEffect(() => {
+        const storedReviews = localStorage.getItem('site_reviews');
+        if (storedReviews) {
+            try {
+                const parsed = JSON.parse(storedReviews);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    setTestimonials([...parsed, ...defaultTestimonials]);
+                }
+            } catch (err) {
+                console.error("Failed to parse reviews", err);
+            }
+        }
+    }, []);
 
     const prev = () => setActive((a) => (a === 0 ? testimonials.length - 1 : a - 1));
     const next = () => setActive((a) => (a === testimonials.length - 1 ? 0 : a + 1));

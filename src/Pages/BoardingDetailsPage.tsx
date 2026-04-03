@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, MapPin, Share2, Heart, ChevronLeft, ChevronRight,
     Phone, Mail, User, Shield, MessageCircle, Home, GraduationCap,
-    Check, ShoppingCart, Send, X, AlertTriangle, Wrench, CreditCard,
+    Check, ShoppingCart, Send, X, CreditCard,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -66,14 +66,13 @@ const BoardingDetailsPage = () => {
     const [chatError, setChatError] = useState('');
     const chatTextRef = useRef<HTMLTextAreaElement>(null);
 
-    // Issue report state
-    const [showIssueForm, setShowIssueForm] = useState(false);
-    const [issueType, setIssueType] = useState('repairs');
-    const [issuePriority, setIssuePriority] = useState('medium');
-    const [issueDescription, setIssueDescription] = useState('');
-    const [issueSending, setIssueSending] = useState(false);
-    const [issueSent, setIssueSent] = useState(false);
-    const [issueError, setIssueError] = useState('');
+    // Review state
+    const [showReviewForm, setShowReviewForm] = useState(false);
+    const [reviewRating, setReviewRating] = useState(5);
+    const [reviewText, setReviewText] = useState('');
+    const [reviewSending, setReviewSending] = useState(false);
+    const [reviewSent, setReviewSent] = useState(false);
+    const [reviewError, setReviewError] = useState('');
 
     // Advance payment state
     const [showAdvanceForm, setShowAdvanceForm] = useState(false);
@@ -163,41 +162,43 @@ const BoardingDetailsPage = () => {
         }
     };
 
-    const handleReportIssue = async () => {
-        if (!boarding || !issueDescription.trim()) return;
+    const handleAddReview = async () => {
+        if (!boarding || !reviewText.trim()) return;
         const storedUser = localStorage.getItem('user');
         if (!storedUser) { navigate('/login'); return; }
         const user = JSON.parse(storedUser);
-        setIssueSending(true);
-        setIssueError('');
+        
+        setReviewSending(true);
+        setReviewError('');
+        
         try {
-            const res = await fetch(`${API_BASE}/issues`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    boardingId:    boarding._id,
-                    boardingTitle: boarding.title,
-                    tenantId:      user._id,
-                    tenantName:    user.name,
-                    tenantEmail:   user.email,
-                    landlordId:    boarding.landlordId,
-                    issueType,
-                    priority:      issuePriority,
-                    description:   issueDescription.trim(),
-                }),
-            });
-            const data = await res.json();
-            if (data.success) {
-                setIssueSent(true);
-                setIssueDescription('');
-                setTimeout(() => { setIssueSent(false); setShowIssueForm(false); }, 3500);
-            } else {
-                setIssueError(data.message || 'Failed to submit issue.');
-            }
+            // Retrieve existing reviews from local storage
+            const storedReviews = localStorage.getItem('site_reviews');
+            const existingReviews = storedReviews ? JSON.parse(storedReviews) : [];
+            
+            // Create new review object
+            const newReview = {
+                name: user.name || 'Anonymous',
+                university: 'Guest',
+                year: 'Recent Review',
+                rating: reviewRating,
+                text: reviewText.trim(),
+                avatar: '🧑🎓',
+                color: '#60A5FA',
+            };
+            
+            // Prepend new review to the list and save
+            existingReviews.unshift(newReview);
+            localStorage.setItem('site_reviews', JSON.stringify(existingReviews));
+            
+            setReviewSent(true);
+            setReviewText('');
+            setReviewRating(5);
+            setTimeout(() => { setReviewSent(false); setShowReviewForm(false); }, 3500);
         } catch {
-            setIssueError('Network error. Please try again.');
+            setReviewError('Failed to add review. Please try again.');
         } finally {
-            setIssueSending(false);
+            setReviewSending(false);
         }
     };
 
@@ -825,92 +826,63 @@ const BoardingDetailsPage = () => {
                                 </div>
                             )}
 
-                            {/* ── Report an Issue Button ── */}
+                            {/* ── Add Review Button ── */}
                             <button
-                                onClick={() => { setShowIssueForm(c => !c); setIssueSent(false); setIssueError(''); }}
+                                onClick={() => { setShowReviewForm(c => !c); setReviewSent(false); setReviewError(''); }}
                                 style={{
                                     width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
-                                    background: showIssueForm ? 'var(--danger-soft-bg-hover)' : 'var(--danger-soft-bg)',
-                                    border: `1px solid ${showIssueForm ? 'var(--danger-soft-border)' : 'var(--danger-soft-bg-hover)'}`,
-                                    color: 'var(--danger-soft-text)',
+                                    background: showReviewForm ? 'var(--primary-soft-bg-hover)' : 'var(--primary-soft-bg)',
+                                    border: `1px solid ${showReviewForm ? 'var(--primary-soft-border)' : 'var(--primary-soft-bg-hover)'}`,
+                                    color: 'var(--primary)',
                                     fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                     transition: 'all 0.25s',
                                 }}
-                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--danger-soft-bg-hover)'; }}
-                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showIssueForm ? 'var(--danger-soft-bg-hover)' : 'var(--danger-soft-bg)'; }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary-soft-bg-hover)'; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showReviewForm ? 'var(--primary-soft-bg-hover)' : 'var(--primary-soft-bg)'; }}
                             >
-                                {showIssueForm ? <><X size={17} /> Cancel Report</> : <><AlertTriangle size={17} /> Report an Issue</>}
+                                {showReviewForm ? <><X size={17} /> Cancel Review</> : <><Heart size={17} /> Add Review</>}
                             </button>
 
-                            {/* ── Inline Issue Report Form ── */}
-                            {showIssueForm && (
-                                <div style={{ borderRadius: '16px', background: 'var(--danger-soft-bg)', border: '1px solid var(--danger-soft-border)', padding: '18px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
-                                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--danger-soft-text)', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <AlertTriangle size={12} /> Report Issue to {boarding.landlordName || 'Owner'}
+                            {/* ── Inline Review Form ── */}
+                            {showReviewForm && (
+                                <div style={{ borderRadius: '16px', background: 'var(--primary-soft-bg)', border: '1px solid var(--primary-soft-border)', padding: '18px', marginBottom: '10px', animation: 'slideDown 0.25s ease' }}>
+                                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <Heart size={12} /> Leave a Review for {boarding.title}
                                     </div>
 
-                                    {issueSent ? (
+                                    {reviewSent ? (
                                         <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--accent)', fontWeight: 700, fontSize: '0.92rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                                             <span style={{ fontSize: '2rem' }}>✅</span>
-                                            Issue reported! The owner has been notified.
+                                            Review submitted! It will appear on the homepage.
                                         </div>
                                     ) : (
                                         <>
-                                            {/* Issue Type */}
+                                            {/* Rating */}
                                             <div style={{ marginBottom: '12px' }}>
-                                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Issue Type</div>
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                                                    {[
-                                                        { id: 'cleaning',   label: '🧹 Cleaning',  color: '#6C63FF' },
-                                                        { id: 'plumbing',   label: '💧 Plumbing',  color: '#06b6d4' },
-                                                        { id: 'electrical', label: '⚡ Electrical', color: '#f59e0b' },
-                                                        { id: 'repairs',    label: '🔨 Repairs',   color: '#22c55e' },
-                                                    ].map(t => (
-                                                        <button
-                                                            key={t.id}
-                                                            type="button"
-                                                            onClick={() => setIssueType(t.id)}
-                                                            style={{
-                                                                padding: '8px 6px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
-                                                                background: issueType === t.id ? `${t.color}22` : 'var(--surface-1)',
-                                                                border: `1.5px solid ${issueType === t.id ? t.color : 'var(--border-1)'}`,
-                                                                color: issueType === t.id ? t.color : 'var(--text-secondary)',
-                                                            }}
-                                                        >{t.label}</button>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            {/* Priority */}
-                                            <div style={{ marginBottom: '12px' }}>
-                                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Priority</div>
+                                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Rating</div>
                                                 <div style={{ display: 'flex', gap: '6px' }}>
-                                                    {[
-                                                        { id: 'low',    label: 'Low',    color: '#22c55e' },
-                                                        { id: 'medium', label: 'Medium', color: '#f59e0b' },
-                                                        { id: 'high',   label: 'High',   color: 'var(--secondary)' },
-                                                    ].map(p => (
+                                                    {[1, 2, 3, 4, 5].map(p => (
                                                         <button
-                                                            key={p.id}
+                                                            key={p}
                                                             type="button"
-                                                            onClick={() => setIssuePriority(p.id)}
+                                                            onClick={() => setReviewRating(p)}
                                                             style={{
                                                                 flex: 1, padding: '7px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
-                                                                background: issuePriority === p.id ? `${p.color}22` : 'var(--surface-1)',
-                                                                border: `1.5px solid ${issuePriority === p.id ? p.color : 'var(--border-1)'}`,
-                                                                color: issuePriority === p.id ? p.color : 'var(--text-secondary)',
+                                                                background: reviewRating === p ? `var(--primary)22` : 'var(--surface-1)',
+                                                                border: `1.5px solid ${reviewRating === p ? 'var(--primary)' : 'var(--border-1)'}`,
+                                                                color: reviewRating === p ? 'var(--primary)' : 'var(--text-secondary)',
                                                             }}
-                                                        >{p.label}</button>
+                                                        >{p} ⭐</button>
                                                     ))}
                                                 </div>
                                             </div>
 
                                             {/* Description */}
                                             <textarea
-                                                value={issueDescription}
-                                                onChange={e => { setIssueDescription(e.target.value); setIssueError(''); }}
-                                                placeholder="Describe the issue in detail…"
+                                                value={reviewText}
+                                                onChange={e => { setReviewText(e.target.value); setReviewError(''); }}
+                                                placeholder="Write your honest review..."
                                                 rows={3}
                                                 style={{
                                                     width: '100%', boxSizing: 'border-box',
@@ -925,26 +897,26 @@ const BoardingDetailsPage = () => {
                                                 onFocus={e => { e.currentTarget.style.borderColor = 'var(--secondary)'; }}
                                                 onBlur={e => { e.currentTarget.style.borderColor = 'var(--input-border)'; }}
                                             />
-                                            {issueError && (
-                                                <p style={{ color: 'var(--secondary)', fontSize: '0.78rem', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '5px' }}>⚠ {issueError}</p>
+                                            {reviewError && (
+                                                <p style={{ color: 'var(--secondary)', fontSize: '0.78rem', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '5px' }}>⚠ {reviewError}</p>
                                             )}
                                             <button
-                                                onClick={handleReportIssue}
-                                                disabled={issueSending || !issueDescription.trim()}
+                                                onClick={handleAddReview}
+                                                disabled={reviewSending || !reviewText.trim()}
                                                 style={{
                                                     width: '100%', padding: '11px', borderRadius: '12px',
-                                                    background: issueSending || !issueDescription.trim() ? 'var(--surface-2)' : 'var(--danger-soft-text)',
+                                                    background: reviewSending || !reviewText.trim() ? 'var(--surface-2)' : 'var(--primary)',
                                                     border: 'none',
-                                                    color: issueSending || !issueDescription.trim() ? 'var(--text-muted)' : '#FFF',
+                                                    color: reviewSending || !reviewText.trim() ? 'var(--text-muted)' : '#FFF',
                                                     fontWeight: 700, fontSize: '0.9rem',
-                                                    cursor: issueSending || !issueDescription.trim() ? 'not-allowed' : 'pointer',
+                                                    cursor: reviewSending || !reviewText.trim() ? 'not-allowed' : 'pointer',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
                                                     transition: 'all 0.2s',
                                                 }}
                                             >
-                                                {issueSending
+                                                {reviewSending
                                                     ? <><div style={{ width: '14px', height: '14px', border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#0D0D1A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Submitting…</>
-                                                    : <><Wrench size={15} /> Submit Issue Report</>
+                                                    : <><Send size={15} /> Submit Review</>
                                                 }
                                             </button>
                                         </>
