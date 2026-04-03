@@ -461,7 +461,7 @@ const BoardingFormPage = () => {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         input::placeholder, textarea::placeholder { color: var(--text-muted); }
-        select option { background: var(--surface-1); color: var(--text-primary); }
+        select option { background: var(--select-option-bg); color: var(--text-primary); }
       `}</style>
     </div>
   );
