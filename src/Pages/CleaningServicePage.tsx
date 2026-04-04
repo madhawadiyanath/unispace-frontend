@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import Navbar from '../Components/Navbar';
 
+const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:5000';
+
 /* ─── Types ───────────────────────────────────────────────── */
 interface ServicePackage {
   id: string;
@@ -171,23 +173,50 @@ const CleaningServicePage = () => {
       setError('Please enter a valid phone number.'); return;
     }
 
+    if (!currentUser?._id) {
+      setError('Please log in to place a cleaning request.');
+      return;
+    }
+
+    const selected = PACKAGES.find(p => p.id === form.packageId);
+    const packageName = selected?.name || form.packageId;
+
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      // Persist booking to localStorage for cleaning staff dashboard
-      const newBooking = {
-        id: Date.now().toString(),
-        ...form,
-        status: 'pending',
-        submittedAt: new Date().toISOString(),
-      };
+    (async () => {
       try {
-        const existing = JSON.parse(localStorage.getItem('cleaningBookings') || '[]');
-        localStorage.setItem('cleaningBookings', JSON.stringify([...existing, newBooking]));
-      } catch {}
-      setLoading(false);
-      setSubmitted(true);
-    }, 1400);
+        const res = await fetch(`${API_BASE}/maintenance`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            requesterId: currentUser._id,
+            requesterName: form.name,
+            requesterEmail: form.email,
+            requesterPhone: form.phone,
+            address: form.address,
+            category: 'cleaning',
+            priority: 'medium',
+            preferredDate: form.date,
+            preferredTime: form.time,
+            description: `Cleaning Service Request\nPackage: ${packageName}\nAdd-ons: ${form.addOns.length ? form.addOns.join(', ') : 'None'}\nNotes: ${form.notes || '—'}`,
+            cleaningPackageId: form.packageId,
+            cleaningAddOns: form.addOns,
+            cleaningNotes: form.notes,
+          }),
+        });
+
+        if (!res.ok) {
+          setError('Failed to submit request. Please try again.');
+          setLoading(false);
+          return;
+        }
+
+        setLoading(false);
+        setSubmitted(true);
+      } catch {
+        setError('Network error. Please try again.');
+        setLoading(false);
+      }
+    })();
   };
 
   /* ── Success Screen ── */
