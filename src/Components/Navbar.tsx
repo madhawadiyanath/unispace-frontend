@@ -18,6 +18,11 @@ const Navbar = () => {
   const storedUser = localStorage.getItem('user');
   const currentUser = storedUser ? JSON.parse(storedUser) : null;
 
+  const userType = String(currentUser?.userType || '').toLowerCase();
+  const canSeeMaintenance = Boolean(
+    currentUser && (userType === 'landlord' || userType === 'admin' || userType.includes('staff')),
+  );
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     setIsOpen(false);
@@ -39,7 +44,7 @@ const Navbar = () => {
 
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
-  const navLinks = [
+  const navLinksBase = [
     { label: 'Home', href: '/', icon: <Home size={16} /> },
     {
       label: 'Browse',
@@ -58,6 +63,10 @@ const Navbar = () => {
       dropdownIcons: [<Sparkles size={14} />, <Droplets size={14} />, <Zap size={14} />, <Hammer size={14} />],
     },
   ];
+
+  const navLinks = navLinksBase.filter((link) =>
+    link.label === 'Maintenance' ? canSeeMaintenance : true,
+  );
 
   return (
     <nav
