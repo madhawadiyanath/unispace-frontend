@@ -335,7 +335,7 @@ const BookingPaymentPage = () => {
                 {step === 'details' && (
                     <div style={{ background: 'var(--search-panel-bg)', border: '1px solid var(--border-1)', borderRadius: '16px', padding: '32px' }}>
                         <div style={{ marginBottom: '24px' }}>
-                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label style={{ display: 'flex', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', alignItems: 'center', gap: '6px' }}>
                                 👤 Full Name *
                             </label>
                             <input
@@ -363,7 +363,7 @@ const BookingPaymentPage = () => {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <label style={{ display: 'flex', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', alignItems: 'center', gap: '6px' }}>
                                     📞 Phone *
                                 </label>
                                 <input
@@ -392,7 +392,7 @@ const BookingPaymentPage = () => {
                                 />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <label style={{ display: 'flex', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', alignItems: 'center', gap: '6px' }}>
                                     ✉️ Email *
                                 </label>
                                 <input
@@ -420,7 +420,7 @@ const BookingPaymentPage = () => {
                         </div>
 
                         <div style={{ marginBottom: '24px' }}>
-                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label style={{ display: 'flex', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', alignItems: 'center', gap: '6px' }}>
                                 📍 Street Address *
                             </label>
                             <input
@@ -448,7 +448,7 @@ const BookingPaymentPage = () => {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', marginBottom: '32px' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <label style={{ display: 'flex', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', alignItems: 'center', gap: '6px' }}>
                                     🏙️ City *
                                 </label>
                                 <input
@@ -474,7 +474,7 @@ const BookingPaymentPage = () => {
                                 />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <label style={{ display: 'flex', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', alignItems: 'center', gap: '6px' }}>
                                     🔑 Zip *
                                 </label>
                                 <input
@@ -527,7 +527,7 @@ const BookingPaymentPage = () => {
                 {step === 'payment' && (
                     <div style={{ background: 'var(--search-panel-bg)', border: '1px solid var(--border-1)', borderRadius: '16px', padding: '32px' }}>
                         <div style={{ marginBottom: '24px' }}>
-                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label style={{ display: 'flex', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', alignItems: 'center', gap: '6px' }}>
                                 👤 Card Holder Name *
                             </label>
                             <input
@@ -554,7 +554,7 @@ const BookingPaymentPage = () => {
                         </div>
 
                         <div style={{ marginBottom: '24px' }}>
-                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label style={{ display: 'flex', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', alignItems: 'center', gap: '6px' }}>
                                 💳 Card Number *
                             </label>
                             <div style={{ position: 'relative' }}>
@@ -599,7 +599,7 @@ const BookingPaymentPage = () => {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <label style={{ display: 'flex', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', alignItems: 'center', gap: '6px' }}>
                                     📅 Expiry * (MM/YY)
                                 </label>
                                 <input
@@ -634,7 +634,7 @@ const BookingPaymentPage = () => {
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <label style={{ display: 'flex', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)', alignItems: 'center', gap: '6px' }}>
                                     🔒 CVV * (3-4)
                                 </label>
                                 <input
