@@ -219,6 +219,21 @@ const MaintenancePage = () => {
   const storedUser = localStorage.getItem('user');
   const currentUser = storedUser ? JSON.parse(storedUser) : null;
 
+  const canAccessMaintenance = useMemo(() => {
+    const t = String(currentUser?.userType || '').toLowerCase();
+    return Boolean(currentUser && (t === 'landlord' || t === 'admin' || t.includes('staff')));
+  }, [currentUser?._id, currentUser?.userType]);
+
+  useEffect(() => {
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+    if (!canAccessMaintenance) {
+      navigate('/');
+    }
+  }, [navigate, currentUser?._id, canAccessMaintenance]);
+
   /* ── Cleaning state ── */
   const [selectedPackage, setSelectedPackage] = useState('deep');
   const [cleaningForm, setCleaningForm] = useState<CleaningForm>({
