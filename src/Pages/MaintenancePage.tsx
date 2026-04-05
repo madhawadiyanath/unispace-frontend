@@ -345,16 +345,64 @@ const MaintenancePage = () => {
     if (!isLettersSpaces(cleaningForm.name)) { setCleaningError('Full name must contain letters only.'); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaningForm.email)) { setCleaningError('Please enter a valid email address.'); return; }
     if (!/^\d{10}$/.test(sanitizePhone10(cleaningForm.phone))) { setCleaningError('Phone number must be exactly 10 digits (numbers only).'); return; }
+
+    if (!currentUser?._id) {
+      setCleaningError('Please log in to submit a request.');
+      return;
+    }
+
     setCleaningLoading(true);
-    setTimeout(() => {
-      const newBooking = { id: Date.now().toString(), ...cleaningForm, status: 'pending', submittedAt: new Date().toISOString() };
+
+    (async () => {
       try {
-        const existing = JSON.parse(localStorage.getItem('cleaningBookings') || '[]');
-        localStorage.setItem('cleaningBookings', JSON.stringify([...existing, newBooking]));
-      } catch {}
-      setCleaningLoading(false);
-      setCleaningSubmitted(true);
-    }, 1400);
+        const addOnsLabel = (cleaningForm.addOns || []).length ? cleaningForm.addOns.join(', ') : 'None';
+        const notesLabel = (cleaningForm.notes || '').trim() ? cleaningForm.notes.trim() : '—';
+        const cleaningDescription = `Cleaning Service: ${pkg.name}. Add-ons: ${addOnsLabel}. Notes: ${notesLabel}. Total: LKR ${totalPrice.toLocaleString()}.`;
+
+        const res = await fetch(`${API_BASE}/maintenance`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            requesterId: currentUser._id,
+            requesterName: cleaningForm.name,
+            requesterEmail: cleaningForm.email,
+            requesterPhone: cleaningForm.phone,
+            address: cleaningForm.address,
+            category: 'cleaning',
+            priority: 'low',
+            preferredDate: cleaningForm.date,
+            preferredTime: cleaningForm.time,
+            description: cleaningDescription,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          setCleaningError(data?.message || 'Failed to submit request.');
+          return;
+        }
+
+        const backendId = data?.request?._id as string | undefined;
+        const newBooking = {
+          id: Date.now().toString(),
+          maintenanceRequestId: backendId,
+          ...cleaningForm,
+          status: 'pending',
+          submittedAt: new Date().toISOString(),
+        };
+
+        try {
+          const existing = JSON.parse(localStorage.getItem('cleaningBookings') || '[]');
+          localStorage.setItem('cleaningBookings', JSON.stringify([...(Array.isArray(existing) ? existing : []), newBooking]));
+        } catch {}
+
+        setCleaningSubmitted(true);
+      } catch {
+        setCleaningError('Failed to submit request.');
+      } finally {
+        setCleaningLoading(false);
+      }
+    })();
   };
 
   /* ── Maintenance helpers ── */
