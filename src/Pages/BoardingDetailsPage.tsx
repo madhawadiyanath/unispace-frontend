@@ -613,7 +613,7 @@ const BoardingDetailsPage = () => {
                                     width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
                                     background: cartAdded ? 'color-mix(in srgb, var(--accent) 20%, transparent)' : 'var(--surface-1)',
                                     border: cartAdded ? '1px solid color-mix(in srgb, var(--accent) 40%, transparent)' : '1px solid var(--border-1)',
-                                    color: cartAdded ? 'var(--accent)' : 'var(--primary-light)',
+                                    color: cartAdded ? 'var(--accent)' : 'var(--primary)',
                                     fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                     transition: 'all 0.25s',
