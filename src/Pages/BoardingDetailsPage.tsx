@@ -1,5 +1,10 @@
     import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { MapContainer, Marker, TileLayer } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import {
     ArrowLeft, MapPin, Share2, Heart, ChevronLeft, ChevronRight,
     Phone, Mail, User, Shield, MessageCircle, Home, GraduationCap,
@@ -21,11 +26,21 @@ interface Boarding {
     contactPhone: string;
     contactEmail: string;
     photos: string[];
+    latitude?: number;
+    longitude?: number;
     status: string;
     landlordId: string;
     landlordName: string;
     createdAt: string;
 }
+
+// Fix Leaflet default marker icon path (Vite bundling)
+L.Marker.prototype.options.icon = L.icon({
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+});
 
 const amenityMap: Record<string, { icon: string; color: string }> = {
     WiFi:            { icon: '📶', color: '#6C63FF' },
@@ -497,26 +512,46 @@ const BoardingDetailsPage = () => {
                         {/* ── Location ── */}
                         <div style={{ background: 'var(--search-panel-bg)', border: '1px solid var(--border-1)', borderRadius: '22px', padding: '30px' }}>
                             <SectionTitle>Location</SectionTitle>
-                            <div style={{ borderRadius: '16px', overflow: 'hidden', height: '220px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', position: 'relative' }}>
-                                {/* Grid dots background */}
-                                <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.15 }} xmlns="http://www.w3.org/2000/svg">
-                                    <defs>
-                                        <pattern id="dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
-                                            <circle cx="2" cy="2" r="1.5" fill="var(--primary)" />
-                                        </pattern>
-                                    </defs>
-                                    <rect width="100%" height="100%" fill="url(#dots)" />
-                                </svg>
-                                {/* Glow */}
-                                <div style={{ position: 'absolute', width: '120px', height: '120px', borderRadius: '50%', background: 'color-mix(in srgb, var(--primary) 20%, transparent)', filter: 'blur(32px)' }} />
-                                <div style={{ position: 'relative', zIndex: 2, width: '52px', height: '52px', borderRadius: '50%', background: 'var(--gradient-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-glow)' }}>
-                                    <MapPin size={22} color="#fff" />
-                                </div>
-                                <p style={{ position: 'relative', zIndex: 2, color: 'var(--text-primary)', margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>{boarding.location}</p>
-                                {boarding.nearUniversity && (
-                                    <p style={{ position: 'relative', zIndex: 2, color: 'var(--text-secondary)', margin: 0, fontSize: '0.82rem' }}>📍 Near {boarding.nearUniversity}</p>
-                                )}
-                            </div>
+                            {(() => {
+                                const lat = Number(boarding.latitude) || 0;
+                                const lng = Number(boarding.longitude) || 0;
+                                const hasCoords = Number.isFinite(lat) && Number.isFinite(lng) && (lat !== 0 || lng !== 0);
+                                const center: [number, number] = hasCoords ? [lat, lng] : [6.9271, 79.8612];
+
+                                return (
+                                    <div style={{ borderRadius: '16px', overflow: 'hidden', background: 'var(--surface-1)', border: '1px solid var(--border-1)' }}>
+                                        <div style={{ height: '260px' }}>
+                                            <MapContainer
+                                                center={center}
+                                                zoom={hasCoords ? 15 : 12}
+                                                scrollWheelZoom
+                                                style={{ height: '100%', width: '100%' }}
+                                            >
+                                                <TileLayer
+                                                    attribution='&copy; OpenStreetMap contributors'
+                                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                                />
+                                                <Marker position={center} />
+                                            </MapContainer>
+                                        </div>
+
+                                        <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', fontWeight: 800, fontSize: '0.95rem' }}>
+                                                <MapPin size={16} color="var(--primary)" />
+                                                <span>{boarding.location || 'Pinned Location'}</span>
+                                            </div>
+                                            {boarding.nearUniversity && (
+                                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>📍 Near {boarding.nearUniversity}</div>
+                                            )}
+                                            {!hasCoords && (
+                                                <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                                                    Exact pin not set for this listing yet.
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     </div>
 
@@ -578,7 +613,7 @@ const BoardingDetailsPage = () => {
                                     width: '100%', padding: '14px', borderRadius: '14px', marginBottom: '10px',
                                     background: cartAdded ? 'color-mix(in srgb, var(--accent) 20%, transparent)' : 'var(--surface-1)',
                                     border: cartAdded ? '1px solid color-mix(in srgb, var(--accent) 40%, transparent)' : '1px solid var(--border-1)',
-                                    color: cartAdded ? 'var(--accent)' : 'var(--primary-light)',
+                                    color: cartAdded ? 'var(--accent)' : 'var(--primary)',
                                     fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                     transition: 'all 0.25s',
