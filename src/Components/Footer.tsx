@@ -290,7 +290,7 @@ const Footer = () => {
                         © 2025 BoardingFinder. All rights reserved.
                     </p>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        Made with <Heart size={13} color="var(--primary)" fill="var(--primary)" style={{ display: 'inline' }} /> for Sri Lankan students
+                        Made with <Heart size={13} color="var(--primary)" fill="var(--primary)" style={{ display: 'inline' }} /> for SLIIT students
                     </p>
                     <div style={{ display: 'flex', gap: '20px' }}>
                         {['Privacy Policy', 'Terms of Service', 'Cookies'].map((link) => (
