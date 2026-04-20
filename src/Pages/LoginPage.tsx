@@ -1,18 +1,113 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Lock, LogIn, Eye, EyeOff, Home, AlertCircle, CheckCircle } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+
+declare global {
+    interface Window {
+        google?: any;
+    }
+}
 
 const LoginPage = () => {
     const navigate = useNavigate();
+
+    const googleButtonRef = useRef<HTMLDivElement | null>(null);
 
     const [form, setForm] = useState({ username: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+
+    const handleGoogleCredential = useCallback(async (credential: string) => {
+        if (!credential) return;
+
+        setLoading(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            const res = await fetch(`${API_BASE}/users/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential }),
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.message || 'Google Sign-In failed.');
+                return;
+            }
+
+            localStorage.setItem('user', JSON.stringify(data.user));
+            setSuccess('Login successful! Redirecting...');
+
+            const userType = data.user?.userType;
+            const destination =
+                userType === 'admin' ? '/admin/dashboard' :
+                userType === 'finance_manager' ? '/finance/dashboard' :
+                userType === 'cleaning_staff' ? '/cleaning-staff/dashboard' :
+                '/';
+            setTimeout(() => navigate(destination), 800);
+        } catch {
+            setError('Unable to connect to the server. Make sure the backend is running.');
+        } finally {
+            setLoading(false);
+        }
+    }, [navigate]);
+
+    useEffect(() => {
+        if (!GOOGLE_CLIENT_ID) return;
+        if (!googleButtonRef.current) return;
+
+        let cancelled = false;
+        let attempts = 0;
+
+        const tryInit = () => {
+            if (cancelled) return;
+            attempts += 1;
+
+            const google = window.google;
+            if (!google?.accounts?.id) {
+                if (attempts < 100) {
+                    window.setTimeout(tryInit, 50);
+                }
+                return;
+            }
+
+            // Avoid duplicate buttons on re-render
+            if (googleButtonRef.current) googleButtonRef.current.innerHTML = '';
+
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: (response: any) => {
+                    const credential = String(response?.credential || '');
+                    handleGoogleCredential(credential);
+                },
+            });
+
+            const parentWidth = googleButtonRef.current?.parentElement?.clientWidth;
+            const buttonWidth = Math.max(240, Math.min(360, parentWidth || 360));
+
+            google.accounts.id.renderButton(googleButtonRef.current, {
+                theme: 'outline',
+                size: 'large',
+                text: 'signin_with',
+                shape: 'pill',
+                width: buttonWidth,
+            });
+        };
+
+        tryInit();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [handleGoogleCredential]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -281,6 +376,17 @@ const LoginPage = () => {
                     <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>or</span>
                     <div style={{ flex: 1, height: '1px', background: 'var(--border-1)' }} />
                 </div>
+
+                {/* Google Sign-In */}
+                {GOOGLE_CLIENT_ID ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>
+                        <div ref={googleButtonRef} />
+                    </div>
+                ) : (
+                    <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '18px' }}>
+                        Google Sign-In is not configured.
+                    </p>
+                )}
 
                 {/* Sign up link */}
                 <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
