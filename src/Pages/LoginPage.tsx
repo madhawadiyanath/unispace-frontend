@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Lock, LogIn, Eye, EyeOff, Home, AlertCircle, CheckCircle } from 'lucide-react';
+import { User, Lock, LogIn, Eye, EyeOff, Home, AlertCircle, CheckCircle, GraduationCap } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
@@ -22,6 +22,7 @@ const LoginPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [googleRole, setGoogleRole] = useState<'student' | 'landlord'>('student');
 
     const handleGoogleCredential = useCallback(async (credential: string) => {
         if (!credential) return;
@@ -34,7 +35,7 @@ const LoginPage = () => {
             const res = await fetch(`${API_BASE}/users/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ credential }),
+                body: JSON.stringify({ credential, userType: googleRole }),
             });
             const data = await res.json();
 
@@ -58,7 +59,7 @@ const LoginPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [navigate]);
+    }, [googleRole, navigate]);
 
     useEffect(() => {
         if (!GOOGLE_CLIENT_ID) return;
@@ -379,8 +380,47 @@ const LoginPage = () => {
 
                 {/* Google Sign-In */}
                 {GOOGLE_CLIENT_ID ? (
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>
-                        <div ref={googleButtonRef} />
+                    <div style={{ marginBottom: '18px' }}>
+                        <div style={{ marginBottom: '12px' }}>
+                            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', letterSpacing: '0.3px' }}>
+                                I AM A
+                            </label>
+                            <div style={{ position: 'relative' }}>
+                                <GraduationCap size={17} color="#6C63FF" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                                <select
+                                    value={googleRole}
+                                    onChange={(e) => setGoogleRole(e.target.value as 'student' | 'landlord')}
+                                    style={{
+                                        width: '100%',
+                                        padding: '13px 14px 13px 42px',
+                                        background: 'var(--input-bg)',
+                                        border: '1px solid var(--input-border)',
+                                        borderRadius: '12px',
+                                        color: 'var(--input-text)',
+                                        fontSize: '0.95rem',
+                                        outline: 'none',
+                                        boxSizing: 'border-box',
+                                        cursor: 'pointer',
+                                        appearance: 'none',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.currentTarget.style.borderColor = 'var(--input-focus-border)';
+                                        e.currentTarget.style.boxShadow = 'var(--input-focus-ring)';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.currentTarget.style.borderColor = 'var(--input-border)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
+                                >
+                                    <option value="student">Student (Looking for boarding)</option>
+                                    <option value="landlord">Landlord (Listing a room)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <div ref={googleButtonRef} />
+                        </div>
                     </div>
                 ) : (
                     <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '18px' }}>
