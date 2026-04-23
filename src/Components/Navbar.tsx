@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Home, Search, Heart, MessageCircle, LogIn, UserPlus, ChevronDown, LogOut, User, Sparkles, Wrench, Droplets, Zap, Hammer, Sun, Moon } from 'lucide-react';
+import { Menu, X, Home, Search, Heart, Bell, LogIn, UserPlus, ChevronDown, LogOut, User, Sparkles, Wrench, Droplets, Zap, Hammer, Sun, Moon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
@@ -17,6 +17,11 @@ const Navbar = () => {
   // Read logged-in user from localStorage
   const storedUser = localStorage.getItem('user');
   const currentUser = storedUser ? JSON.parse(storedUser) : null;
+
+  const userType = String(currentUser?.userType || '').toLowerCase();
+  const canSeeMaintenance = Boolean(
+    currentUser && (userType === 'landlord' || userType === 'admin' || userType.includes('staff')),
+  );
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -39,7 +44,7 @@ const Navbar = () => {
 
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
-  const navLinks = [
+  const navLinksBase = [
     { label: 'Home', href: '/', icon: <Home size={16} /> },
     {
       label: 'Browse',
@@ -48,7 +53,7 @@ const Navbar = () => {
       dropdown: ['All Boardings', 'Near Campus', 'Budget Friendly', 'Premium'],
     },
     { label: 'Favourites', href: '/favourites', icon: <Heart size={16} /> },
-    { label: 'Messages', href: '#', icon: <MessageCircle size={16} /> },
+    { label: 'Notification', href: '/notifications', icon: <Bell size={16} /> },
     {
       label: 'Maintenance',
       href: '/maintenance',
@@ -58,6 +63,10 @@ const Navbar = () => {
       dropdownIcons: [<Sparkles size={14} />, <Droplets size={14} />, <Zap size={14} />, <Hammer size={14} />],
     },
   ];
+
+  const navLinks = navLinksBase.filter((link) =>
+    link.label === 'Maintenance' ? canSeeMaintenance : true,
+  );
 
   return (
     <nav

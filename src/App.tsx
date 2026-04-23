@@ -15,6 +15,7 @@ import CleaningStaffDashboard from './Pages/CleaningStaffDashboard';
 import MaintenancePage from './Pages/MaintenancePage';
 import EditProfilePage from './Pages/EditProfilePage';
 import FavouritesPage from './Pages/FavouritesPage';
+import NotificationsPage from './Pages/NotificationsPage';
 
 function App() {
   useEffect(() => {
@@ -45,6 +46,7 @@ function App() {
         <Route path="/cleaning-staff/dashboard" element={<CleaningStaffDashboard />} />
         <Route path="/maintenance" element={<MaintenancePage />} />
         <Route path="/favourites" element={<FavouritesPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
       </Routes>
     </BrowserRouter>
   );

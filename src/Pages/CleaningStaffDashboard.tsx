@@ -11,6 +11,7 @@ const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhos
 /* ─── Types ──────────────────────────────────────────────── */
 interface BookingRequest {
   id: string;
+  maintenanceRequestId?: string;
   name: string;
   phone: string;
   email: string;
@@ -117,6 +118,9 @@ const CleaningStaffDashboard = () => {
 
   const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
 
+  const [maintenanceCategoryTab, setMaintenanceCategoryTab] = useState<'cleaning' | 'plumbing' | 'electrical' | 'repairs'>('plumbing');
+  const [maintenanceStatusTab, setMaintenanceStatusTab] = useState<'pending' | 'finished'>('pending');
+
   const loadMaintenanceRequests = async () => {
     try {
       const res = await fetch(`${API_BASE}/maintenance`);
@@ -162,11 +166,28 @@ const CleaningStaffDashboard = () => {
     const updated = bookings.map(b => b.id === id ? { ...b, status } : b);
     setBookings(updated);
     localStorage.setItem('cleaningBookings', JSON.stringify(updated));
+
+    const booking = updated.find(b => b.id === id);
+    const maintenanceId = booking?.maintenanceRequestId;
+    if (!maintenanceId) return;
+
+    const nextBackendStatus: MaintenanceRequestStatus | null =
+      status === 'accepted' ? 'accepted' :
+      status === 'completed' ? 'completed' :
+      null;
+    if (!nextBackendStatus) return;
+
+    updateMaintenanceStatus(maintenanceId, nextBackendStatus);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/login');
+  };
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const updateMaintenanceStatus = (id: string, status: MaintenanceRequestStatus) => {
@@ -201,16 +222,191 @@ const CleaningStaffDashboard = () => {
     activeTab === 'completed' ? completed :
     bookings;
 
-  const maintenanceForStaff = maintenanceRequests
-    .filter(r => r.type !== 'cleaning')
+  const maintenanceForStaffAll = maintenanceRequests
     .slice()
     .sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''));
 
-  const pendingMaintenanceCount = maintenanceForStaff.filter(r => r.status === 'pending').length;
+  const isPendingLikeStatus = (status: MaintenanceRequestStatus) => status === 'pending' || status === 'accepted';
+  const isFinishedLikeStatus = (status: MaintenanceRequestStatus) => status === 'completed' || status === 'rejected';
+
+  const cleaningForMaintenanceTab = bookings;
+  const cleaningPendingCount = cleaningForMaintenanceTab.filter(b => b.status !== 'completed').length;
+  const cleaningFinishedCount = cleaningForMaintenanceTab.filter(b => b.status === 'completed').length;
+
+  const maintenanceByType: Record<'plumbing' | 'electrical' | 'repairs', MaintenanceRequest[]> = {
+    plumbing: maintenanceForStaffAll.filter(r => r.type === 'plumbing'),
+    electrical: maintenanceForStaffAll.filter(r => r.type === 'electrical'),
+    repairs: maintenanceForStaffAll.filter(r => r.type === 'repairs'),
+  };
+
+  const maintenancePendingCountByType = {
+    plumbing: maintenanceByType.plumbing.filter(r => isPendingLikeStatus(r.status)).length,
+    electrical: maintenanceByType.electrical.filter(r => isPendingLikeStatus(r.status)).length,
+    repairs: maintenanceByType.repairs.filter(r => isPendingLikeStatus(r.status)).length,
+  };
+
+  const maintenanceFinishedCountByType = {
+    plumbing: maintenanceByType.plumbing.filter(r => isFinishedLikeStatus(r.status)).length,
+    electrical: maintenanceByType.electrical.filter(r => isFinishedLikeStatus(r.status)).length,
+    repairs: maintenanceByType.repairs.filter(r => isFinishedLikeStatus(r.status)).length,
+  };
+
+  const filteredCleaningForMaintenanceTab = cleaningForMaintenanceTab.filter(b =>
+    maintenanceStatusTab === 'pending' ? b.status !== 'completed' : b.status === 'completed',
+  );
+
+  const filteredMaintenanceForCategory = (category: 'plumbing' | 'electrical' | 'repairs') => {
+    const list = maintenanceByType[category];
+    return list.filter(r => (maintenanceStatusTab === 'pending' ? isPendingLikeStatus(r.status) : isFinishedLikeStatus(r.status)));
+  };
 
   /* ─────────────────────────── JSX ─────────────────────────── */
   return (
     <div style={{ minHeight: '100vh', background: 'var(--gradient-hero)', fontFamily: "'Inter', sans-serif", color: 'var(--text-primary)' }}>
+
+      <div
+        className="staff-layout"
+        style={{
+          display: 'flex',
+          minHeight: '100vh',
+          width: '100%',
+        }}
+      >
+        {/* ── Side Nav ── */}
+        <aside
+          className="staff-sidenav"
+          style={{
+            width: '260px',
+            flex: '0 0 260px',
+            padding: '18px 14px',
+            borderRight: '1px solid var(--border-1)',
+            background: 'var(--card-bg)',
+            position: 'sticky',
+            top: 0,
+            height: '100vh',
+            overflowY: 'auto',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '14px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', marginBottom: '14px' }}>
+            <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'linear-gradient(135deg, #22d3ee, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Sparkles size={18} color="#fff" />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, letterSpacing: '-0.2px' }}>Staff</div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {currentUser?.name || 'Cleaning Staff'}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => scrollToSection('bookings-section')}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '10px 12px',
+                borderRadius: '12px',
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border-1)',
+                color: 'var(--text-primary)',
+                fontWeight: 800,
+                cursor: 'pointer',
+              }}
+            >
+              <ClipboardList size={16} /> Bookings
+            </button>
+
+            <button
+              type="button"
+              onClick={() => scrollToSection('maintenance-section')}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '10px 12px',
+                borderRadius: '12px',
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border-1)',
+                color: 'var(--text-primary)',
+                fontWeight: 800,
+                cursor: 'pointer',
+              }}
+            >
+              <Wrench size={16} /> Maintenance
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/cleaning-service')}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '10px 12px',
+                borderRadius: '12px',
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border-1)',
+                color: 'var(--text-primary)',
+                fontWeight: 800,
+                cursor: 'pointer',
+              }}
+            >
+              <Sparkles size={16} /> Cleaning Page
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/maintenance')}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '10px 12px',
+                borderRadius: '12px',
+                background: 'rgba(34,211,238,0.10)',
+                border: '1px solid rgba(34,211,238,0.22)',
+                color: '#22d3ee',
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              <ChevronRight size={16} /> Open Maintenance
+            </button>
+          </div>
+
+          <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid var(--border-1)' }}>
+            <button
+              type="button"
+              onClick={handleLogout}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '10px 12px',
+                borderRadius: '12px',
+                background: 'var(--danger-soft-bg)',
+                border: '1px solid var(--danger-soft-border)',
+                color: 'var(--danger-soft-text)',
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
+        </aside>
+
+        {/* ── Main ── */}
+        <div className="staff-main" style={{ flex: 1, minWidth: 0 }}>
 
       {/* ── Top Header ── */}
       <header style={{
@@ -310,7 +506,7 @@ const CleaningStaffDashboard = () => {
         </div>
 
         {/* ── Tab Filter ── */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        <div id="bookings-section" style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
           {([
             { id: 'all',       label: `All Bookings (${bookings.length})`,   icon: <ClipboardList size={14} /> },
             { id: 'pending',   label: `New Requests (${pending.length})`,    icon: <Bell size={14} /> },
@@ -457,7 +653,7 @@ const CleaningStaffDashboard = () => {
         )}
 
         {/* ── Maintenance Requests (Plumbing/Electrical/Repairs) ── */}
-        <div style={{ marginTop: '26px' }}>
+  <div id="maintenance-section" style={{ marginTop: '26px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(108,99,255,0.10)', border: '1px solid rgba(108,99,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -466,10 +662,7 @@ const CleaningStaffDashboard = () => {
               <div>
                 <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1.05rem' }}>Maintenance Requests</div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  {maintenanceForStaff.length} total
-                  {pendingMaintenanceCount > 0 && (
-                    <span style={{ color: '#FCD34D', fontWeight: 800 }}> · {pendingMaintenanceCount} pending</span>
-                  )}
+                  View by category and status
                 </div>
               </div>
             </div>
@@ -492,117 +685,308 @@ const CleaningStaffDashboard = () => {
             </div>
           </div>
 
-          {maintenanceForStaff.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '34px 18px', borderRadius: '18px', background: 'var(--card-bg)', border: '1px solid var(--border-1)', color: 'var(--text-muted)' }}>
-              <AlertCircle size={38} color="var(--text-muted)" style={{ marginBottom: '12px', opacity: 0.7 }} />
-              <div style={{ fontWeight: 800, color: 'var(--text-secondary)' }}>No maintenance requests yet</div>
-              <div style={{ fontSize: '0.85rem', marginTop: '6px' }}>When owners submit requests, they will appear here.</div>
-            </div>
-          ) : (
-            <div className="booking-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '18px' }}>
-              {maintenanceForStaff.map(req => {
-                const typeCfg: Record<string, { label: string; icon: ReactNode; color: string }> = {
-                  plumbing: { label: 'Plumbing', icon: <Droplets size={16} />, color: '#06b6d4' },
-                  electrical: { label: 'Electrical', icon: <Zap size={16} />, color: '#f59e0b' },
-                  repairs: { label: 'Repairs', icon: <Hammer size={16} />, color: '#22c55e' },
-                };
-                const tc = typeCfg[req.type] || { label: req.type, icon: <Wrench size={16} />, color: '#a78bfa' };
-                const statusMap: Record<MaintenanceRequestStatus, { color: string; bg: string; border: string; label: string }> = {
-                  pending: { color: '#FCD34D', bg: 'rgba(252,211,77,0.12)', border: 'rgba(252,211,77,0.3)', label: '● Pending' },
-                  accepted: { color: '#22d3ee', bg: 'rgba(34,211,238,0.12)', border: 'rgba(34,211,238,0.3)', label: '◉ Accepted' },
-                  completed: { color: '#43E97B', bg: 'rgba(67,233,123,0.12)', border: 'rgba(67,233,123,0.3)', label: '✓ Completed' },
-                  rejected: { color: '#fb7185', bg: 'rgba(251,113,133,0.12)', border: 'rgba(251,113,133,0.3)', label: '✕ Rejected' },
-                };
-                const s = statusMap[req.status];
+          {/* Sub-tabs: Category */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
+            {([
+              { id: 'cleaning', label: 'Cleaning', icon: <Sparkles size={14} />, pending: cleaningPendingCount, finished: cleaningFinishedCount },
+              { id: 'plumbing', label: 'Plumbing', icon: <Droplets size={14} />, pending: maintenancePendingCountByType.plumbing, finished: maintenanceFinishedCountByType.plumbing },
+              { id: 'electrical', label: 'Electrical', icon: <Zap size={14} />, pending: maintenancePendingCountByType.electrical, finished: maintenanceFinishedCountByType.electrical },
+              { id: 'repairs', label: 'General', icon: <Hammer size={14} />, pending: maintenancePendingCountByType.repairs, finished: maintenanceFinishedCountByType.repairs },
+            ] as const).map(t => (
+              <button
+                key={t.id}
+                onClick={() => setMaintenanceCategoryTab(t.id)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 14px',
+                  borderRadius: '12px',
+                  background: maintenanceCategoryTab === t.id ? 'var(--surface-1)' : 'var(--surface-2)',
+                  border: `1px solid ${maintenanceCategoryTab === t.id ? 'rgba(34,211,238,0.35)' : 'var(--border-1)'}`,
+                  color: 'var(--text-primary)',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  fontSize: '0.82rem',
+                }}
+              >
+                <span style={{ opacity: 0.9 }}>{t.icon}</span>
+                {t.label}
+                <span style={{ fontWeight: 900, color: 'var(--text-muted)' }}>
+                  (
+                  {maintenanceStatusTab === 'pending' ? t.pending : t.finished}
+                  )
+                </span>
+              </button>
+            ))}
+          </div>
 
-                return (
-                  <div key={req.id} style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ height: '4px', background: `linear-gradient(90deg, ${tc.color}, ${tc.color}88)` }} />
+          {/* Sub-tabs: Status */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+            {([
+              { id: 'pending', label: 'Pending', hint: 'Pending + In Progress' },
+              { id: 'finished', label: 'Finished', hint: 'Completed + Rejected' },
+            ] as const).map(t => (
+              <button
+                key={t.id}
+                onClick={() => setMaintenanceStatusTab(t.id)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 14px',
+                  borderRadius: '12px',
+                  background: maintenanceStatusTab === t.id ? 'linear-gradient(135deg, #22d3ee, #06b6d4)' : 'var(--surface-2)',
+                  border: maintenanceStatusTab === t.id ? 'none' : '1px solid var(--border-1)',
+                  color: maintenanceStatusTab === t.id ? '#0D0D1A' : 'var(--text-secondary)',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  fontSize: '0.82rem',
+                }}
+                title={t.hint}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
 
-                    <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'flex-start' }}>
-                        <div>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                            <span style={{ color: tc.color, opacity: 0.95 }}>{tc.icon}</span> {tc.label}
+          {/* Content */}
+          {maintenanceCategoryTab === 'cleaning' ? (
+            filteredCleaningForMaintenanceTab.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '34px 18px', borderRadius: '18px', background: 'var(--card-bg)', border: '1px solid var(--border-1)', color: 'var(--text-muted)' }}>
+                <AlertCircle size={38} color="var(--text-muted)" style={{ marginBottom: '12px', opacity: 0.7 }} />
+                <div style={{ fontWeight: 800, color: 'var(--text-secondary)' }}>No cleaning requests</div>
+                <div style={{ fontSize: '0.85rem', marginTop: '6px' }}>Try switching to Pending/Finished.</div>
+              </div>
+            ) : (
+              <div className="booking-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '18px' }}>
+                {filteredCleaningForMaintenanceTab.map(booking => {
+                  const pkgColor = PACKAGE_COLORS[booking.packageId] || '#6C63FF';
+                  const statusMap = {
+                    pending:   { color: '#FCD34D', bg: 'rgba(252,211,77,0.12)',  border: 'rgba(252,211,77,0.3)',  label: '● Pending' },
+                    accepted:  { color: '#22d3ee', bg: 'rgba(34,211,238,0.12)', border: 'rgba(34,211,238,0.3)', label: '◉ In Progress' },
+                    completed: { color: '#43E97B', bg: 'rgba(67,233,123,0.12)', border: 'rgba(67,233,123,0.3)', label: '✓ Finished' },
+                  };
+                  const s = statusMap[booking.status];
+
+                  return (
+                    <div
+                      key={booking.id}
+                      style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+                    >
+                      <div style={{ height: '4px', background: `linear-gradient(90deg, ${pkgColor}, ${pkgColor}88)` }} />
+                      <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'flex-start' }}>
+                          <div>
+                            <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{PACKAGE_NAMES[booking.packageId] || booking.packageId}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                              {new Date(booking.submittedAt).toLocaleString()}
+                            </div>
                           </div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            {new Date(req.submittedAt).toLocaleString()}
+                          <span style={{ padding: '4px 12px', borderRadius: '100px', background: s.bg, color: s.color, fontSize: '0.72rem', fontWeight: 800, border: `1px solid ${s.border}` }}>
+                            {s.label}
+                          </span>
+                        </div>
+
+                        <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {[
+                            { icon: <User size={13} color={pkgColor} />, text: booking.name },
+                            { icon: <Phone size={13} color={pkgColor} />, text: booking.phone },
+                            { icon: <Mail size={13} color={pkgColor} />, text: booking.email },
+                            { icon: <MapPin size={13} color={pkgColor} />, text: booking.address },
+                          ].map((item, i) => (
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.83rem', color: 'var(--text-secondary)' }}>
+                              {item.icon}
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.text}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                          <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                            <Calendar size={13} color={pkgColor} /> {booking.date}
+                          </div>
+                          <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                            <Clock size={13} color={pkgColor} /> {booking.time}
                           </div>
                         </div>
-                        <span style={{ padding: '4px 12px', borderRadius: '100px', background: s.bg, color: s.color, fontSize: '0.72rem', fontWeight: 800, border: `1px solid ${s.border}` }}>
-                          {s.label}
-                        </span>
-                      </div>
 
-                      <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {[
-                          { icon: <User size={13} color={tc.color} />, text: req.name },
-                          { icon: <Phone size={13} color={tc.color} />, text: req.phone },
-                          { icon: <Mail size={13} color={tc.color} />, text: req.email },
-                          { icon: <MapPin size={13} color={tc.color} />, text: req.address },
-                        ].map((item, i) => (
-                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.83rem', color: 'var(--text-secondary)' }}>
-                            {item.icon}
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.text}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '10px' }}>
-                        <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                          <Calendar size={13} color={tc.color} /> {req.date}
-                        </div>
-                        <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                          <Clock size={13} color={tc.color} /> {req.time || '—'}
-                        </div>
-                      </div>
-
-                      <div style={{ background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.55, borderLeft: `3px solid ${tc.color}55` }}>
-                        {req.description}
-                      </div>
-
-                      <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
-                        {req.status === 'pending' && (
-                          <button
-                            onClick={() => updateMaintenanceStatus(req.id, 'accepted')}
-                            style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.35)', color: '#22d3ee', fontWeight: 700, cursor: 'pointer', fontSize: '0.87rem', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(34,211,238,0.22)'}
-                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(34,211,238,0.12)'}
-                          >
-                            <CheckCircle size={15} /> Accept
-                          </button>
-                        )}
-                        {req.status === 'accepted' && (
-                          <button
-                            onClick={() => updateMaintenanceStatus(req.id, 'completed')}
-                            style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(67,233,123,0.12)', border: '1px solid rgba(67,233,123,0.35)', color: '#43E97B', fontWeight: 700, cursor: 'pointer', fontSize: '0.87rem', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(67,233,123,0.22)'}
-                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(67,233,123,0.12)'}
-                          >
-                            <CheckCircle size={15} /> Complete
-                          </button>
-                        )}
-                        {req.status === 'completed' && (
-                          <div style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(67,233,123,0.08)', border: '1px solid rgba(67,233,123,0.2)', color: '#43E97B', fontSize: '0.87rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                            <CheckCircle size={15} /> Done
+                        {booking.notes && (
+                          <div style={{ background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.55, borderLeft: `3px solid ${pkgColor}55` }}>
+                            📝 {booking.notes}
                           </div>
                         )}
+
+                        <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
+                          {booking.status === 'pending' && (
+                            <button
+                              onClick={() => updateStatus(booking.id, 'accepted')}
+                              style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.35)', color: '#22d3ee', fontWeight: 700, cursor: 'pointer', fontSize: '0.87rem', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(34,211,238,0.22)'}
+                              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(34,211,238,0.12)'}
+                            >
+                              <CheckCircle size={15} /> Accept Job
+                            </button>
+                          )}
+                          {booking.status === 'accepted' && (
+                            <button
+                              onClick={() => updateStatus(booking.id, 'completed')}
+                              style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(67,233,123,0.12)', border: '1px solid rgba(67,233,123,0.35)', color: '#43E97B', fontWeight: 700, cursor: 'pointer', fontSize: '0.87rem', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(67,233,123,0.22)'}
+                              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(67,233,123,0.12)'}
+                            >
+                              <CheckCircle size={15} /> Mark Finished
+                            </button>
+                          )}
+                          {booking.status === 'completed' && (
+                            <div style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(67,233,123,0.08)', border: '1px solid rgba(67,233,123,0.2)', color: '#43E97B', fontSize: '0.87rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                              <CheckCircle size={15} /> Finished
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
+                  );
+                })}
+              </div>
+            )
+          ) : (
+            (() => {
+              const list = filteredMaintenanceForCategory(maintenanceCategoryTab);
+              if (list.length === 0) {
+                return (
+                  <div style={{ textAlign: 'center', padding: '34px 18px', borderRadius: '18px', background: 'var(--card-bg)', border: '1px solid var(--border-1)', color: 'var(--text-muted)' }}>
+                    <AlertCircle size={38} color="var(--text-muted)" style={{ marginBottom: '12px', opacity: 0.7 }} />
+                    <div style={{ fontWeight: 800, color: 'var(--text-secondary)' }}>No maintenance requests</div>
+                    <div style={{ fontSize: '0.85rem', marginTop: '6px' }}>Try switching to Pending/Finished.</div>
                   </div>
                 );
-              })}
-            </div>
+              }
+
+              return (
+                <div className="booking-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '18px' }}>
+                  {list.map(req => {
+                    const typeCfg: Record<string, { label: string; icon: ReactNode; color: string }> = {
+                      plumbing: { label: 'Plumbing', icon: <Droplets size={16} />, color: '#06b6d4' },
+                      electrical: { label: 'Electrical', icon: <Zap size={16} />, color: '#f59e0b' },
+                      repairs: { label: 'General', icon: <Hammer size={16} />, color: '#22c55e' },
+                    };
+                    const tc = typeCfg[req.type] || { label: req.type, icon: <Wrench size={16} />, color: '#a78bfa' };
+                    const statusMap: Record<MaintenanceRequestStatus, { color: string; bg: string; border: string; label: string }> = {
+                      pending: { color: '#FCD34D', bg: 'rgba(252,211,77,0.12)', border: 'rgba(252,211,77,0.3)', label: '● Pending' },
+                      accepted: { color: '#22d3ee', bg: 'rgba(34,211,238,0.12)', border: 'rgba(34,211,238,0.3)', label: '◉ In Progress' },
+                      completed: { color: '#43E97B', bg: 'rgba(67,233,123,0.12)', border: 'rgba(67,233,123,0.3)', label: '✓ Finished' },
+                      rejected: { color: '#fb7185', bg: 'rgba(251,113,133,0.12)', border: 'rgba(251,113,133,0.3)', label: '✕ Rejected' },
+                    };
+                    const s = statusMap[req.status];
+
+                    return (
+                      <div key={req.id} style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ height: '4px', background: `linear-gradient(90deg, ${tc.color}, ${tc.color}88)` }} />
+
+                        <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'flex-start' }}>
+                            <div>
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                                <span style={{ color: tc.color, opacity: 0.95 }}>{tc.icon}</span> {tc.label}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                {new Date(req.submittedAt).toLocaleString()}
+                              </div>
+                            </div>
+                            <span style={{ padding: '4px 12px', borderRadius: '100px', background: s.bg, color: s.color, fontSize: '0.72rem', fontWeight: 800, border: `1px solid ${s.border}` }}>
+                              {s.label}
+                            </span>
+                          </div>
+
+                          <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {[
+                              { icon: <User size={13} color={tc.color} />, text: req.name },
+                              { icon: <Phone size={13} color={tc.color} />, text: req.phone },
+                              { icon: <Mail size={13} color={tc.color} />, text: req.email },
+                              { icon: <MapPin size={13} color={tc.color} />, text: req.address },
+                            ].map((item, i) => (
+                              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.83rem', color: 'var(--text-secondary)' }}>
+                                {item.icon}
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.text}</span>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '10px' }}>
+                            <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                              <Calendar size={13} color={tc.color} /> {req.date}
+                            </div>
+                            <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                              <Clock size={13} color={tc.color} /> {req.time || '—'}
+                            </div>
+                          </div>
+
+                          <div style={{ background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.55, borderLeft: `3px solid ${tc.color}55` }}>
+                            {req.description}
+                          </div>
+
+                          <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
+                            {req.status === 'pending' && (
+                              <button
+                                onClick={() => updateMaintenanceStatus(req.id, 'accepted')}
+                                style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.35)', color: '#22d3ee', fontWeight: 700, cursor: 'pointer', fontSize: '0.87rem', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(34,211,238,0.22)'}
+                                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(34,211,238,0.12)'}
+                              >
+                                <CheckCircle size={15} /> Accept
+                              </button>
+                            )}
+                            {req.status === 'accepted' && (
+                              <button
+                                onClick={() => updateMaintenanceStatus(req.id, 'completed')}
+                                style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(67,233,123,0.12)', border: '1px solid rgba(67,233,123,0.35)', color: '#43E97B', fontWeight: 700, cursor: 'pointer', fontSize: '0.87rem', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(67,233,123,0.22)'}
+                                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(67,233,123,0.12)'}
+                              >
+                                <CheckCircle size={15} /> Finish
+                              </button>
+                            )}
+                            {req.status === 'completed' && (
+                              <div style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(67,233,123,0.08)', border: '1px solid rgba(67,233,123,0.2)', color: '#43E97B', fontSize: '0.87rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                <CheckCircle size={15} /> Finished
+                              </div>
+                            )}
+                            {req.status === 'rejected' && (
+                              <div style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(251,113,133,0.10)', border: '1px solid rgba(251,113,133,0.25)', color: '#fb7185', fontSize: '0.87rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                Rejected
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()
           )}
         </div>
       </div>
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 980px) {
+          .staff-layout { display: block !important; }
+          .staff-sidenav {
+            position: relative !important;
+            width: auto !important;
+            height: auto !important;
+            border-right: none !important;
+            border-bottom: 1px solid var(--border-1) !important;
+          }
+        }
         @media (max-width: 640px) {
           .booking-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
+        </div>
+      </div>
     </div>
   );
 };
