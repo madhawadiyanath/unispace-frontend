@@ -8,7 +8,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import {
     ArrowLeft, MapPin, Share2, Heart, ChevronLeft, ChevronRight,
     Phone, Mail, User, Shield, MessageCircle, Home, GraduationCap,
-    Check, ShoppingCart, Send, X, CreditCard,
+    Check, ShoppingCart, Send, X, CreditCard, Copy,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -71,6 +71,8 @@ const BoardingDetailsPage = () => {
     const [activePhoto, setActivePhoto] = useState(0);
     const [liked, setLiked] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [showTopShareMenu, setShowTopShareMenu] = useState(false);
+    const [showSidebarShareMenu, setShowSidebarShareMenu] = useState(false);
     const [showContact, setShowContact] = useState(false);
     const [cartAdded, setCartAdded] = useState(false);
 
@@ -123,11 +125,47 @@ const BoardingDetailsPage = () => {
             .finally(() => setLoading(false));
     }, [id]);
 
-    const handleShare = () => {
+    const copyShareLink = () => {
         navigator.clipboard.writeText(window.location.href).then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2500);
         });
+    };
+
+    const handleShareWhatsApp = () => {
+        const listingTitle = boarding?.title ? `Check out this boarding: ${boarding.title}` : 'Check out this boarding listing';
+        const encodedText = encodeURIComponent(`${listingTitle} ${window.location.href}`);
+        window.open(`https://wa.me/?text=${encodedText}`, '_blank', 'noopener,noreferrer');
+        setShowTopShareMenu(false);
+        setShowSidebarShareMenu(false);
+    };
+
+    const handleShareNative = async () => {
+        if (!navigator.share) {
+            copyShareLink();
+            setShowTopShareMenu(false);
+            setShowSidebarShareMenu(false);
+            return;
+        }
+
+        try {
+            await navigator.share({
+                title: boarding?.title || 'Boarding Listing',
+                text: 'Check out this boarding listing',
+                url: window.location.href,
+            });
+        } catch {
+            // Ignore user-cancelled native share dialogs.
+        } finally {
+            setShowTopShareMenu(false);
+            setShowSidebarShareMenu(false);
+        }
+    };
+
+    const handleCopyFromMenu = () => {
+        copyShareLink();
+        setShowTopShareMenu(false);
+        setShowSidebarShareMenu(false);
     };
 
     const handleToggleFavourite = () => {
@@ -392,14 +430,30 @@ const BoardingDetailsPage = () => {
                     </button>
 
                     <div style={{ display: 'flex', gap: '10px' }}>
-                        <button
-                            onClick={handleShare}
-                            style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '10px 20px', background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '100px', color: '#fff', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.25s' }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,0,0,0.65)'; }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,0,0,0.45)'; }}
-                        >
-                            {copied ? <><Check size={15} color="#43E97B" /> Copied!</> : <><Share2 size={15} /> Share</>}
-                        </button>
+                        <div style={{ position: 'relative' }}>
+                            <button
+                                onClick={() => setShowTopShareMenu(prev => !prev)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '10px 20px', background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '100px', color: '#fff', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.25s' }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,0,0,0.65)'; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,0,0,0.45)'; }}
+                            >
+                                {copied ? <><Check size={15} color="#43E97B" /> Copied!</> : <><Share2 size={15} /> Share</>}
+                            </button>
+
+                            {showTopShareMenu && (
+                                <div style={{ position: 'absolute', top: '50px', right: 0, minWidth: '190px', zIndex: 40, borderRadius: '12px', background: 'rgba(13,13,26,0.94)', border: '1px solid rgba(255,255,255,0.14)', backdropFilter: 'blur(14px)', boxShadow: '0 14px 30px rgba(0,0,0,0.35)', padding: '8px' }}>
+                                    <button onClick={handleCopyFromMenu} style={{ width: '100%', border: 'none', background: 'transparent', color: '#fff', display: 'flex', alignItems: 'center', gap: '9px', padding: '9px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, textAlign: 'left' }}>
+                                        <Copy size={14} /> Copy Link
+                                    </button>
+                                    <button onClick={handleShareWhatsApp} style={{ width: '100%', border: 'none', background: 'transparent', color: '#fff', display: 'flex', alignItems: 'center', gap: '9px', padding: '9px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, textAlign: 'left' }}>
+                                        <MessageCircle size={14} /> Share on WhatsApp
+                                    </button>
+                                    <button onClick={handleShareNative} style={{ width: '100%', border: 'none', background: 'transparent', color: '#fff', display: 'flex', alignItems: 'center', gap: '9px', padding: '9px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, textAlign: 'left' }}>
+                                        <Share2 size={14} /> More Options
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                         <button
                             onClick={handleToggleFavourite}
                             style={{ width: '42px', height: '42px', borderRadius: '50%', background: liked ? 'rgba(255,101,132,0.85)' : 'rgba(0,0,0,0.45)', backdropFilter: 'blur(14px)', border: `1px solid ${liked ? 'rgba(255,101,132,0.5)' : 'rgba(255,255,255,0.15)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s' }}
@@ -1073,14 +1127,30 @@ const BoardingDetailsPage = () => {
                             )}
 
                             {/* Share button */}
-                            <button
-                                onClick={handleShare}
-                                style={{ width: '100%', padding: '11px', borderRadius: '12px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', transition: 'all 0.2s' }}
-                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-3)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
-                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; }}
-                            >
-                                <Share2 size={15} /> {copied ? '✓ Link Copied!' : 'Share Listing'}
-                            </button>
+                            <div style={{ position: 'relative' }}>
+                                <button
+                                    onClick={() => setShowSidebarShareMenu(prev => !prev)}
+                                    style={{ width: '100%', padding: '11px', borderRadius: '12px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', transition: 'all 0.2s' }}
+                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-3)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
+                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; }}
+                                >
+                                    <Share2 size={15} /> {copied ? '✓ Link Copied!' : 'Share Listing'}
+                                </button>
+
+                                {showSidebarShareMenu && (
+                                    <div style={{ position: 'absolute', bottom: '48px', right: 0, minWidth: '190px', zIndex: 30, borderRadius: '12px', background: 'var(--search-panel-bg)', border: '1px solid var(--border-1)', boxShadow: 'var(--search-panel-shadow)', padding: '8px' }}>
+                                        <button onClick={handleCopyFromMenu} style={{ width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '9px', padding: '9px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, textAlign: 'left' }}>
+                                            <Copy size={14} /> Copy Link
+                                        </button>
+                                        <button onClick={handleShareWhatsApp} style={{ width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '9px', padding: '9px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, textAlign: 'left' }}>
+                                            <MessageCircle size={14} /> Share on WhatsApp
+                                        </button>
+                                        <button onClick={handleShareNative} style={{ width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '9px', padding: '9px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, textAlign: 'left' }}>
+                                            <Share2 size={14} /> More Options
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Verified badge */}
