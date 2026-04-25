@@ -89,6 +89,10 @@ const AdminDashboard = () => {
     const [bookingSearch, setBookingSearch] = useState('');
     const [bookingFilter, setBookingFilter] = useState<'all' | 'active' | 'cancelled' | 'completed'>('all');
 
+    // Reports state
+    const [reportTab, setReportTab] = useState<'overview' | 'finance' | 'inventory' | 'analytics'>('overview');
+    const [reportDateRange, setReportDateRange] = useState({ from: '', to: '' });
+
     // Guard: admins only
     const storedUser = localStorage.getItem('user');
     const currentUser = storedUser ? JSON.parse(storedUser) : null;
@@ -899,14 +903,388 @@ const AdminDashboard = () => {
                         );
                     })()}
 
-                    {/* ── Reports placeholder ── */}
-                    {activeSection === 'reports' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', color: 'var(--text-muted)' }}>
-                            <Clock size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
-                            <h2 style={{ fontFamily: "'Outfit', sans-serif", margin: '0 0 8px', fontSize: '1.4rem', color: 'var(--text-secondary)' }}>Coming Soon</h2>
-                            <p style={{ margin: 0, fontSize: '0.9rem' }}>Reports section is under development.</p>
-                        </div>
-                    )}
+                    {/* ── Reports Section ── */}
+                    {activeSection === 'reports' && (() => {
+                        const totalRevenue = bookings
+                            .filter(b => b.paymentStatus === 'completed')
+                            .reduce((sum, b) => {
+                                const boarding = boardings.find(bo => bo._id === b.boardingId);
+                                return sum + (boarding?.price || 0);
+                            }, 0);
+
+                        const totalBookings = bookings.length;
+                        const activeBookings = bookings.filter(b => b.bookingStatus === 'active').length;
+                        const totalListings = boardings.length;
+                        const publishedListings = boardings.filter(b => b.status === 'published').length;
+                        const totalUsers = users.length;
+
+                        const monthlyData = [
+                            { month: 'Jan', revenue: 45000, bookings: 12 },
+                            { month: 'Feb', revenue: 52000, bookings: 15 },
+                            { month: 'Mar', revenue: 48000, bookings: 13 },
+                            { month: 'Apr', revenue: 61000, bookings: 18 },
+                            { month: 'May', revenue: 55000, bookings: 16 },
+                            { month: 'Jun', revenue: 67000, bookings: 20 },
+                        ];
+
+                        const universitiesList = [
+                            { name: 'SLIIT', listings: boardings.filter(b => b.nearUniversity === 'SLIIT').length, bookings: bookings.filter(b => boardings.find(bo => bo._id === b.boardingId)?.nearUniversity === 'SLIIT').length },
+                            { name: 'NSBM', listings: boardings.filter(b => b.nearUniversity === 'NSBM').length, bookings: bookings.filter(b => boardings.find(bo => bo._id === b.boardingId)?.nearUniversity === 'NSBM').length },
+                            { name: 'UOC', listings: boardings.filter(b => b.nearUniversity === 'UOC').length, bookings: bookings.filter(b => boardings.find(bo => bo._id === b.boardingId)?.nearUniversity === 'UOC').length },
+                            { name: 'Multiple', listings: boardings.filter(b => b.nearUniversity === 'Multiple').length, bookings: bookings.filter(b => boardings.find(bo => bo._id === b.boardingId)?.nearUniversity === 'Multiple').length },
+                        ];
+
+                        const roomTypeStats = [
+                            { type: 'Single Room', count: boardings.filter(b => b.roomType === 'Single Room').length, percentage: 0 },
+                            { type: 'Shared Room', count: boardings.filter(b => b.roomType === 'Shared Room').length, percentage: 0 },
+                            { type: 'Studio', count: boardings.filter(b => b.roomType === 'Studio').length, percentage: 0 },
+                            { type: 'Annex', count: boardings.filter(b => b.roomType === 'Annex').length, percentage: 0 },
+                            { type: 'Hostel', count: boardings.filter(b => b.roomType === 'Hostel').length, percentage: 0 },
+                        ].map(item => ({
+                            ...item,
+                            percentage: totalListings > 0 ? Math.round((item.count / totalListings) * 100) : 0
+                        })).filter(item => item.count > 0);
+
+                        return (
+                            <div>
+                                {/* Header */}
+                                <div style={{ marginBottom: '32px' }}>
+                                    <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.8rem', fontWeight: 900, margin: '0 0 8px', color: 'var(--text-primary)' }}>📊 Reports & Analytics</h2>
+                                    <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Comprehensive insights into your platform performance</p>
+                                </div>
+
+                                {/* Tab Navigation */}
+                                <div style={{ display: 'flex', gap: '8px', marginBottom: '28px', overflowX: 'auto', paddingBottom: '4px' }}>
+                                    {(['overview', 'finance', 'inventory', 'analytics'] as const).map(tab => (
+                                        <button
+                                            key={tab}
+                                            onClick={() => setReportTab(tab)}
+                                            style={{
+                                                padding: '10px 20px',
+                                                borderRadius: '100px',
+                                                fontSize: '0.9rem',
+                                                fontWeight: 600,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.3s',
+                                                background: reportTab === tab ? 'linear-gradient(135deg, #6C63FF, #a855f7)' : 'var(--surface-1)',
+                                                border: reportTab === tab ? 'none' : '1px solid var(--border-1)',
+                                                color: reportTab === tab ? '#fff' : 'var(--text-secondary)',
+                                                textTransform: 'capitalize',
+                                                whiteSpace: 'nowrap',
+                                            }}
+                                        >
+                                            {tab === 'overview' && '📈 Overview'}
+                                            {tab === 'finance' && '💰 Finance'}
+                                            {tab === 'inventory' && '📦 Inventory'}
+                                            {tab === 'analytics' && '📊 Analytics'}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* OVERVIEW TAB */}
+                                {reportTab === 'overview' && (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px' }}>
+                                        {[
+                                            { label: 'Total Revenue', value: `LKR ${totalRevenue.toLocaleString()}`, icon: '💵', color: '#43E97B', trend: '+12.5%' },
+                                            { label: 'Total Bookings', value: totalBookings.toString(), icon: '📅', color: '#6C63FF', trend: '+8.2%' },
+                                            { label: 'Active Bookings', value: activeBookings.toString(), icon: '🔥', color: '#FF6B9D', trend: `${Math.round((activeBookings/totalBookings)*100)}%` },
+                                            { label: 'Total Listings', value: totalListings.toString(), icon: '🏠', color: '#FFD700', trend: `${publishedListings}/${totalListings}` },
+                                            { label: 'Published', value: publishedListings.toString(), icon: '✅', color: '#22d3ee', trend: 'Active' },
+                                            { label: 'Total Users', value: totalUsers.toString(), icon: '👥', color: '#a78bfa', trend: '+5 new' },
+                                        ].map((stat, i) => (
+                                            <div key={i} style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px', position: 'relative', overflow: 'hidden' }}>
+                                                <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', background: stat.color, opacity: 0.08, borderRadius: '50%' }} />
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', position: 'relative', zIndex: 1 }}>
+                                                    <div style={{ fontSize: '2.4rem' }}>{stat.icon}</div>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: stat.color, background: `${stat.color}20`, padding: '4px 10px', borderRadius: '8px' }}>{stat.trend}</span>
+                                                </div>
+                                                <p style={{ margin: '0 0 6px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>{stat.label}</p>
+                                                <h3 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)' }}>{stat.value}</h3>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* FINANCE TAB */}
+                                {reportTab === 'finance' && (
+                                    <div style={{ display: 'grid', gap: '24px' }}>
+                                        {/* Finance Stats */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                                            {[
+                                                { label: 'Total Revenue', value: `LKR ${totalRevenue.toLocaleString()}`, subtext: 'All completed payments' },
+                                                { label: 'Avg Booking Value', value: `LKR ${totalBookings > 0 ? Math.round(totalRevenue / totalBookings).toLocaleString() : 0}`, subtext: 'Per transaction' },
+                                                { label: 'Completed Payments', value: bookings.filter(b => b.paymentStatus === 'completed').length.toString(), subtext: `${bookings.length} total bookings` },
+                                                { label: 'Pending Payments', value: bookings.filter(b => b.paymentStatus === 'pending').length.toString(), subtext: 'Awaiting completion' },
+                                            ].map((item, i) => (
+                                                <div key={i} style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '16px', padding: '20px' }}>
+                                                    <p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</p>
+                                                    <h4 style={{ margin: '0 0 4px', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)' }}>{item.value}</h4>
+                                                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.subtext}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Monthly Revenue Chart */}
+                                        <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px' }}>
+                                            <h3 style={{ margin: '0 0 20px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>📈 Monthly Revenue</h3>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px' }}>
+                                                {monthlyData.map((m, i) => {
+                                                    const maxRevenue = Math.max(...monthlyData.map(d => d.revenue));
+                                                    const height = (m.revenue / maxRevenue) * 200;
+                                                    return (
+                                                        <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                                            <div style={{ width: '100%', background: 'var(--surface-1)', borderRadius: '10px', height: '150px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '4px', position: 'relative' }}>
+                                                                <div style={{ width: '80%', height: `${height}px`, background: 'linear-gradient(180deg, #6C63FF, #a855f7)', borderRadius: '8px 8px 0 0', transition: 'all 0.3s' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.8'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; }} />
+                                            </div>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <p style={{ margin: '0', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>{m.month}</p>
+                                                <p style={{ margin: '2px 0 0', fontSize: '0.7rem', color: 'var(--text-muted)' }}>LKR {(m.revenue/1000).toFixed(0)}K</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* Recent Transactions */}
+                                        <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px' }}>
+                                            <h3 style={{ margin: '0 0 16px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>💳 Recent Transactions</h3>
+                                            <div style={{ overflowX: 'auto' }}>
+                                                <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
+                                                    <thead>
+                                                        <tr style={{ borderBottom: '2px solid var(--border-1)' }}>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Client</th>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Amount</th>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Status</th>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Date</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {bookings.slice(0, 5).map(b => (
+                                                            <tr key={b._id} style={{ borderBottom: '1px solid var(--border-1)' }}>
+                                                                <td style={{ padding: '12px', color: 'var(--text-primary)', fontWeight: 500 }}>{b.clientName}</td>
+                                                                <td style={{ padding: '12px', color: 'var(--text-primary)', fontWeight: 700 }}>LKR {boardings.find(bo => bo._id === b.boardingId)?.price.toLocaleString() || '—'}</td>
+                                                                <td style={{ padding: '12px' }}>
+                                                                    <span style={{ padding: '4px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, background: b.paymentStatus === 'completed' ? 'rgba(67,233,123,0.15)' : 'rgba(252,211,77,0.15)', color: b.paymentStatus === 'completed' ? '#43E97B' : '#FCD34D', textTransform: 'capitalize' }}>
+                                                                        {b.paymentStatus}
+                                                                    </span>
+                                                                </td>
+                                                                <td style={{ padding: '12px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{new Date(b.createdAt).toLocaleDateString()}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* INVENTORY TAB */}
+                                {reportTab === 'inventory' && (
+                                    <div style={{ display: 'grid', gap: '24px' }}>
+                                        {/* Inventory Stats */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                                            {[
+                                                { label: 'Total Listings', value: totalListings.toString(), subtext: 'All properties' },
+                                                { label: 'Published', value: publishedListings.toString(), subtext: 'Active listings' },
+                                                { label: 'Pending', value: boardings.filter(b => b.status === 'pending').length.toString(), subtext: 'Under review' },
+                                                { label: 'Rejected', value: boardings.filter(b => b.status === 'rejected').length.toString(), subtext: 'Not approved' },
+                                            ].map((item, i) => (
+                                                <div key={i} style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '16px', padding: '20px' }}>
+                                                    <p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</p>
+                                                    <h4 style={{ margin: '0 0 4px', fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)' }}>{item.value}</h4>
+                                                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.subtext}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Room Type Distribution */}
+                                        <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px' }}>
+                                            <h3 style={{ margin: '0 0 20px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>🏠 Room Type Distribution</h3>
+                                            <div style={{ display: 'grid', gap: '12px' }}>
+                                                {roomTypeStats.map((item, i) => (
+                                                    <div key={i}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                                            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{item.type}</span>
+                                                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#6C63FF' }}>{item.count} ({item.percentage}%)</span>
+                                                        </div>
+                                                        <div style={{ width: '100%', height: '8px', background: 'var(--surface-1)', borderRadius: '10px', overflow: 'hidden' }}>
+                                                            <div style={{ width: `${item.percentage}%`, height: '100%', background: 'linear-gradient(90deg, #6C63FF, #a855f7)', transition: 'width 0.4s' }} />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* University Distribution */}
+                                        <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px' }}>
+                                            <h3 style={{ margin: '0 0 20px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>🎓 Distribution by University</h3>
+                                            <div style={{ overflowX: 'auto' }}>
+                                                <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
+                                                    <thead>
+                                                        <tr style={{ borderBottom: '2px solid var(--border-1)' }}>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>University</th>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Listings</th>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Bookings</th>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Avg Rate</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {universitiesList.map((uni, i) => (
+                                                            <tr key={i} style={{ borderBottom: '1px solid var(--border-1)' }}>
+                                                                <td style={{ padding: '12px', color: 'var(--text-primary)', fontWeight: 600 }}>{uni.name}</td>
+                                                                <td style={{ padding: '12px', color: 'var(--text-primary)', fontWeight: 700 }}>{uni.listings}</td>
+                                                                <td style={{ padding: '12px', color: 'var(--text-primary)' }}>{uni.bookings}</td>
+                                                                <td style={{ padding: '12px', color: '#6C63FF', fontWeight: 600 }}>{uni.listings > 0 ? ((uni.bookings / uni.listings) * 100).toFixed(1) : 0}%</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        {/* Recent Listings */}
+                                        <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px' }}>
+                                            <h3 style={{ margin: '0 0 16px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>📋 Recent Listings</h3>
+                                            <div style={{ overflowX: 'auto' }}>
+                                                <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
+                                                    <thead>
+                                                        <tr style={{ borderBottom: '2px solid var(--border-1)' }}>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Title</th>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Type</th>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Status</th>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Price</th>
+                                                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Added</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {boardings.slice(0, 8).map(b => (
+                                                            <tr key={b._id} style={{ borderBottom: '1px solid var(--border-1)' }}>
+                                                                <td style={{ padding: '12px', color: 'var(--text-primary)', fontWeight: 500 }}>{b.title}</td>
+                                                                <td style={{ padding: '12px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{b.roomType}</td>
+                                                                <td style={{ padding: '12px' }}>
+                                                                    <span style={{ padding: '4px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, background: b.status === 'published' ? 'rgba(67,233,123,0.15)' : b.status === 'pending' ? 'rgba(252,211,77,0.15)' : 'rgba(255,101,132,0.15)', color: b.status === 'published' ? '#43E97B' : b.status === 'pending' ? '#FCD34D' : '#FF6584', textTransform: 'capitalize' }}>
+                                                                        {b.status}
+                                                                    </span>
+                                                                </td>
+                                                                <td style={{ padding: '12px', color: 'var(--text-primary)', fontWeight: 700 }}>LKR {b.price.toLocaleString()}</td>
+                                                                <td style={{ padding: '12px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{new Date(b.createdAt).toLocaleDateString()}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* ANALYTICS TAB */}
+                                {reportTab === 'analytics' && (
+                                    <div style={{ display: 'grid', gap: '24px' }}>
+                                        {/* Key Metrics */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                                            {[
+                                                { label: 'Conversion Rate', value: totalBookings > 0 ? ((activeBookings / totalBookings) * 100).toFixed(1) + '%' : '0%', subtext: 'Active of total bookings' },
+                                                { label: 'Avg Listing Price', value: `LKR ${totalListings > 0 ? Math.round(boardings.reduce((sum, b) => sum + b.price, 0) / totalListings).toLocaleString() : 0}`, subtext: 'Mean property price' },
+                                                { label: 'Occupancy Rate', value: totalListings > 0 ? ((publishedListings / totalListings) * 100).toFixed(1) + '%' : '0%', subtext: 'Published vs total' },
+                                                { label: 'Bookings/User', value: totalUsers > 0 ? (totalBookings / totalUsers).toFixed(2) : '0', subtext: 'Avg per user' },
+                                            ].map((item, i) => (
+                                                <div key={i} style={{ background: 'linear-gradient(135deg, rgba(108,99,255,0.1), rgba(168,85,247,0.05))', border: '1px solid rgba(108,99,255,0.2)', borderRadius: '16px', padding: '20px' }}>
+                                                    <p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</p>
+                                                    <h4 style={{ margin: '0 0 4px', fontSize: '1.6rem', fontWeight: 800, color: '#6C63FF' }}>{item.value}</h4>
+                                                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.subtext}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Booking Trends */}
+                                        <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px' }}>
+                                            <h3 style={{ margin: '0 0 20px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>📊 Monthly Bookings Trend</h3>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px' }}>
+                                                {monthlyData.map((m, i) => {
+                                                    const maxBookings = Math.max(...monthlyData.map(d => d.bookings));
+                                                    const height = (m.bookings / maxBookings) * 150;
+                                                    return (
+                                                        <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                                            <div style={{ width: '100%', background: 'var(--surface-1)', borderRadius: '10px', height: '120px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '4px' }}>
+                                                                <div style={{ width: '70%', height: `${height}px`, background: 'linear-gradient(180deg, #43E97B, #38f9d7)', borderRadius: '8px 8px 0 0' }} />
+                                                            </div>
+                                                            <div style={{ textAlign: 'center' }}>
+                                                                <p style={{ margin: '0', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>{m.month}</p>
+                                                                <p style={{ margin: '2px 0 0', fontSize: '0.7rem', color: 'var(--text-muted)' }}>{m.bookings} bookings</p>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* User Breakdown */}
+                                        <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px' }}>
+                                            <h3 style={{ margin: '0 0 16px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>👥 User Breakdown</h3>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                                {[
+                                                    { label: 'Regular Users', value: users.filter(u => u.userType === 'user').length, color: '#6C63FF' },
+                                                    { label: 'Landlords', value: users.filter(u => u.userType === 'landlord').length, color: '#FFD700' },
+                                                    { label: 'Finance Managers', value: users.filter(u => u.userType === 'finance_manager').length, color: '#43E97B' },
+                                                    { label: 'Cleaning Staff', value: users.filter(u => u.userType === 'cleaning_staff').length, color: '#22d3ee' },
+                                                ].map((user, i) => (
+                                                    <div key={i} style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '14px', padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                                        <div style={{ width: '50px', height: '50px', background: `${user.color}20`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem' }}>
+                                                            {user.label.includes('Regular') && '👤'}
+                                                            {user.label.includes('Landlord') && '🏠'}
+                                                            {user.label.includes('Finance') && '💼'}
+                                                            {user.label.includes('Cleaning') && '🧹'}
+                                                        </div>
+                                                        <div>
+                                                            <p style={{ margin: '0 0 4px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{user.label}</p>
+                                                            <h4 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: user.color }}>{user.value}</h4>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Export Options */}
+                                        <div style={{ background: 'linear-gradient(135deg, rgba(108,99,255,0.1), rgba(168,85,247,0.05))', border: '1px solid rgba(108,99,255,0.2)', borderRadius: '18px', padding: '24px', display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <div>
+                                                <h4 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>📥 Export Reports</h4>
+                                                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>Generate and download detailed reports for analysis</p>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                {['PDF', 'CSV', 'Excel'].map(format => (
+                                                    <button
+                                                        key={format}
+                                                        style={{
+                                                            padding: '10px 16px',
+                                                            borderRadius: '10px',
+                                                            background: 'linear-gradient(135deg, #6C63FF, #a855f7)',
+                                                            border: 'none',
+                                                            color: '#fff',
+                                                            fontWeight: 600,
+                                                            fontSize: '0.85rem',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.3s',
+                                                        }}
+                                                        onMouseEnter={e => {
+                                                            (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+                                                            (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 24px rgba(108, 99, 255, 0.4)';
+                                                        }}
+                                                        onMouseLeave={e => {
+                                                            (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                                                            (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+                                                        }}
+                                                    >
+                                                        ⬇️ Export {format}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })()}
                 </main>
             </div>
 
