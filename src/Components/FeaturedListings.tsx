@@ -85,102 +85,6 @@ const FeaturedListings = () => {
 
     const filters = ['All','Near SLIIT', 'Near NSBM', 'Near UOC',  'Budget', 'Premium'];
 
-    const listings: Listing[] = [
-        {
-            id: 1,
-            title: 'Cozy Single Room',
-            location: 'Pittugala, Malabe',
-            university: 'SLIIT',
-            price: 9500,
-            rating: 4.8,
-            reviews: 32,
-            type: 'Single Room',
-            amenities: ['WiFi', 'AC', 'Meals'],
-            badge: 'Best Value',
-            badgeColor: '#43E97B',
-            emoji: '🏡',
-            bgGradient: 'linear-gradient(135deg, rgba(67,233,123,0.25), rgba(56,249,215,0.1))',
-            available: true,
-        },
-        {
-            id: 2,
-            title: 'Modern Studio Apt',
-            location: 'Homagama, Colombo',
-            university: 'NSBM',
-            price: 18000,
-            rating: 4.9,
-            reviews: 58,
-            type: 'Studio',
-            amenities: ['WiFi', 'AC', 'Study Room', 'Kitchen'],
-            badge: 'Top Rated',
-            badgeColor: '#6C63FF',
-            emoji: '🏢',
-            bgGradient: 'linear-gradient(135deg, rgba(108,99,255,0.25), rgba(168,85,247,0.1))',
-            available: true,
-        },
-        {
-            id: 3,
-            title: 'Shared Double Room',
-            location: 'Thurstan Road, Colombo 03',
-            university: 'UOC',
-            price: 6500,
-            rating: 4.6,
-            reviews: 47,
-            type: 'Shared Room',
-            amenities: ['WiFi', 'Common Kitchen'],
-            badge: 'Budget Pick',
-            badgeColor: '#FF6584',
-            emoji: '🏠',
-            bgGradient: 'linear-gradient(135deg, rgba(255,101,132,0.25), rgba(255,143,163,0.1))',
-            available: true,
-        },
-        {
-            id: 4,
-            title: 'Luxury Annex Room',
-            location: 'Nugegoda, Colombo',
-            university: 'UOC',
-            price: 25000,
-            rating: 5.0,
-            reviews: 19,
-            type: 'Annex',
-            amenities: ['WiFi', 'AC', 'Parking', 'Garden'],
-            badge: 'Premium',
-            badgeColor: '#FFD700',
-            emoji: '✨',
-            bgGradient: 'linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,200,0,0.05))',
-            available: false,
-        },
-        {
-            id: 5,
-            title: 'Girls Hostel Room',
-            location: 'Kirulapana, Colombo',
-            university: 'SLIIT',
-            price: 12000,
-            rating: 4.7,
-            reviews: 64,
-            type: 'Hostel',
-            amenities: ['WiFi', 'Security', 'Meals'],
-            badge: 'Girls Only',
-            badgeColor: '#FF6584',
-            emoji: '🌸',
-            bgGradient: 'linear-gradient(135deg, rgba(255,101,132,0.2), rgba(168,85,247,0.1))',
-            available: true,
-        },
-        {
-            id: 6,
-            title: 'Family Boarding House',
-            location: 'Wellampitiya, Colombo',
-            university: 'Multiple',
-            price: 8000,
-            rating: 4.5,
-            reviews: 38,
-            type: 'Single Room',
-            amenities: ['WiFi', 'Meals', 'Laundry'],
-            emoji: '🏘️',
-            bgGradient: 'linear-gradient(135deg, rgba(56,249,215,0.2), rgba(67,233,123,0.05))',
-            available: true,
-        },
-    ];
 
     const toggleLike = (listing: Listing) => {
         const id = listing.id;
@@ -221,11 +125,8 @@ const FeaturedListings = () => {
         }
     };
 
-    // Combine: API live listings first, then hardcoded as samples
-    const allListings = [...apiListings, ...listings];
-
     // Apply search + filter
-    const displayListings = allListings.filter(listing => {
+    const displayListings = apiListings.filter(listing => {
         const q = searchQuery.toLowerCase();
         const matchSearch = !q ||
             listing.title.toLowerCase().includes(q) ||
