@@ -7,7 +7,7 @@ const AllBoardingsPage = () => {
     <div style={{ minHeight: '100vh', background: 'var(--app-bg)' }}>
       <Navbar />
       <main style={{ paddingTop: '72px' }}>
-        <FeaturedListings />
+        <FeaturedListings showHeader={false} />
       </main>
       <Footer />
     </div>
