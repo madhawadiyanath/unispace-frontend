@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
+const FAVOURITES_KEY = 'favouriteBoardings';
 
 interface Boarding {
     _id: string;
@@ -98,6 +99,18 @@ const BoardingDetailsPage = () => {
     const [advanceError, setAdvanceError] = useState('');
 
     useEffect(() => {
+        if (!boarding) return;
+        try {
+            const stored = localStorage.getItem(FAVOURITES_KEY);
+            const parsed = stored ? JSON.parse(stored) : [];
+            const exists = Array.isArray(parsed) && parsed.some((item: { _id: string }) => item._id === boarding._id);
+            setLiked(exists);
+        } catch {
+            setLiked(false);
+        }
+    }, [boarding]);
+
+    useEffect(() => {
         window.scrollTo(0, 0);
         if (!id) { setNotFound(true); setLoading(false); return; }
         fetch(`${API_BASE}/boardings/${id}`)
@@ -115,6 +128,43 @@ const BoardingDetailsPage = () => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2500);
         });
+    };
+
+    const handleToggleFavourite = () => {
+        if (!boarding) return;
+
+        try {
+            const stored = localStorage.getItem(FAVOURITES_KEY);
+            const existing = stored ? JSON.parse(stored) : [];
+            const list = Array.isArray(existing) ? existing : [];
+            const alreadyLiked = list.some((item: { _id: string }) => item._id === boarding._id);
+
+            if (alreadyLiked) {
+                const updated = list.filter((item: { _id: string }) => item._id !== boarding._id);
+                localStorage.setItem(FAVOURITES_KEY, JSON.stringify(updated));
+                setLiked(false);
+                return;
+            }
+
+            const favouriteItem = {
+                _id: boarding._id,
+                title: boarding.title,
+                price: boarding.price,
+                location: boarding.location,
+                nearUniversity: boarding.nearUniversity,
+                roomType: boarding.roomType,
+                photos: boarding.photos,
+                landlordName: boarding.landlordName,
+                status: boarding.status,
+                savedAt: Date.now(),
+            };
+
+            localStorage.setItem(FAVOURITES_KEY, JSON.stringify([favouriteItem, ...list]));
+            setLiked(true);
+            navigate('/favourites');
+        } catch {
+            setLiked(false);
+        }
     };
 
     const handleAddToCart = () => {
@@ -351,7 +401,7 @@ const BoardingDetailsPage = () => {
                             {copied ? <><Check size={15} color="#43E97B" /> Copied!</> : <><Share2 size={15} /> Share</>}
                         </button>
                         <button
-                            onClick={() => setLiked(p => !p)}
+                            onClick={handleToggleFavourite}
                             style={{ width: '42px', height: '42px', borderRadius: '50%', background: liked ? 'rgba(255,101,132,0.85)' : 'rgba(0,0,0,0.45)', backdropFilter: 'blur(14px)', border: `1px solid ${liked ? 'rgba(255,101,132,0.5)' : 'rgba(255,255,255,0.15)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.25s' }}
                         >
                             <Heart size={17} color="#fff" fill={liked ? '#fff' : 'transparent'} />
