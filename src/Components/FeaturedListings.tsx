@@ -24,7 +24,11 @@ interface Listing {
     isLive?: boolean;
 }
 
-const FeaturedListings = () => {
+type FeaturedListingsProps = {
+    showHeader?: boolean;
+};
+
+const FeaturedListings = ({ showHeader = true }: FeaturedListingsProps) => {
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('All');
     const [likedCards, setLikedCards] = useState<(number | string)[]>([]);
@@ -166,76 +170,77 @@ const FeaturedListings = () => {
             }}
         >
             <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-                {/* Header */}
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-end',
-                        marginBottom: '40px',
-                        flexWrap: 'wrap',
-                        gap: '20px',
-                    }}
-                >
-                    <div>
-                        <div
-                            style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                background: 'var(--danger-soft-bg)',
-                                border: '1px solid var(--danger-soft-border)',
-                                borderRadius: '100px',
-                                padding: '6px 16px',
-                                marginBottom: '16px',
-                            }}
-                        >
-                            <Heart size={14} color="var(--danger-soft-text)" />
-                            <span style={{ fontSize: '0.8rem', color: 'var(--danger-soft-text)', fontWeight: 600 }}>
-                                Featured Listings
-                            </span>
-                        </div>
-                        <h2
-                            style={{
-                                fontFamily: "'Outfit', sans-serif",
-                                fontSize: 'clamp(1.8rem, 3vw, 2.6rem)',
-                                fontWeight: 800,
-                                letterSpacing: '-0.5px',
-                            }}
-                        >
-                            Handpicked{' '}
-                            <span
-                                style={{
-                                    background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                }}
-                            >
-                                Boarding Houses
-                            </span>
-                        </h2>
-                    </div>
-                    <a
-                        href="#"
+                {showHeader && (
+                    <div
                         style={{
                             display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            color: 'var(--primary)',
-                            fontWeight: 600,
-                            fontSize: '0.9rem',
-                            transition: 'gap 0.2s',
-                        }}
-                        onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLElement).style.gap = '10px';
-                        }}
-                        onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.gap = '6px';
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-end',
+                            marginBottom: '40px',
+                            flexWrap: 'wrap',
+                            gap: '20px',
                         }}
                     >
-                        View All Listings <ArrowRight size={16} />
-                    </a>
-                </div>
+                        <div>
+                            <div
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    background: 'var(--danger-soft-bg)',
+                                    border: '1px solid var(--danger-soft-border)',
+                                    borderRadius: '100px',
+                                    padding: '6px 16px',
+                                    marginBottom: '16px',
+                                }}
+                            >
+                                <Heart size={14} color="var(--danger-soft-text)" />
+                                <span style={{ fontSize: '0.8rem', color: 'var(--danger-soft-text)', fontWeight: 600 }}>
+                                    Featured Listings
+                                </span>
+                            </div>
+                            <h2
+                                style={{
+                                    fontFamily: "'Outfit', sans-serif",
+                                    fontSize: 'clamp(1.8rem, 3vw, 2.6rem)',
+                                    fontWeight: 800,
+                                    letterSpacing: '-0.5px',
+                                }}
+                            >
+                                Handpicked{' '}
+                                <span
+                                    style={{
+                                        background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent',
+                                    }}
+                                >
+                                    Boarding Houses
+                                </span>
+                            </h2>
+                        </div>
+                        <a
+                            href="#"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                color: 'var(--primary)',
+                                fontWeight: 600,
+                                fontSize: '0.9rem',
+                                transition: 'gap 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                                (e.currentTarget as HTMLElement).style.gap = '10px';
+                            }}
+                            onMouseLeave={(e) => {
+                                (e.currentTarget as HTMLElement).style.gap = '6px';
+                            }}
+                        >
+                            View All Listings <ArrowRight size={16} />
+                        </a>
+                    </div>
+                )}
 
                 {/* Search Bar */}
                 <div style={{ position: 'relative', maxWidth: '520px', marginBottom: '24px' }}>
