@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Star, MapPin, Wifi, Coffee, ArrowRight, Heart, Shield, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
+const FAVOURITES_KEY = 'favouriteBoardings';
 
 interface Listing {
     id: number | string;
@@ -29,6 +30,20 @@ const FeaturedListings = () => {
     const [likedCards, setLikedCards] = useState<(number | string)[]>([]);
     const [apiListings, setApiListings] = useState<Listing[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem(FAVOURITES_KEY);
+            const parsed = stored ? JSON.parse(stored) : [];
+            if (!Array.isArray(parsed)) return;
+            const likedIds = parsed
+                .map((item: { _id?: string | number }) => item?._id)
+                .filter((id): id is string | number => id !== undefined && id !== null);
+            setLikedCards(likedIds);
+        } catch {
+            setLikedCards([]);
+        }
+    }, []);
 
     // Fetch published boardings from API
     useEffect(() => {
@@ -167,10 +182,43 @@ const FeaturedListings = () => {
         },
     ];
 
-    const toggleLike = (id: number | string) => {
-        setLikedCards((prev) =>
-            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-        );
+    const toggleLike = (listing: Listing) => {
+        const id = listing.id;
+        const isLiked = likedCards.includes(id);
+
+        try {
+            const stored = localStorage.getItem(FAVOURITES_KEY);
+            const parsed = stored ? JSON.parse(stored) : [];
+            const list = Array.isArray(parsed) ? parsed : [];
+
+            if (isLiked) {
+                const updated = list.filter((item: { _id: number | string }) => item._id !== id);
+                localStorage.setItem(FAVOURITES_KEY, JSON.stringify(updated));
+                setLikedCards((prev) => prev.filter((i) => i !== id));
+                return;
+            }
+
+            const favouriteItem = {
+                _id: id,
+                title: listing.title,
+                price: listing.price,
+                location: listing.location,
+                nearUniversity: listing.university,
+                roomType: listing.type,
+                photos: listing.photoUrl ? [listing.photoUrl.replace(API_BASE, '')] : [],
+                landlordName: 'Landlord',
+                status: listing.available ? 'published' : 'occupied',
+                savedAt: Date.now(),
+            };
+
+            const withoutCurrent = list.filter((item: { _id: number | string }) => item._id !== id);
+            const updated = [favouriteItem, ...withoutCurrent];
+            localStorage.setItem(FAVOURITES_KEY, JSON.stringify(updated));
+            setLikedCards((prev) => [...prev, id]);
+            navigate('/favourites');
+        } catch {
+            setLikedCards((prev) => (prev.includes(id) ? prev : [...prev, id]));
+        }
     };
 
     // Combine: API live listings first, then hardcoded as samples
@@ -475,7 +523,7 @@ const FeaturedListings = () => {
 
                                 {/* Like Button */}
                                 <button
-                                    onClick={() => toggleLike(listing.id)}
+                                    onClick={() => toggleLike(listing)}
                                     style={{
                                         position: 'absolute',
                                         top: '12px',
