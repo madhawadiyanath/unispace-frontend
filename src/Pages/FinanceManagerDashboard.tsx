@@ -1,3 +1,5 @@
+// Finance Manager Dashboard page for BoardingFinder
+// Handles financial overview, listings, transactions, advances, users, and reports
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -8,8 +10,10 @@ import {
     FileText, ChevronRight, Search,
 } from 'lucide-react';
 
+// Base URL for backend API
 const API_BASE = 'http://localhost:5000';
 
+// Boarding listing type
 interface Boarding {
     _id: string;
     title: string;
@@ -23,6 +27,7 @@ interface Boarding {
     createdAt: string;
 }
 
+// User type
 interface User {
     _id: string;
     name: string;
@@ -30,6 +35,7 @@ interface User {
     userType: string;
 }
 
+// Advance payment type
 interface AdvancePayment {
     _id: string;
     boardingTitle: string;
@@ -44,21 +50,32 @@ interface AdvancePayment {
     createdAt: string;
 }
 
+// Main dashboard component
 const FinanceManagerDashboard = () => {
     const navigate = useNavigate();
+    // Sidebar state for mobile
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    // Which dashboard section is active
     const [activeSection, setActiveSection] = useState('overview');
+    // All boardings (listings)
     const [boardings, setBoardings] = useState<Boarding[]>([]);
+    // All users
     const [users, setUsers] = useState<User[]>([]);
+    // Loading states
     const [loadingBoardings, setLoadingBoardings] = useState(true);
     const [loadingUsers, setLoadingUsers] = useState(true);
+    // Search term for listings
     const [searchTerm, setSearchTerm] = useState('');
+    // Advance payments
     const [advancePayments, setAdvancePayments] = useState<AdvancePayment[]>([]);
+    const [loadingAdvances, setLoadingAdvances] = useState(true);
     const [loadingAdvances, setLoadingAdvances] = useState(true);
 
     const storedUser = localStorage.getItem('user');
+    // Current logged-in user
     const currentUser = storedUser ? JSON.parse(storedUser) : null;
 
+    // On mount: check user type and fetch initial data
     useEffect(() => {
         if (!currentUser || currentUser.userType !== 'finance_manager') {
             navigate('/login');
@@ -69,6 +86,7 @@ const FinanceManagerDashboard = () => {
         fetchAdvances();
     }, []);
 
+    // Fetch all boardings from API
     const fetchBoardings = async () => {
         setLoadingBoardings(true);
         try {
@@ -79,6 +97,7 @@ const FinanceManagerDashboard = () => {
         finally { setLoadingBoardings(false); }
     };
 
+    // Fetch all users from API
     const fetchUsers = async () => {
         setLoadingUsers(true);
         try {
@@ -89,6 +108,7 @@ const FinanceManagerDashboard = () => {
         finally { setLoadingUsers(false); }
     };
 
+    // Fetch all advance payments from API
     const fetchAdvances = async () => {
         setLoadingAdvances(true);
         try {
@@ -99,11 +119,13 @@ const FinanceManagerDashboard = () => {
         finally { setLoadingAdvances(false); }
     };
 
+    // Logout and redirect to login
     const handleLogout = () => {
         localStorage.removeItem('user');
         navigate('/login');
     };
 
+    // Update advance payment status (dropdown in advances table)
     const handleUpdateAdvanceStatus = (id: string, status: string) => {
         fetch(`${API_BASE}/advances/${id}/status`, {
             method: 'PUT',
@@ -114,23 +136,30 @@ const FinanceManagerDashboard = () => {
     };
 
     // ── Derived financial stats ──
+    // ── Derived financial stats ──
     const publishedListings = boardings.filter(b => b.status === 'published');
     const pendingListings   = boardings.filter(b => b.status === 'pending');
+    // Total revenue from published listings
     const totalRevenue      = publishedListings.reduce((sum, b) => sum + (b.price || 0), 0);
+    // Average rent for published listings
     const avgRent           = publishedListings.length ? Math.round(totalRevenue / publishedListings.length) : 0;
+    // User counts by type
     const students          = users.filter(u => u.userType === 'student').length;
     const landlords         = users.filter(u => u.userType === 'landlord').length;
 
+    // Advance payment stats
     const totalAdvancesCollected = advancePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
     const totalPlatformFees      = advancePayments.reduce((sum, p) => sum + (p.platformFee || 0), 0);
     const pendingAdvances        = advancePayments.filter(p => p.status === 'pending').length;
 
+    // Filtered listings for search
     const filteredBoardings = boardings.filter(b =>
         b.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         b.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         b.landlordName?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    // Sidebar navigation items
     const navItems = [
         { id: 'overview',      label: 'Overview',       icon: <BarChart2 size={18} /> },
         { id: 'listings',      label: 'Listings',        icon: <Home size={18} /> },
@@ -140,6 +169,7 @@ const FinanceManagerDashboard = () => {
         { id: 'reports',       label: 'Reports',         icon: <FileText size={18} /> },
     ];
 
+    // Stat cards for overview section
     const statCards = [
         {
             label: 'Total Listing Revenue',
@@ -193,12 +223,15 @@ const FinanceManagerDashboard = () => {
         },
     ];
 
+    // Current section label for header
     const sectionLabel = navItems.find(n => n.id === activeSection)?.label || 'Overview';
 
+    // ── Render main dashboard layout ──
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#0D0D1A', fontFamily: "'Inter', sans-serif", color: '#fff' }}>
 
             {/* ══════════════════════════ SIDEBAR ══════════════════════════ */}
+            {/* Sidebar with navigation and user info */}
             <aside
                 style={{
                     width: '240px',
@@ -211,6 +244,7 @@ const FinanceManagerDashboard = () => {
                 className="fm-sidebar"
             >
                 {/* Logo */}
+                {/* Logo and app name */}
                 <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(252,211,77,0.1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'linear-gradient(135deg, #FCD34D, #F59E0B)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 18px rgba(252,211,77,0.4)', flexShrink: 0 }}>
@@ -224,6 +258,7 @@ const FinanceManagerDashboard = () => {
                 </div>
 
                 {/* Nav */}
+                {/* Navigation links */}
                 <nav style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' }}>
                     {navItems.map(item => (
                         <button
@@ -247,6 +282,7 @@ const FinanceManagerDashboard = () => {
                 </nav>
 
                 {/* User Info + Logout */}
+                {/* User info and logout button */}
                 <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(252,211,77,0.1)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '12px', background: 'rgba(252,211,77,0.05)', marginBottom: '10px' }}>
                         <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #FCD34D, #F59E0B)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -269,9 +305,11 @@ const FinanceManagerDashboard = () => {
             </aside>
 
             {/* ══════════════════════════ MAIN ══════════════════════════ */}
+                {/* Main content area */}
             <div style={{ marginLeft: '240px', flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }} className="fm-main">
 
                 {/* Top bar */}
+                {/* Top bar with section title and date */}
                 <header style={{ padding: '16px 28px', borderBottom: '1px solid rgba(252,211,77,0.1)', background: 'rgba(13,13,26,0.85)', backdropFilter: 'blur(14px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 40 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <button
@@ -281,6 +319,7 @@ const FinanceManagerDashboard = () => {
                         >
                             {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
                         </button>
+                        {/* Welcome banner for finance manager */}
                         <div>
                             <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.3rem', fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>
                                 {sectionLabel}
@@ -327,6 +366,7 @@ const FinanceManagerDashboard = () => {
                             </div>
 
                             {/* Stat Cards */}
+                            {/* Stat cards grid */}
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
                                 {statCards.map((s, i) => (
                                     <div
@@ -352,10 +392,12 @@ const FinanceManagerDashboard = () => {
                             </div>
 
                             {/* Revenue breakdown + recent listings */}
+                            {/* Revenue breakdown and recent listings */}
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }} className="fm-grid">
 
                                 {/* Revenue by room type */}
                                 <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(252,211,77,0.12)', borderRadius: '18px', padding: '24px' }}>
+                                    {/* Revenue by room type bar chart */}
                                     <h3 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <BarChart2 size={16} color="#FCD34D" /> Revenue by Room Type
                                     </h3>
@@ -404,6 +446,7 @@ const FinanceManagerDashboard = () => {
                                             <div style={{ width: '22px', height: '22px', border: '2px solid rgba(252,211,77,0.3)', borderTopColor: '#FCD34D', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
                                         </div>
                                     ) : (
+                                        {/* Recent listings preview */}
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                             {boardings.slice(0, 5).map(b => {
                                                 const sc: Record<string, string> = { published: '#43E97B', pending: '#FCD34D', rejected: '#FF6584' };
@@ -436,6 +479,7 @@ const FinanceManagerDashboard = () => {
                     {activeSection === 'listings' && (
                         <div>
                             {/* Search */}
+                            {/* Search input for listings */}
                             <div style={{ position: 'relative', maxWidth: '380px', marginBottom: '20px' }}>
                                 <Search size={15} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                                 <input
@@ -669,6 +713,7 @@ const FinanceManagerDashboard = () => {
                     {/* ══════ USERS ══════ */}
                     {activeSection === 'users' && (
                         <div>
+                            {/* User summary cards */}
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px', marginBottom: '22px' }}>
                                 {[
                                     { label: 'Total Users', value: users.length, color: '#a855f7', bg: 'rgba(168,85,247,0.12)' },
@@ -683,6 +728,7 @@ const FinanceManagerDashboard = () => {
                                 ))}
                             </div>
 
+                            {/* All users table */}
                             <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(252,211,77,0.14)', borderRadius: '18px', padding: '24px' }}>
                                 <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.1rem', fontWeight: 700, margin: '0 0 20px' }}>All Users</h2>
                                 {loadingUsers ? (
@@ -730,6 +776,7 @@ const FinanceManagerDashboard = () => {
                     {/* ══════ REPORTS ══════ */}
                     {activeSection === 'reports' && (
                         <div>
+                            {/* Financial summary report */}
                             <div style={{ background: 'rgba(18,18,40,0.85)', border: '1px solid rgba(252,211,77,0.14)', borderRadius: '18px', padding: '32px', marginBottom: '20px' }}>
                                 <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.1rem', fontWeight: 700, margin: '0 0 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <FileText size={18} color="#FCD34D" /> Financial Summary Report
