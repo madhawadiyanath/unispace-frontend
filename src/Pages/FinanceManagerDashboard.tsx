@@ -69,7 +69,6 @@ const FinanceManagerDashboard = () => {
     // Advance payments
     const [advancePayments, setAdvancePayments] = useState<AdvancePayment[]>([]);
     const [loadingAdvances, setLoadingAdvances] = useState(true);
-    const [loadingAdvances, setLoadingAdvances] = useState(true);
 
     const storedUser = localStorage.getItem('user');
     // Current logged-in user
@@ -84,7 +83,7 @@ const FinanceManagerDashboard = () => {
         fetchBoardings();
         fetchUsers();
         fetchAdvances();
-    }, []);
+    }, [currentUser, navigate]);
 
     // Fetch all boardings from API
     const fetchBoardings = async () => {
@@ -446,7 +445,6 @@ const FinanceManagerDashboard = () => {
                                             <div style={{ width: '22px', height: '22px', border: '2px solid rgba(252,211,77,0.3)', borderTopColor: '#FCD34D', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
                                         </div>
                                     ) : (
-                                        {/* Recent listings preview */}
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                             {boardings.slice(0, 5).map(b => {
                                                 const sc: Record<string, string> = { published: '#43E97B', pending: '#FCD34D', rejected: '#FF6584' };
@@ -827,7 +825,7 @@ const FinanceManagerDashboard = () => {
             `}</style>
         </div>
     );
-};
+}
 
 export default FinanceManagerDashboard;
         
