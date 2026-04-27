@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Star, ChevronLeft, ChevronRight, Quote, Send, ThumbsUp, MessageSquare } from 'lucide-react';
+import { Star, ChevronLeft, ChevronRight, Quote, Send, ThumbsUp } from 'lucide-react';
 
 const Testimonials = () => {
     const [active, setActive] = useState(0);
@@ -139,7 +139,7 @@ const Testimonials = () => {
 
             <div style={{ maxWidth: '960px', margin: '0 auto', position: 'relative' }}>
                 {/* Header */}
-                <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                     <div
                         style={{
                             display: 'inline-flex',
@@ -149,18 +149,18 @@ const Testimonials = () => {
                             border: '1px solid rgba(255,215,0,0.3)',
                             borderRadius: '100px',
                             padding: '6px 16px',
-                            marginBottom: '20px',
+                            marginBottom: '16px',
                         }}
                     >
                         <Star size={14} color="#FFD700" fill="#FFD700" />
                         <span style={{ fontSize: '0.8rem', color: '#FFD700', fontWeight: 600 }}>
-                            Student Stories
+                            Student Reviews
                         </span>
                     </div>
                     <h2
                         style={{
                             fontFamily: "'Outfit', sans-serif",
-                            fontSize: 'clamp(1.8rem, 3vw, 2.6rem)',
+                            fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)',
                             fontWeight: 800,
                             letterSpacing: '-0.5px',
                         }}
@@ -184,8 +184,8 @@ const Testimonials = () => {
                         background: 'var(--surface-2)',
                         backdropFilter: 'blur(20px)',
                         border: `1px solid ${current.color}30`,
-                        borderRadius: '28px',
-                        padding: '48px',
+                        borderRadius: '20px',
+                        padding: '32px',
                         position: 'relative',
                         boxShadow: `var(--shadow-card), 0 0 0 1px ${current.color}15`,
                         transition: 'all 0.4s ease',
@@ -197,26 +197,26 @@ const Testimonials = () => {
                     <div
                         style={{
                             position: 'absolute',
-                            top: '32px',
-                            right: '40px',
-                            width: '60px',
-                            height: '60px',
-                            borderRadius: '16px',
+                            top: '24px',
+                            right: '24px',
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '12px',
                             background: `${current.color}15`,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                         }}
                     >
-                        <Quote size={28} color={current.color} />
+                        <Quote size={24} color={current.color} />
                     </div>
 
                     {/* Stars */}
-                    <div style={{ display: 'flex', gap: '4px', marginBottom: '24px' }}>
+                    <div style={{ display: 'flex', gap: '4px', marginBottom: '20px' }}>
                         {Array.from({ length: 5 }).map((_, i) => (
                             <Star
                                 key={i}
-                                size={20}
+                                size={18}
                                 color="#FFD700"
                                 fill={i < current.rating ? '#FFD700' : 'transparent'}
                             />
@@ -226,12 +226,12 @@ const Testimonials = () => {
                     {/* Text */}
                     <p
                         style={{
-                            fontSize: '1.2rem',
-                            lineHeight: 1.8,
+                            fontSize: '1.1rem',
+                            lineHeight: 1.7,
                             color: 'var(--text-secondary)',
                             fontStyle: 'italic',
-                            marginBottom: '36px',
-                            maxWidth: '760px',
+                            marginBottom: '28px',
+                            maxWidth: '680px',
                         }}
                     >
                         "{current.text}"
@@ -239,30 +239,30 @@ const Testimonials = () => {
 
                     {/* Author */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div
                                 style={{
-                                    width: '56px',
-                                    height: '56px',
-                                    borderRadius: '16px',
+                                    width: '48px',
+                                    height: '48px',
+                                    borderRadius: '12px',
                                     background: `${current.color}20`,
                                     border: `2px solid ${current.color}40`,
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    fontSize: '1.8rem',
+                                    fontSize: '1.5rem',
                                 }}
                             >
                                 {current.avatar}
                             </div>
                             <div>
-                                <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>{current.name}</div>
-                                <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{current.name}</div>
+                                <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                                     {current.university}
                                 </div>
                                 <div
                                     style={{
-                                        fontSize: '0.75rem',
+                                        fontSize: '0.7rem',
                                         color: current.color,
                                         fontWeight: 600,
                                         marginTop: '2px',
@@ -279,15 +279,15 @@ const Testimonials = () => {
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '8px',
-                                padding: '8px 16px',
-                                borderRadius: '12px',
+                                gap: '6px',
+                                padding: '6px 12px',
+                                borderRadius: '10px',
                                 background: likedReviews.has(active) ? `${current.color}20` : 'var(--surface-1)',
                                 border: `1px solid ${likedReviews.has(active) ? current.color : 'var(--border-1)'}`,
                                 color: likedReviews.has(active) ? current.color : 'var(--text-secondary)',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s ease',
-                                fontSize: '0.9rem',
+                                fontSize: '0.85rem',
                             }}
                             onMouseEnter={(e) => {
                                 if (!likedReviews.has(active)) {
@@ -304,7 +304,7 @@ const Testimonials = () => {
                                 }
                             }}
                         >
-                            <ThumbsUp size={16} fill={likedReviews.has(active) ? current.color : 'transparent'} />
+                            <ThumbsUp size={14} fill={likedReviews.has(active) ? current.color : 'transparent'} />
                             {likedReviews.has(active) ? 'Liked' : 'Helpful'}
                         </button>
                     </div>
@@ -316,16 +316,16 @@ const Testimonials = () => {
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        gap: '16px',
-                        marginTop: '36px',
+                        gap: '12px',
+                        marginTop: '24px',
                     }}
                 >
                     <button
                         onClick={prev}
                         style={{
-                            width: '44px',
-                            height: '44px',
-                            borderRadius: '12px',
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '10px',
                             background: 'var(--surface-1)',
                             border: '1px solid var(--border-1)',
                             color: 'var(--text-secondary)',
@@ -346,18 +346,18 @@ const Testimonials = () => {
                             (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
                         }}
                     >
-                        <ChevronLeft size={20} />
+                        <ChevronLeft size={18} />
                     </button>
 
                     {/* Dots */}
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '6px' }}>
                         {testimonials.map((_, i) => (
                             <button
                                 key={i}
                                 onClick={() => setActive(i)}
                                 style={{
-                                    width: active === i ? '28px' : '10px',
-                                    height: '10px',
+                                    width: active === i ? '24px' : '8px',
+                                    height: '8px',
                                     borderRadius: '100px',
                                     background: active === i ? current.color : 'var(--border-1)',
                                     border: 'none',
@@ -372,9 +372,9 @@ const Testimonials = () => {
                     <button
                         onClick={next}
                         style={{
-                            width: '44px',
-                            height: '44px',
-                            borderRadius: '12px',
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '10px',
                             background: 'var(--surface-1)',
                             border: '1px solid var(--border-1)',
                             color: 'var(--text-secondary)',
@@ -395,43 +395,11 @@ const Testimonials = () => {
                             (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
                         }}
                     >
-                        <ChevronRight size={20} />
+                        <ChevronRight size={18} />
                     </button>
                 </div>
 
-                {/* Add Review Button */}
-                <div style={{ textAlign: 'center', marginTop: '48px' }}>
-                    <button
-                        onClick={() => setShowReviewForm(!showReviewForm)}
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            padding: '14px 28px',
-                            borderRadius: '16px',
-                            background: 'linear-gradient(135deg, #6C63FF, #FF6584)',
-                            border: 'none',
-                            color: 'white',
-                            fontSize: '1rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            boxShadow: '0 4px 20px rgba(108,99,255,0.3)',
-                        }}
-                        onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
-                            (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 30px rgba(108,99,255,0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                            (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(108,99,255,0.3)';
-                        }}
-                    >
-                        <MessageSquare size={20} />
-                        Share Your Experience
-                    </button>
-                </div>
-
+                
                 {/* Review Form */}
                 {showReviewForm && (
                     <div
