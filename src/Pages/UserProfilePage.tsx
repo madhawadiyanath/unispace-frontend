@@ -23,6 +23,8 @@ import {
   Wrench,
   MapPin,
   AlertTriangle,
+  Bell,
+  RefreshCw,
 } from 'lucide-react';
 
 const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:5000';
@@ -146,17 +148,29 @@ interface UserData {
   userType: string;
 }
 
+interface ProfileNotification {
+  _id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'booking' | 'payment' | 'message' | 'system';
+  isRead: boolean;
+  createdAt: string;
+}
+
 const UserProfilePage = () => {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [myBoardings, setMyBoardings] = useState<Boarding[]>([]);
   const [loadingBoardings, setLoadingBoardings] = useState(false);
+  const [deletingBoardingId, setDeletingBoardingId] = useState<string | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [issueReports, setIssueReports] = useState<IssueReport[]>([]);
   const [loadingIssues, setLoadingIssues] = useState(false);
   const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
+  const [notifications, setNotifications] = useState<ProfileNotification[]>([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -208,6 +222,17 @@ const UserProfilePage = () => {
         })
         .catch(() => setMaintenanceRequests([]));
     }
+
+    // Always fetch notifications for any logged-in user (role-based)
+    setLoadingNotifications(true);
+    const query = new URLSearchParams();
+    query.set('email', user.email);
+    query.set('role', String(user.userType || 'student').toLowerCase());
+    fetch(`${API_BASE}/notifications?${query.toString()}`)
+      .then(r => r.json())
+      .then(data => setNotifications(Array.isArray(data?.notifications) ? data.notifications : []))
+      .catch(() => setNotifications([]))
+      .finally(() => setLoadingNotifications(false));
   }, [navigate]);
 
   const acceptedMaintenanceForOwner = useMemo(() => {
@@ -238,6 +263,49 @@ const UserProfilePage = () => {
       body: JSON.stringify({ status }),
     }).catch(() => {});
     setIssueReports(prev => prev.map(i => i._id === id ? { ...i, status: status as IssueReport['status'] } : i));
+  };
+
+  const handleDeleteMyBoarding = async (boardingId: string, title: string) => {
+    if (!currentUser || currentUser.userType !== 'landlord') return;
+    const confirmed = window.confirm(`Delete listing "${title}"? This action cannot be undone.`);
+    if (!confirmed) return;
+
+    setDeletingBoardingId(boardingId);
+    try {
+      const res = await fetch(`${API_BASE}/boardings/${boardingId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requesterId: currentUser._id,
+          requesterRole: currentUser.userType,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        window.alert(data.message || 'Failed to delete listing.');
+        return;
+      }
+
+      setMyBoardings(prev => prev.filter(b => b._id !== boardingId));
+    } catch {
+      window.alert('Unable to connect to the server.');
+    } finally {
+      setDeletingBoardingId(null);
+    }
+  };
+
+  const refreshNotifications = () => {
+    if (!currentUser) return;
+    setLoadingNotifications(true);
+    const query = new URLSearchParams();
+    query.set('email', currentUser.email);
+    query.set('role', String(currentUser.userType || '').toLowerCase());
+    fetch(`${API_BASE}/notifications?${query.toString()}`)
+      .then(r => r.json())
+      .then(data => setNotifications(Array.isArray(data?.notifications) ? data.notifications : []))
+      .catch(() => setNotifications([]))
+      .finally(() => setLoadingNotifications(false));
   };
 
   const handleLogout = () => {
@@ -484,6 +552,94 @@ const UserProfilePage = () => {
           </div>
         </div>
 
+        {/* ── Profile Notifications ── */}
+        <div
+          style={{
+            marginTop: '24px',
+            background: 'var(--card-bg)',
+            backdropFilter: 'blur(24px)',
+            border: '1px solid var(--border-1)',
+            borderRadius: '24px',
+            overflow: 'hidden',
+            boxShadow: 'var(--shadow-card)',
+          }}
+        >
+          <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border-1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(34,211,238,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <Bell size={18} color="#22d3ee" />
+                {notifications.filter(n => !n.isRead).length > 0 && (
+                  <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#FF6584', color: '#fff', fontSize: '0.65rem', fontWeight: 800, borderRadius: '100px', padding: '1px 6px', minWidth: '18px', textAlign: 'center' }}>
+                    {notifications.filter(n => !n.isRead).length}
+                  </span>
+                )}
+              </div>
+              <div>
+                <h3 style={{ margin: 0, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '1rem' }}>Notifications</h3>
+                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                  {notifications.length} update{notifications.length !== 1 ? 's' : ''}
+                  {notifications.filter(n => !n.isRead).length > 0 && (
+                    <span style={{ color: '#FF6584', fontWeight: 700 }}> · {notifications.filter(n => !n.isRead).length} unread</span>
+                  )}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={refreshNotifications}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '10px', background: 'rgba(34,211,238,0.08)', border: '1px solid rgba(34,211,238,0.25)', color: '#22d3ee', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(34,211,238,0.18)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(34,211,238,0.08)'; }}
+            >
+              <RefreshCw size={13} /> Refresh
+            </button>
+          </div>
+
+          <div style={{ padding: '16px 28px 24px' }}>
+            {loadingNotifications ? (
+              <div style={{ textAlign: 'center', padding: '28px', color: 'var(--text-muted)' }}>
+                <div style={{ width: '24px', height: '24px', border: '2px solid rgba(34,211,238,0.3)', borderTopColor: '#22d3ee', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
+                Loading notifications…
+              </div>
+            ) : notifications.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '36px 0' }}>
+                <Bell size={38} color="rgba(34,211,238,0.2)" style={{ marginBottom: '12px' }} />
+                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>No notifications yet.</p>
+                <p style={{ margin: '6px 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Boarding approvals and payment updates will appear here.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {notifications.slice(0, 5).map(note => {
+                  const color = note.type === 'booking' ? '#43E97B' : note.type === 'payment' ? '#FCD34D' : note.type === 'message' ? '#38F9D7' : '#22d3ee';
+                  return (
+                    <div
+                      key={note._id}
+                      style={{
+                        padding: '16px 18px',
+                        borderRadius: '16px',
+                        background: note.isRead ? 'var(--surface-1)' : 'rgba(34,211,238,0.05)',
+                        border: `1px solid ${note.isRead ? 'var(--border-1)' : 'rgba(34,211,238,0.22)'}`,
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '100px', background: `color-mix(in srgb, ${color} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 25%, transparent)`, color, fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '8px' }}>
+                            {note.type}
+                          </div>
+                          <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800, color: 'var(--text-primary)' }}>{note.title}</h4>
+                          <p style={{ margin: '6px 0 0', color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.9rem' }}>{note.message}</p>
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', flexShrink: 0 }}>
+                          {new Date(note.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* ── Landlord: My Boardings section ── */}
         {currentUser.userType === 'landlord' && (
           <div
@@ -554,9 +710,31 @@ const UserProfilePage = () => {
                           <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
                           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>{b.location} · LKR {b.price.toLocaleString()}/mo · {b.roomType}</div>
                         </div>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 12px', borderRadius: '100px', background: sc.bg, color: sc.color, fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize', border: `1px solid ${sc.color}44`, flexShrink: 0 }}>
-                          {sc.icon}{b.status}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 12px', borderRadius: '100px', background: sc.bg, color: sc.color, fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize', border: `1px solid ${sc.color}44` }}>
+                            {sc.icon}{b.status}
+                          </span>
+                          <button
+                            onClick={() => handleDeleteMyBoarding(b._id, b.title)}
+                            disabled={deletingBoardingId === b._id}
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '9px',
+                              background: 'var(--danger-soft-bg)',
+                              border: '1px solid var(--danger-soft-border)',
+                              color: 'var(--danger-soft-text)',
+                              cursor: deletingBoardingId === b._id ? 'not-allowed' : 'pointer',
+                              opacity: deletingBoardingId === b._id ? 0.6 : 1,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                            title={deletingBoardingId === b._id ? 'Deleting...' : 'Delete listing'}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </div>
                     );
                   })}

@@ -11,6 +11,7 @@ const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhos
 /* ─── Types ──────────────────────────────────────────────── */
 interface BookingRequest {
   id: string;
+  maintenanceRequestId?: string;
   name: string;
   phone: string;
   email: string;
@@ -165,6 +166,18 @@ const CleaningStaffDashboard = () => {
     const updated = bookings.map(b => b.id === id ? { ...b, status } : b);
     setBookings(updated);
     localStorage.setItem('cleaningBookings', JSON.stringify(updated));
+
+    const booking = updated.find(b => b.id === id);
+    const maintenanceId = booking?.maintenanceRequestId;
+    if (!maintenanceId) return;
+
+    const nextBackendStatus: MaintenanceRequestStatus | null =
+      status === 'accepted' ? 'accepted' :
+      status === 'completed' ? 'completed' :
+      null;
+    if (!nextBackendStatus) return;
+
+    updateMaintenanceStatus(maintenanceId, nextBackendStatus);
   };
 
   const handleLogout = () => {

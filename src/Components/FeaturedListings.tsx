@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Star, MapPin, Wifi, Coffee, ArrowRight, Heart, Shield, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
+const FAVOURITES_KEY = 'favouriteBoardings';
 
 interface Listing {
     id: number | string;
@@ -23,12 +24,30 @@ interface Listing {
     isLive?: boolean;
 }
 
-const FeaturedListings = () => {
+type FeaturedListingsProps = {
+    showHeader?: boolean;
+};
+
+const FeaturedListings = ({ showHeader = true }: FeaturedListingsProps) => {
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('All');
     const [likedCards, setLikedCards] = useState<(number | string)[]>([]);
     const [apiListings, setApiListings] = useState<Listing[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem(FAVOURITES_KEY);
+            const parsed = stored ? JSON.parse(stored) : [];
+            if (!Array.isArray(parsed)) return;
+            const likedIds = parsed
+                .map((item: { _id?: string | number }) => item?._id)
+                .filter((id): id is string | number => id !== undefined && id !== null);
+            setLikedCards(likedIds);
+        } catch {
+            setLikedCards([]);
+        }
+    }, []);
 
     // Fetch published boardings from API
     useEffect(() => {
@@ -70,114 +89,48 @@ const FeaturedListings = () => {
 
     const filters = ['All','Near SLIIT', 'Near NSBM', 'Near UOC',  'Budget', 'Premium'];
 
-    const listings: Listing[] = [
-        {
-            id: 1,
-            title: 'Cozy Single Room',
-            location: 'Pittugala, Malabe',
-            university: 'SLIIT',
-            price: 9500,
-            rating: 4.8,
-            reviews: 32,
-            type: 'Single Room',
-            amenities: ['WiFi', 'AC', 'Meals'],
-            badge: 'Best Value',
-            badgeColor: '#43E97B',
-            emoji: '🏡',
-            bgGradient: 'linear-gradient(135deg, rgba(67,233,123,0.25), rgba(56,249,215,0.1))',
-            available: true,
-        },
-        {
-            id: 2,
-            title: 'Modern Studio Apt',
-            location: 'Homagama, Colombo',
-            university: 'NSBM',
-            price: 18000,
-            rating: 4.9,
-            reviews: 58,
-            type: 'Studio',
-            amenities: ['WiFi', 'AC', 'Study Room', 'Kitchen'],
-            badge: 'Top Rated',
-            badgeColor: '#6C63FF',
-            emoji: '🏢',
-            bgGradient: 'linear-gradient(135deg, rgba(108,99,255,0.25), rgba(168,85,247,0.1))',
-            available: true,
-        },
-        {
-            id: 3,
-            title: 'Shared Double Room',
-            location: 'Thurstan Road, Colombo 03',
-            university: 'UOC',
-            price: 6500,
-            rating: 4.6,
-            reviews: 47,
-            type: 'Shared Room',
-            amenities: ['WiFi', 'Common Kitchen'],
-            badge: 'Budget Pick',
-            badgeColor: '#FF6584',
-            emoji: '🏠',
-            bgGradient: 'linear-gradient(135deg, rgba(255,101,132,0.25), rgba(255,143,163,0.1))',
-            available: true,
-        },
-        {
-            id: 4,
-            title: 'Luxury Annex Room',
-            location: 'Nugegoda, Colombo',
-            university: 'UOC',
-            price: 25000,
-            rating: 5.0,
-            reviews: 19,
-            type: 'Annex',
-            amenities: ['WiFi', 'AC', 'Parking', 'Garden'],
-            badge: 'Premium',
-            badgeColor: '#FFD700',
-            emoji: '✨',
-            bgGradient: 'linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,200,0,0.05))',
-            available: false,
-        },
-        {
-            id: 5,
-            title: 'Girls Hostel Room',
-            location: 'Kirulapana, Colombo',
-            university: 'SLIIT',
-            price: 12000,
-            rating: 4.7,
-            reviews: 64,
-            type: 'Hostel',
-            amenities: ['WiFi', 'Security', 'Meals'],
-            badge: 'Girls Only',
-            badgeColor: '#FF6584',
-            emoji: '🌸',
-            bgGradient: 'linear-gradient(135deg, rgba(255,101,132,0.2), rgba(168,85,247,0.1))',
-            available: true,
-        },
-        {
-            id: 6,
-            title: 'Family Boarding House',
-            location: 'Wellampitiya, Colombo',
-            university: 'Multiple',
-            price: 8000,
-            rating: 4.5,
-            reviews: 38,
-            type: 'Single Room',
-            amenities: ['WiFi', 'Meals', 'Laundry'],
-            emoji: '🏘️',
-            bgGradient: 'linear-gradient(135deg, rgba(56,249,215,0.2), rgba(67,233,123,0.05))',
-            available: true,
-        },
-    ];
 
-    const toggleLike = (id: number | string) => {
-        setLikedCards((prev) =>
-            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-        );
+    const toggleLike = (listing: Listing) => {
+        const id = listing.id;
+        const isLiked = likedCards.includes(id);
+
+        try {
+            const stored = localStorage.getItem(FAVOURITES_KEY);
+            const parsed = stored ? JSON.parse(stored) : [];
+            const list = Array.isArray(parsed) ? parsed : [];
+
+            if (isLiked) {
+                const updated = list.filter((item: { _id: number | string }) => item._id !== id);
+                localStorage.setItem(FAVOURITES_KEY, JSON.stringify(updated));
+                setLikedCards((prev) => prev.filter((i) => i !== id));
+                return;
+            }
+
+            const favouriteItem = {
+                _id: id,
+                title: listing.title,
+                price: listing.price,
+                location: listing.location,
+                nearUniversity: listing.university,
+                roomType: listing.type,
+                photos: listing.photoUrl ? [listing.photoUrl.replace(API_BASE, '')] : [],
+                landlordName: 'Landlord',
+                status: listing.available ? 'published' : 'occupied',
+                savedAt: Date.now(),
+            };
+
+            const withoutCurrent = list.filter((item: { _id: number | string }) => item._id !== id);
+            const updated = [favouriteItem, ...withoutCurrent];
+            localStorage.setItem(FAVOURITES_KEY, JSON.stringify(updated));
+            setLikedCards((prev) => [...prev, id]);
+            navigate('/favourites');
+        } catch {
+            setLikedCards((prev) => (prev.includes(id) ? prev : [...prev, id]));
+        }
     };
 
-    // Combine: API live listings first, then hardcoded as samples
-    const allListings = [...apiListings, ...listings];
-
     // Apply search + filter
-    const displayListings = allListings.filter(listing => {
+    const displayListings = apiListings.filter(listing => {
         const q = searchQuery.toLowerCase();
         const matchSearch = !q ||
             listing.title.toLowerCase().includes(q) ||
@@ -217,76 +170,77 @@ const FeaturedListings = () => {
             }}
         >
             <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-                {/* Header */}
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-end',
-                        marginBottom: '40px',
-                        flexWrap: 'wrap',
-                        gap: '20px',
-                    }}
-                >
-                    <div>
-                        <div
-                            style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                background: 'var(--danger-soft-bg)',
-                                border: '1px solid var(--danger-soft-border)',
-                                borderRadius: '100px',
-                                padding: '6px 16px',
-                                marginBottom: '16px',
-                            }}
-                        >
-                            <Heart size={14} color="var(--danger-soft-text)" />
-                            <span style={{ fontSize: '0.8rem', color: 'var(--danger-soft-text)', fontWeight: 600 }}>
-                                Featured Listings
-                            </span>
-                        </div>
-                        <h2
-                            style={{
-                                fontFamily: "'Outfit', sans-serif",
-                                fontSize: 'clamp(1.8rem, 3vw, 2.6rem)',
-                                fontWeight: 800,
-                                letterSpacing: '-0.5px',
-                            }}
-                        >
-                            Handpicked{' '}
-                            <span
-                                style={{
-                                    background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                }}
-                            >
-                                Boarding Houses
-                            </span>
-                        </h2>
-                    </div>
-                    <a
-                        href="#"
+                {showHeader && (
+                    <div
                         style={{
                             display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            color: 'var(--primary)',
-                            fontWeight: 600,
-                            fontSize: '0.9rem',
-                            transition: 'gap 0.2s',
-                        }}
-                        onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLElement).style.gap = '10px';
-                        }}
-                        onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.gap = '6px';
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-end',
+                            marginBottom: '40px',
+                            flexWrap: 'wrap',
+                            gap: '20px',
                         }}
                     >
-                        View All Listings <ArrowRight size={16} />
-                    </a>
-                </div>
+                        <div>
+                            <div
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    background: 'var(--danger-soft-bg)',
+                                    border: '1px solid var(--danger-soft-border)',
+                                    borderRadius: '100px',
+                                    padding: '6px 16px',
+                                    marginBottom: '16px',
+                                }}
+                            >
+                                <Heart size={14} color="var(--danger-soft-text)" />
+                                <span style={{ fontSize: '0.8rem', color: 'var(--danger-soft-text)', fontWeight: 600 }}>
+                                    Featured Listings
+                                </span>
+                            </div>
+                            <h2
+                                style={{
+                                    fontFamily: "'Outfit', sans-serif",
+                                    fontSize: 'clamp(1.8rem, 3vw, 2.6rem)',
+                                    fontWeight: 800,
+                                    letterSpacing: '-0.5px',
+                                }}
+                            >
+                                Handpicked{' '}
+                                <span
+                                    style={{
+                                        background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent',
+                                    }}
+                                >
+                                    Boarding Houses
+                                </span>
+                            </h2>
+                        </div>
+                        <a
+                            href="#"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                color: 'var(--primary)',
+                                fontWeight: 600,
+                                fontSize: '0.9rem',
+                                transition: 'gap 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                                (e.currentTarget as HTMLElement).style.gap = '10px';
+                            }}
+                            onMouseLeave={(e) => {
+                                (e.currentTarget as HTMLElement).style.gap = '6px';
+                            }}
+                        >
+                            View All Listings <ArrowRight size={16} />
+                        </a>
+                    </div>
+                )}
 
                 {/* Search Bar */}
                 <div style={{ position: 'relative', maxWidth: '520px', marginBottom: '24px' }}>
@@ -475,7 +429,7 @@ const FeaturedListings = () => {
 
                                 {/* Like Button */}
                                 <button
-                                    onClick={() => toggleLike(listing.id)}
+                                    onClick={() => toggleLike(listing)}
                                     style={{
                                         position: 'absolute',
                                         top: '12px',
