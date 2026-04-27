@@ -359,13 +359,15 @@ const MaintenancePage = () => {
         const notesLabel = (cleaningForm.notes || '').trim() ? cleaningForm.notes.trim() : '—';
         const cleaningDescription = `Cleaning Service: ${pkg.name}. Add-ons: ${addOnsLabel}. Notes: ${notesLabel}. Total: LKR ${totalPrice.toLocaleString()}.`;
 
+        const requesterEmail = String(currentUser?.email || cleaningForm.email || '').trim().toLowerCase();
+
         const res = await fetch(`${API_BASE}/maintenance`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             requesterId: currentUser._id,
             requesterName: cleaningForm.name,
-            requesterEmail: cleaningForm.email,
+            requesterEmail,
             requesterPhone: cleaningForm.phone,
             address: cleaningForm.address,
             category: 'cleaning',
@@ -376,13 +378,17 @@ const MaintenancePage = () => {
           }),
         });
 
-        const data = await res.json();
+        const data = await res.json().catch(() => ({} as any));
         if (!res.ok) {
           setCleaningError(data?.message || 'Failed to submit request.');
           return;
         }
 
         const backendId = data?.request?._id as string | undefined;
+        if (!backendId) {
+          setCleaningError('Request saved but server did not return an id. Please try again.');
+          return;
+        }
         const newBooking = {
           id: Date.now().toString(),
           maintenanceRequestId: backendId,

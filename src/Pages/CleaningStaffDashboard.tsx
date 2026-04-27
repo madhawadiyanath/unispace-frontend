@@ -229,9 +229,9 @@ const CleaningStaffDashboard = () => {
   const isPendingLikeStatus = (status: MaintenanceRequestStatus) => status === 'pending' || status === 'accepted';
   const isFinishedLikeStatus = (status: MaintenanceRequestStatus) => status === 'completed' || status === 'rejected';
 
-  const cleaningForMaintenanceTab = bookings;
-  const cleaningPendingCount = cleaningForMaintenanceTab.filter(b => b.status !== 'completed').length;
-  const cleaningFinishedCount = cleaningForMaintenanceTab.filter(b => b.status === 'completed').length;
+  const cleaningForMaintenanceTab = maintenanceForStaffAll.filter(r => r.type === 'cleaning');
+  const cleaningPendingCount = cleaningForMaintenanceTab.filter(r => isPendingLikeStatus(r.status)).length;
+  const cleaningFinishedCount = cleaningForMaintenanceTab.filter(r => isFinishedLikeStatus(r.status)).length;
 
   const maintenanceByType: Record<'plumbing' | 'electrical' | 'repairs', MaintenanceRequest[]> = {
     plumbing: maintenanceForStaffAll.filter(r => r.type === 'plumbing'),
@@ -251,8 +251,8 @@ const CleaningStaffDashboard = () => {
     repairs: maintenanceByType.repairs.filter(r => isFinishedLikeStatus(r.status)).length,
   };
 
-  const filteredCleaningForMaintenanceTab = cleaningForMaintenanceTab.filter(b =>
-    maintenanceStatusTab === 'pending' ? b.status !== 'completed' : b.status === 'completed',
+  const filteredCleaningForMaintenanceTab = cleaningForMaintenanceTab.filter(r =>
+    maintenanceStatusTab === 'pending' ? isPendingLikeStatus(r.status) : isFinishedLikeStatus(r.status),
   );
 
   const filteredMaintenanceForCategory = (category: 'plumbing' | 'electrical' | 'repairs') => {
@@ -760,27 +760,35 @@ const CleaningStaffDashboard = () => {
               </div>
             ) : (
               <div className="booking-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '18px' }}>
-                {filteredCleaningForMaintenanceTab.map(booking => {
-                  const pkgColor = PACKAGE_COLORS[booking.packageId] || '#6C63FF';
-                  const statusMap = {
+                {filteredCleaningForMaintenanceTab.map(req => {
+                  const pkgColor = '#6C63FF';
+
+                  const titleFromDescription = () => {
+                    const text = String(req.description || '');
+                    const match = text.match(/Cleaning Service:\s*([^\.]+)\./i);
+                    return match?.[1]?.trim() || 'Cleaning Service';
+                  };
+
+                  const statusMap: Record<MaintenanceRequestStatus, { color: string; bg: string; border: string; label: string }> = {
                     pending:   { color: '#FCD34D', bg: 'rgba(252,211,77,0.12)',  border: 'rgba(252,211,77,0.3)',  label: '● Pending' },
                     accepted:  { color: '#22d3ee', bg: 'rgba(34,211,238,0.12)', border: 'rgba(34,211,238,0.3)', label: '◉ In Progress' },
                     completed: { color: '#43E97B', bg: 'rgba(67,233,123,0.12)', border: 'rgba(67,233,123,0.3)', label: '✓ Finished' },
+                    rejected:  { color: '#fb7185', bg: 'rgba(251,113,133,0.12)', border: 'rgba(251,113,133,0.3)', label: '✕ Rejected' },
                   };
-                  const s = statusMap[booking.status];
+                  const s = statusMap[req.status];
 
                   return (
                     <div
-                      key={booking.id}
+                      key={req.id}
                       style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
                     >
                       <div style={{ height: '4px', background: `linear-gradient(90deg, ${pkgColor}, ${pkgColor}88)` }} />
                       <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'flex-start' }}>
                           <div>
-                            <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{PACKAGE_NAMES[booking.packageId] || booking.packageId}</div>
+                            <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{titleFromDescription()}</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                              {new Date(booking.submittedAt).toLocaleString()}
+                              {new Date(req.submittedAt).toLocaleString()}
                             </div>
                           </div>
                           <span style={{ padding: '4px 12px', borderRadius: '100px', background: s.bg, color: s.color, fontSize: '0.72rem', fontWeight: 800, border: `1px solid ${s.border}` }}>
@@ -790,10 +798,10 @@ const CleaningStaffDashboard = () => {
 
                         <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           {[
-                            { icon: <User size={13} color={pkgColor} />, text: booking.name },
-                            { icon: <Phone size={13} color={pkgColor} />, text: booking.phone },
-                            { icon: <Mail size={13} color={pkgColor} />, text: booking.email },
-                            { icon: <MapPin size={13} color={pkgColor} />, text: booking.address },
+                            { icon: <User size={13} color={pkgColor} />, text: req.name },
+                            { icon: <Phone size={13} color={pkgColor} />, text: req.phone },
+                            { icon: <Mail size={13} color={pkgColor} />, text: req.email },
+                            { icon: <MapPin size={13} color={pkgColor} />, text: req.address },
                           ].map((item, i) => (
                             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.83rem', color: 'var(--text-secondary)' }}>
                               {item.icon}
@@ -804,23 +812,23 @@ const CleaningStaffDashboard = () => {
 
                         <div style={{ display: 'flex', gap: '10px' }}>
                           <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                            <Calendar size={13} color={pkgColor} /> {booking.date}
+                            <Calendar size={13} color={pkgColor} /> {req.date}
                           </div>
                           <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                            <Clock size={13} color={pkgColor} /> {booking.time}
+                            <Clock size={13} color={pkgColor} /> {req.time}
                           </div>
                         </div>
 
-                        {booking.notes && (
+                        {req.description && (
                           <div style={{ background: 'var(--surface-2)', borderRadius: '10px', padding: '10px 12px', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.55, borderLeft: `3px solid ${pkgColor}55` }}>
-                            📝 {booking.notes}
+                            📝 {req.description}
                           </div>
                         )}
 
                         <div style={{ marginTop: 'auto', display: 'flex', gap: '8px' }}>
-                          {booking.status === 'pending' && (
+                          {req.status === 'pending' && (
                             <button
-                              onClick={() => updateStatus(booking.id, 'accepted')}
+                              onClick={() => updateMaintenanceStatus(req.id, 'accepted')}
                               style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.35)', color: '#22d3ee', fontWeight: 700, cursor: 'pointer', fontSize: '0.87rem', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                               onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(34,211,238,0.22)'}
                               onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(34,211,238,0.12)'}
@@ -828,9 +836,9 @@ const CleaningStaffDashboard = () => {
                               <CheckCircle size={15} /> Accept Job
                             </button>
                           )}
-                          {booking.status === 'accepted' && (
+                          {req.status === 'accepted' && (
                             <button
-                              onClick={() => updateStatus(booking.id, 'completed')}
+                              onClick={() => updateMaintenanceStatus(req.id, 'completed')}
                               style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(67,233,123,0.12)', border: '1px solid rgba(67,233,123,0.35)', color: '#43E97B', fontWeight: 700, cursor: 'pointer', fontSize: '0.87rem', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                               onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(67,233,123,0.22)'}
                               onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(67,233,123,0.12)'}
@@ -838,7 +846,7 @@ const CleaningStaffDashboard = () => {
                               <CheckCircle size={15} /> Mark Finished
                             </button>
                           )}
-                          {booking.status === 'completed' && (
+                          {(req.status === 'completed' || req.status === 'rejected') && (
                             <div style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'rgba(67,233,123,0.08)', border: '1px solid rgba(67,233,123,0.2)', color: '#43E97B', fontSize: '0.87rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                               <CheckCircle size={15} /> Finished
                             </div>
