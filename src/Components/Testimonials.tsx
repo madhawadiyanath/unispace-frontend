@@ -1,8 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Star, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
+import { useState } from 'react';
+import { Star, ChevronLeft, ChevronRight, Quote, Send, ThumbsUp, MessageSquare } from 'lucide-react';
 
 const Testimonials = () => {
     const [active, setActive] = useState(0);
+    const [showReviewForm, setShowReviewForm] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [likedReviews, setLikedReviews] = useState<Set<number>>(new Set());
+    const [newReview, setNewReview] = useState({
+        name: '',
+        university: '',
+        year: '',
+        rating: 5,
+        text: ''
+    });
 
     const defaultTestimonials = [
         {
@@ -43,24 +53,63 @@ const Testimonials = () => {
         },
     ];
 
-    const [testimonials, setTestimonials] = useState(defaultTestimonials);
-
-    useEffect(() => {
+    const [testimonials, setTestimonials] = useState(() => {
         const storedReviews = localStorage.getItem('site_reviews');
         if (storedReviews) {
             try {
                 const parsed = JSON.parse(storedReviews);
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    setTestimonials([...parsed, ...defaultTestimonials]);
+                    return [...parsed, ...defaultTestimonials];
                 }
             } catch (err) {
                 console.error("Failed to parse reviews", err);
             }
         }
-    }, []);
+        return defaultTestimonials;
+    });
 
-    const prev = () => setActive((a) => (a === 0 ? testimonials.length - 1 : a - 1));
-    const next = () => setActive((a) => (a === testimonials.length - 1 ? 0 : a + 1));
+    const prev = () => {
+        setIsAnimating(true);
+        setTimeout(() => {
+            setActive((a) => (a === 0 ? testimonials.length - 1 : a - 1));
+            setIsAnimating(false);
+        }, 150);
+    };
+
+    const next = () => {
+        setIsAnimating(true);
+        setTimeout(() => {
+            setActive((a) => (a === testimonials.length - 1 ? 0 : a + 1));
+            setIsAnimating(false);
+        }, 150);
+    };
+
+    const handleLike = (index: number) => {
+        setLikedReviews(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(index)) {
+                newSet.delete(index);
+            } else {
+                newSet.add(index);
+            }
+            return newSet;
+        });
+    };
+
+    const handleSubmitReview = () => {
+        if (newReview.name && newReview.university && newReview.text) {
+            const review = {
+                ...newReview,
+                avatar: '👤',
+                color: '#FF6B6B',
+            };
+            const updatedReviews = [review, ...testimonials];
+            setTestimonials(updatedReviews);
+            localStorage.setItem('site_reviews', JSON.stringify([review]));
+            setNewReview({ name: '', university: '', year: '', rating: 5, text: '' });
+            setShowReviewForm(false);
+        }
+    };
 
     const current = testimonials[active];
 
@@ -140,6 +189,8 @@ const Testimonials = () => {
                         position: 'relative',
                         boxShadow: `var(--shadow-card), 0 0 0 1px ${current.color}15`,
                         transition: 'all 0.4s ease',
+                        transform: isAnimating ? 'scale(0.98)' : 'scale(1)',
+                        opacity: isAnimating ? 0.8 : 1,
                     }}
                 >
                     {/* Quote icon */}
@@ -187,38 +238,75 @@ const Testimonials = () => {
                     </p>
 
                     {/* Author */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div
-                            style={{
-                                width: '56px',
-                                height: '56px',
-                                borderRadius: '16px',
-                                background: `${current.color}20`,
-                                border: `2px solid ${current.color}40`,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '1.8rem',
-                            }}
-                        >
-                            {current.avatar}
-                        </div>
-                        <div>
-                            <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>{current.name}</div>
-                            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                                {current.university}
-                            </div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                             <div
                                 style={{
-                                    fontSize: '0.75rem',
-                                    color: current.color,
-                                    fontWeight: 600,
-                                    marginTop: '2px',
+                                    width: '56px',
+                                    height: '56px',
+                                    borderRadius: '16px',
+                                    background: `${current.color}20`,
+                                    border: `2px solid ${current.color}40`,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '1.8rem',
                                 }}
                             >
-                                {current.year}
+                                {current.avatar}
+                            </div>
+                            <div>
+                                <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>{current.name}</div>
+                                <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                    {current.university}
+                                </div>
+                                <div
+                                    style={{
+                                        fontSize: '0.75rem',
+                                        color: current.color,
+                                        fontWeight: 600,
+                                        marginTop: '2px',
+                                    }}
+                                >
+                                    {current.year}
+                                </div>
                             </div>
                         </div>
+                        
+                        {/* Like Button */}
+                        <button
+                            onClick={() => handleLike(active)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '8px 16px',
+                                borderRadius: '12px',
+                                background: likedReviews.has(active) ? `${current.color}20` : 'var(--surface-1)',
+                                border: `1px solid ${likedReviews.has(active) ? current.color : 'var(--border-1)'}`,
+                                color: likedReviews.has(active) ? current.color : 'var(--text-secondary)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                fontSize: '0.9rem',
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!likedReviews.has(active)) {
+                                    (e.currentTarget as HTMLElement).style.background = 'var(--nav-link-hover-bg)';
+                                    (e.currentTarget as HTMLElement).style.borderColor = current.color;
+                                    (e.currentTarget as HTMLElement).style.color = current.color;
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!likedReviews.has(active)) {
+                                    (e.currentTarget as HTMLElement).style.background = 'var(--surface-1)';
+                                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-1)';
+                                    (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
+                                }
+                            }}
+                        >
+                            <ThumbsUp size={16} fill={likedReviews.has(active) ? current.color : 'transparent'} />
+                            {likedReviews.has(active) ? 'Liked' : 'Helpful'}
+                        </button>
                     </div>
                 </div>
 
@@ -310,6 +398,183 @@ const Testimonials = () => {
                         <ChevronRight size={20} />
                     </button>
                 </div>
+
+                {/* Add Review Button */}
+                <div style={{ textAlign: 'center', marginTop: '48px' }}>
+                    <button
+                        onClick={() => setShowReviewForm(!showReviewForm)}
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '14px 28px',
+                            borderRadius: '16px',
+                            background: 'linear-gradient(135deg, #6C63FF, #FF6584)',
+                            border: 'none',
+                            color: 'white',
+                            fontSize: '1rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            boxShadow: '0 4px 20px rgba(108,99,255,0.3)',
+                        }}
+                        onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+                            (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 30px rgba(108,99,255,0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                            (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(108,99,255,0.3)';
+                        }}
+                    >
+                        <MessageSquare size={20} />
+                        Share Your Experience
+                    </button>
+                </div>
+
+                {/* Review Form */}
+                {showReviewForm && (
+                    <div
+                        style={{
+                            marginTop: '32px',
+                            padding: '32px',
+                            background: 'var(--surface-2)',
+                            borderRadius: '20px',
+                            border: '1px solid var(--border-1)',
+                            boxShadow: 'var(--shadow-card)',
+                        }}
+                    >
+                        <h3 style={{ marginBottom: '24px', color: 'var(--text-primary)', fontSize: '1.3rem' }}>
+                            Write Your Review
+                        </h3>
+                        
+                        <div style={{ display: 'grid', gap: '20px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                <input
+                                    type="text"
+                                    placeholder="Your Name"
+                                    value={newReview.name}
+                                    onChange={(e) => setNewReview({...newReview, name: e.target.value})}
+                                    style={{
+                                        padding: '12px 16px',
+                                        borderRadius: '12px',
+                                        border: '1px solid var(--border-1)',
+                                        background: 'var(--surface-1)',
+                                        color: 'var(--text-primary)',
+                                        fontSize: '1rem',
+                                    }}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="University"
+                                    value={newReview.university}
+                                    onChange={(e) => setNewReview({...newReview, university: e.target.value})}
+                                    style={{
+                                        padding: '12px 16px',
+                                        borderRadius: '12px',
+                                        border: '1px solid var(--border-1)',
+                                        background: 'var(--surface-1)',
+                                        color: 'var(--text-primary)',
+                                        fontSize: '1rem',
+                                    }}
+                                />
+                            </div>
+                            
+                            <input
+                                type="text"
+                                placeholder="Year & Field (e.g., 2nd Year - IT)"
+                                value={newReview.year}
+                                onChange={(e) => setNewReview({...newReview, year: e.target.value})}
+                                style={{
+                                    padding: '12px 16px',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border-1)',
+                                    background: 'var(--surface-1)',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '1rem',
+                                }}
+                            />
+                            
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                    Rating
+                                </label>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setNewReview({...newReview, rating: i + 1})}
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                padding: '4px',
+                                            }}
+                                        >
+                                            <Star
+                                                size={24}
+                                                color="#FFD700"
+                                                fill={i < newReview.rating ? '#FFD700' : 'transparent'}
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <textarea
+                                placeholder="Share your experience..."
+                                value={newReview.text}
+                                onChange={(e) => setNewReview({...newReview, text: e.target.value})}
+                                rows={4}
+                                style={{
+                                    padding: '12px 16px',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border-1)',
+                                    background: 'var(--surface-1)',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '1rem',
+                                    resize: 'vertical',
+                                    fontFamily: 'inherit',
+                                }}
+                            />
+                            
+                            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                                <button
+                                    onClick={() => setShowReviewForm(false)}
+                                    style={{
+                                        padding: '12px 24px',
+                                        borderRadius: '12px',
+                                        border: '1px solid var(--border-1)',
+                                        background: 'var(--surface-1)',
+                                        color: 'var(--text-secondary)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSubmitReview}
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '12px 24px',
+                                        borderRadius: '12px',
+                                        background: 'linear-gradient(135deg, #6C63FF, #FF6584)',
+                                        border: 'none',
+                                        color: 'white',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                >
+                                    <Send size={16} />
+                                    Submit Review
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </section>
     );
