@@ -185,6 +185,25 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleUpdateBookingStatus = async (id: string, bookingStatus: 'active' | 'cancelled' | 'completed') => {
+        try {
+            const res = await fetch(`${API_BASE}/bookings/${id}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookingStatus }),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                setBookings(prev => prev.map(b => b._id === id ? { ...b, bookingStatus } : b));
+            } else {
+                console.error(data.message || 'Failed to update booking status');
+            }
+        } catch {
+            console.error('Booking status update failed');
+        }
+    };
+
     const handleAddFinanceManager = async (e: React.FormEvent) => {
         e.preventDefault();
         setFmError('');
@@ -874,6 +893,7 @@ const AdminDashboard = () => {
                                                         <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.5px' }}>Email</th>
                                                         <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.5px' }}>Card</th>
                                                         <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.5px' }}>Status</th>
+                                                        <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.5px' }}>Actions</th>
                                                         <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.5px' }}>Date</th>
                                                     </tr>
                                                 </thead>
@@ -888,6 +908,27 @@ const AdminDashboard = () => {
                                                                 <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, background: b.bookingStatus === 'active' ? 'rgba(67,233,123,0.15)' : b.bookingStatus === 'cancelled' ? 'rgba(255,107,157,0.15)' : 'rgba(108,99,255,0.15)', color: b.bookingStatus === 'active' ? '#43E97B' : b.bookingStatus === 'cancelled' ? '#FF6B9D' : '#6C63FF', textTransform: 'capitalize' }}>
                                                                     {b.bookingStatus}
                                                                 </span>
+                                                            </td>
+                                                            <td style={{ padding: '12px' }}>
+                                                                <select
+                                                                    value={b.bookingStatus}
+                                                                    onChange={e => handleUpdateBookingStatus(b._id, e.target.value as 'active' | 'cancelled' | 'completed')}
+                                                                    style={{
+                                                                        padding: '6px 10px',
+                                                                        borderRadius: '8px',
+                                                                        background: 'var(--surface-1)',
+                                                                        border: '1px solid var(--border-1)',
+                                                                        color: 'var(--text-primary)',
+                                                                        fontSize: '0.8rem',
+                                                                        fontWeight: 600,
+                                                                        cursor: 'pointer',
+                                                                        outline: 'none',
+                                                                    }}
+                                                                >
+                                                                    <option value="active">Approve</option>
+                                                                    <option value="completed">Completed</option>
+                                                                    <option value="cancelled">Cancelled</option>
+                                                                </select>
                                                             </td>
                                                             <td style={{ padding: '12px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                                                                 {new Date(b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
