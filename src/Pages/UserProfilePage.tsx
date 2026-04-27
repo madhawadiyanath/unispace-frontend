@@ -162,6 +162,7 @@ const UserProfilePage = () => {
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [myBoardings, setMyBoardings] = useState<Boarding[]>([]);
   const [loadingBoardings, setLoadingBoardings] = useState(false);
+  const [deletingBoardingId, setDeletingBoardingId] = useState<string | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -262,6 +263,36 @@ const UserProfilePage = () => {
       body: JSON.stringify({ status }),
     }).catch(() => {});
     setIssueReports(prev => prev.map(i => i._id === id ? { ...i, status: status as IssueReport['status'] } : i));
+  };
+
+  const handleDeleteMyBoarding = async (boardingId: string, title: string) => {
+    if (!currentUser || currentUser.userType !== 'landlord') return;
+    const confirmed = window.confirm(`Delete listing "${title}"? This action cannot be undone.`);
+    if (!confirmed) return;
+
+    setDeletingBoardingId(boardingId);
+    try {
+      const res = await fetch(`${API_BASE}/boardings/${boardingId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requesterId: currentUser._id,
+          requesterRole: currentUser.userType,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        window.alert(data.message || 'Failed to delete listing.');
+        return;
+      }
+
+      setMyBoardings(prev => prev.filter(b => b._id !== boardingId));
+    } catch {
+      window.alert('Unable to connect to the server.');
+    } finally {
+      setDeletingBoardingId(null);
+    }
   };
 
   const refreshNotifications = () => {
@@ -679,9 +710,31 @@ const UserProfilePage = () => {
                           <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
                           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>{b.location} · LKR {b.price.toLocaleString()}/mo · {b.roomType}</div>
                         </div>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 12px', borderRadius: '100px', background: sc.bg, color: sc.color, fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize', border: `1px solid ${sc.color}44`, flexShrink: 0 }}>
-                          {sc.icon}{b.status}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 12px', borderRadius: '100px', background: sc.bg, color: sc.color, fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize', border: `1px solid ${sc.color}44` }}>
+                            {sc.icon}{b.status}
+                          </span>
+                          <button
+                            onClick={() => handleDeleteMyBoarding(b._id, b.title)}
+                            disabled={deletingBoardingId === b._id}
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '9px',
+                              background: 'var(--danger-soft-bg)',
+                              border: '1px solid var(--danger-soft-border)',
+                              color: 'var(--danger-soft-text)',
+                              cursor: deletingBoardingId === b._id ? 'not-allowed' : 'pointer',
+                              opacity: deletingBoardingId === b._id ? 0.6 : 1,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                            title={deletingBoardingId === b._id ? 'Deleting...' : 'Delete listing'}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
