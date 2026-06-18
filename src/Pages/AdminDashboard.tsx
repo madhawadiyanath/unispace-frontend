@@ -56,6 +56,9 @@ const AdminDashboard = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [userTypeFilter, setUserTypeFilter] = useState<'all' | 'student' | 'landlord' | 'user' | 'cleaning_staff' | 'finance_manager' | 'admin'>('all');
+    const [userPage, setUserPage] = useState(1);
+    const USERS_PER_PAGE = 10;
     const [activeSection, setActiveSection] = useState('dashboard');
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
@@ -274,11 +277,16 @@ const AdminDashboard = () => {
         navigate('/login');
     };
 
-    const filteredUsers = users.filter(u =>
-        u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.userType?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredUsers = users.filter(u => {
+        const matchSearch =
+            u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.userType?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchType = userTypeFilter === 'all' || u.userType === userTypeFilter;
+        return matchSearch && matchType;
+    });
+    const userTotalPages = Math.max(1, Math.ceil(filteredUsers.length / USERS_PER_PAGE));
+    const pagedUsers = filteredUsers.slice((userPage - 1) * USERS_PER_PAGE, userPage * USERS_PER_PAGE);
 
     const stats = [
         { label: 'Total Users', value: users.length, icon: <Users size={22} />, color: '#6C63FF', bg: 'rgba(108,99,255,0.15)' },
@@ -476,27 +484,31 @@ const AdminDashboard = () => {
                     {/* ── Users Section ── */}
                     {activeSection === 'users' && (
                         <div>
-                            {/* Search */}
-                            <div style={{ position: 'relative', maxWidth: '380px', marginBottom: '20px' }}>
-                                <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                                <input
-                                    type="text"
-                                    placeholder="Search by name, email or type..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    style={{ width: '100%', padding: '11px 14px 11px 40px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }}
-                                />
+                            {/* Toolbar */}
+                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '20px' }}>
+                                <div style={{ position: 'relative', flex: '1', minWidth: '220px', maxWidth: '360px' }}>
+                                    <Search size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search by name, email or type..."
+                                        value={searchTerm}
+                                        onChange={(e) => { setSearchTerm(e.target.value); setUserPage(1); }}
+                                        style={{ width: '100%', padding: '10px 14px 10px 38px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
+                                    />
+                                </div>
+                                {(['all', 'student', 'landlord', 'user', 'cleaning_staff', 'finance_manager', 'admin'] as const).map(f => (
+                                    <button key={f} onClick={() => { setUserTypeFilter(f); setUserPage(1); }} style={{ padding: '8px 18px', borderRadius: '100px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', background: userTypeFilter === f ? 'linear-gradient(135deg, #6C63FF, #a855f7)' : 'var(--surface-1)', border: userTypeFilter === f ? 'none' : '1px solid var(--border-1)', color: userTypeFilter === f ? '#fff' : 'var(--text-secondary)', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
+                                        {f === 'all' ? 'All' : f.replace('_', ' ')}
+                                        {f !== 'all' && <span style={{ marginLeft: '4px', opacity: 0.7 }}>({users.filter(u => u.userType === f).length})</span>}
+                                    </button>
+                                ))}
+                                <button onClick={fetchUsers} style={{ marginLeft: 'auto', background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '10px', padding: '8px 14px', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer' }}>Refresh</button>
                             </div>
 
                             <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-1)', borderRadius: '18px', padding: '24px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                    <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
-                                        All Users <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: '8px' }}>({filteredUsers.length})</span>
-                                    </h2>
-                                    <button onClick={fetchUsers} style={{ background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', borderRadius: '10px', padding: '7px 14px', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer' }}>
-                                        Refresh
-                                    </button>
-                                </div>
+                                <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.1rem', fontWeight: 700, margin: '0 0 20px' }}>
+                                    All Users <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: '8px' }}>({filteredUsers.length})</span>
+                                </h2>
 
                                 {loadingUsers ? (
                                     <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
@@ -504,12 +516,35 @@ const AdminDashboard = () => {
                                         Loading users...
                                     </div>
                                 ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        {filteredUsers.map(u => (
-                                            <UserRow key={u._id} user={u} typeColor={typeColor} onDelete={() => setDeleteConfirm(u._id)} />
-                                        ))}
-                                        {filteredUsers.length === 0 && <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '30px 0' }}>No users match your search.</p>}
-                                    </div>
+                                    <>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                            {pagedUsers.map(u => (
+                                                <UserRow key={u._id} user={u} typeColor={typeColor} onDelete={() => setDeleteConfirm(u._id)} />
+                                            ))}
+                                            {filteredUsers.length === 0 && <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '30px 0' }}>No users match your search.</p>}
+                                        </div>
+                                        {filteredUsers.length > USERS_PER_PAGE && (
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '24px' }}>
+                                                <button
+                                                    onClick={() => setUserPage(p => Math.max(1, p - 1))}
+                                                    disabled={userPage === 1}
+                                                    style={{ padding: '7px 18px', borderRadius: '10px', background: userPage === 1 ? 'var(--surface-1)' : 'rgba(108,99,255,0.15)', border: '1px solid var(--border-1)', color: userPage === 1 ? 'var(--text-muted)' : 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 600, cursor: userPage === 1 ? 'default' : 'pointer' }}
+                                                >
+                                                    ← Prev
+                                                </button>
+                                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                                                    Page {userPage} of {userTotalPages}
+                                                </span>
+                                                <button
+                                                    onClick={() => setUserPage(p => Math.min(userTotalPages, p + 1))}
+                                                    disabled={userPage === userTotalPages}
+                                                    style={{ padding: '7px 18px', borderRadius: '10px', background: userPage === userTotalPages ? 'var(--surface-1)' : 'rgba(108,99,255,0.15)', border: '1px solid var(--border-1)', color: userPage === userTotalPages ? 'var(--text-muted)' : 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 600, cursor: userPage === userTotalPages ? 'default' : 'pointer' }}
+                                                >
+                                                    Next →
+                                                </button>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>
